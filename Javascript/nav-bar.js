@@ -7,7 +7,7 @@ class NavBar extends HTMLElement {
 		<!-- Navigasi Utama -->
 		<!-- Navigation Links di Bawah Logo -->
 		<ul class="nav-links">
-			<li><a href="index.html" class="active">Beranda</a></li>
+			<li><a href="/index.html" class="active">Beranda</a></li>
 			<!-- Menu dengan trigger modal (pakai data-target) -->
 			<li><a href="#" class="open-modal-btn" data-target="PenelusuranModal">Penelusuran</a></li>
 			<li><a href="/html/postingan.html">Postingan </a></li>
