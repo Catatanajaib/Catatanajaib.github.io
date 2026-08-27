@@ -1,0 +1,435 @@
+/* Membuat perpindahan halaman bergeser mulus saat menu diklik */
+html {
+  scroll-behavior: smooth;
+}
+
+* {
+    margin: 0px;
+    padding:0px;
+    box-sizing: border-box;
+    font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+}
+
+body {
+  background: DarkTurquoise;
+  text-align: center;
+  height: auto;
+  width: 100%;
+  max-width: 800px;
+  margin: 0 auto;
+  padding-top: 90px; /* Menyesuaikan tinggi navbar agar konten bawah tidak tertutup */
+}
+	
+.text-1{ color: #FF0000; margin-bottom: 10px; }
+.text-2{ color: #00FF00; margin-bottom: 10px; }
+.text-3{ color: #0000FF; margin-bottom: 10px; }
+	
+.text-4{ background-color: #F08080; color: #000000; margin-bottom: 10px; }
+.text-5{ background-color: #98FB98; color: #000000; margin-bottom: 10px; }
+.text-6{ background-color: #87CEFA; color: #000000; margin-bottom: 10px; }
+	
+.table-1{ border: 2px solid #FF0000; margin-bottom: 10px; }
+.table-2{ border: 2px solid #00FF00; margin-bottom: 10px; }
+.table-3{ border: 2px solid #0000FF; margin-bottom: 10px; }
+	
+.button-1{ background-color: #FF0000; color: #ffffff; padding: 10px 20px; border: none; margin-bottom: 10px; }
+.button-2{ background-color: #00FF00; color: #000000; padding: 10px 20px; border: none; margin-bottom: 10px; }
+.button-3{ background-color: #0000FF; color: #ffffff; padding: 10px 20px; border: none; margin-bottom: 10px; }
+	
+.div-1{ background-color: #F08080; color: #000000; padding: 20px; margin-bottom: 10px; }
+.div-2{ background-color: #98FB98; color: #000000; padding: 20px; margin-bottom: 10px; }
+.div-3{ background-color: #87CEFA; color: #000000; padding: 20px; margin-bottom: 10px; }
+
+.kotak-1{	
+			background-color : white ;
+            width: 100%;
+            height: 90px;
+            border: 2px solid #333;
+            padding: 3px;
+            margin: 0px;
+        }
+
+.kotak-2{	
+			background-color : white ;
+            width: 100%;
+            height: 10px;
+            border: 2px solid #333;
+            padding: 3px;
+            margin: 0px;
+        }
+        
+
+/* Gaya Navbar */
+/* Update Gaya Navbar agar konten berada di Tengah Vertikal */
+/* Navbar Utama (Transparan mengikuti warna Body) */
+.navbar {
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  align-items: center;
+  gap: 8px;
+  
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 100%;
+  z-index: 1000;
+  
+  /* Hilangkan background putih di navbar utama */
+  background-color: transparent; 
+  padding: 10px 0;
+  transition: transform 0.3s ease;
+}
+
+/* Class Sembunyi Auto-Hide */
+.navbar--hidden {
+  transform: translateY(-100%);
+}
+
+/* Logo H4 (Warna Latar Mengikuti Body) */
+h4.logo {
+  font-size: 1.5rem;
+  font-weight: 700;
+  color: #ffffff; /* Mengubah warna teks agar jelas di atas DarkTurquoise */
+  letter-spacing: 0.5px;
+  margin: 0;
+  text-align: center;
+}
+
+/* Menambahkan Warna Background Khusus untuk Menu Navigasi */
+.nav-links {
+  list-style: none;
+  display: flex;
+  gap: 1.5rem;
+  
+  /* Latar Belakang Putih Hanya di Belakang Menu */
+  background-color: #ffffff;
+  padding: 8px 24px;
+  border-radius: 20px; /* Sudut melengkung halus */
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.15);
+}
+
+.nav-links a {
+    text-decoration: none;
+    color: #555555;
+    font-weight: 600;
+    font-size: 0.95rem;
+    position: relative;
+    padding: 0.5rem 0;
+    transition: color 0.3s ease;
+}
+
+/* Efek Garis Bawah Animasi saat Hover */
+.nav-links a::after {
+    content: '';
+    position: absolute;
+    width: 0;
+    height: 2px;
+    bottom: 0;
+    left: 0;
+    background-color: #2575fc;
+    transition: width 0.3s ease;
+}
+
+.nav-links a:hover {
+    color: #2575fc;
+}
+
+.nav-links a:hover::after,
+.nav-links a.active::after {
+    width: 100%;
+}
+
+.nav-links a.active {
+    color: #2575fc;
+}
+
+/* Styling Latar Belakang Modal */
+.modal {
+  display: none; /* Disembunyikan secara default */
+  position: fixed;
+  z-index: 1000;
+  left: 0;
+  top: 0;
+  width: 100%;
+  height: 100%;
+  background-color: rgba(0, 0, 0, 0.5); /* Efek gelap transparan */
+  justify-content: center;
+  align-items:center;
+  
+  }
+
+/* Kotak Konten Modal */
+.modal-content {
+  background-color: #fff;
+  margin: 10% auto;
+  padding: 25px;
+  width: 80%;
+  max-width: 500px;
+  border-radius: 8px;
+  position: relative;
+  box-shadow: 0 4px 10px rgba(0,0,0,0.3);
+}
+
+/* Tombol Tutup (X) */
+.close-btn {
+  position: absolute;
+  right: 15px;
+  top: 10px;
+  font-size: 24px;
+  font-weight: bold;
+  cursor: pointer;
+  color: #888;
+}
+
+.close-btn:hover {
+  color: #000;
+}
+
+
+
+/* Tombol Aksi (CTA) */
+.btn-cta {
+    text-decoration: none;
+    background: linear-gradient(135deg, #6a11cb 0%, #2575fc 100%);
+    color: #ffffff;
+    padding: 0.6rem 1.4rem;
+    margin:2px;
+    border-radius: 50px;
+    font-weight: 600;
+    font-size: 0.9rem;
+    transition: transform 0.2s ease, box-shadow 0.2s ease;
+}
+
+.btn-cta:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 6px 15px rgba(37, 117, 252, 0.3);
+}
+/*kolom postingan */
+.post-container {
+  background: #ffffff;
+  text-align:left;
+  padding: 10px;
+  width: 100%;
+  border-radius: 5px;
+  box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+}
+
+.post-container h2 {
+  margin-bottom: 15px;
+  font-size: 20px;
+  color: #333333;
+}
+
+.form-group {
+  margin-bottom: 15px;
+}
+
+.form-group label {
+  display: block;
+  margin-bottom: 5px;
+  font-weight: bold;
+  color: #555555;
+}
+
+.form-group input,
+.form-group textarea {
+  width: 100%;
+  padding: 10px;
+  border: 1px solid #ccc;
+  border-radius: 4px;
+  box-sizing: border-box;
+}
+
+.form-group textarea {  text-align: left;
+  resize: none;
+}
+
+.btn-post {
+  background-color: #007bff;
+  color: white;
+  padding: 10px 15px;
+  border: none;
+  border-radius: 4px;
+  cursor: pointer;
+  width: 100%;
+  font-size: 16px;
+}
+
+.btn-post:hover {
+  background-color: #0056b3;
+}
+
+.post-meta { text-align:left;font-size: 0.8em; color: #666; margin-bottom: 8px; padding:10px; }
+.badge {   text-align: left; background: #ffc107 ; color: #000; padding: 1px 5px; border-radius: 5px; font-size: 0.75em; }
+  
+/* Header Post */
+    .post-header {
+      display: flex;
+      align-items: center;
+      padding: 14px 16px;
+    }
+
+    .avatar {
+      width: 44px;
+      height: 44px;
+      border-radius: 50%;
+      object-fit: &cover;
+      margin-right: 12px;
+    }
+
+    .user-info h4 {
+      font-size: 15px;
+      font-weight: 600;
+      color: #050505;
+    }
+
+    .user-info span {
+      font-size: 12px;
+      color: #65676b;
+    }
+
+    /* Konten Post */
+    .post-content {
+      padding: 0 16px 12px;
+      font-size: 14px;
+      line-height: 1.5;
+      color: #1c1e21;
+    }
+
+    .post-media img {
+      width: 100%;
+      height: auto;
+      display: block;
+      max-height: 400px;
+      object-fit: cover;
+    }
+
+    /* Statistik & Aksi */
+    .post-stats {
+      display: flex;
+      justify-content: space-between;
+      padding: 10px 16px;
+      font-size: 13px;
+      color: #65676b;
+      border-bottom: 1px solid #e4e6eb;
+    }
+
+    .post-actions {
+      display: flex;
+      justify-content: space-around;
+      padding: 4px 8px;
+    }
+    
+    .action-btn {
+    background: none;
+    border: none;
+    display: flex;
+    align-items: center;
+    gap: 6px;
+    padding: 8px 16px;
+    border-radius: 6px;
+    cursor: pointer;
+    font-size: 14px;
+    font-weight: 500;
+    color: #65676b;
+    transition: background-color 0.2s;
+    }
+    
+    .action-btn:hover {
+    background-color: #f2f2f2;
+    color: #1877f2;
+    }
+    
+    /*untuk infity scroll*/
+    .container {
+    max-width: 680px;
+    margin: 40px auto;
+    padding: 0 16px;
+    }
+    h1 {
+    margin-bottom: 24px;
+    text-align: center;
+    }
+    .post-card {
+    background: #ffffff;
+    border-radius: 12px;
+    overflow: hidden;
+    margin-bottom: 24px;
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.05);
+    transition: transform 0.2s ease;
+    }
+    .post-card:hover {
+    transform: translateY(-2px);
+    }
+    .post-thumb {
+    width: 100%;
+    height: 220px;
+    object-fit: cover;
+    display: block;
+    }
+    .post-content {
+    padding: 20px;
+    }
+    .post-tag {
+    display: inline-block;
+    font-size: 0.75rem;
+    font-weight: bold;
+    color: #2563eb;
+    background: #eff6ff;
+    padding: 4px 8px;
+    border-radius: 4px;
+    margin-bottom: 8px;
+    text-transform: uppercase;
+    }
+    .post-title {
+    font-size: 1.25rem;
+    margin-bottom: 8px;
+    color: #1e293b;
+    }
+    .post-title a {
+    text-decoration: none;
+    color: inherit;
+    }
+    .post-title a:hover {
+    color: #2563eb;
+    }
+    .post-excerpt {
+    font-size: 0.95rem;
+    color: #64748b;
+    margin-bottom: 16px;
+    }
+    .post-meta {
+    font-size: 0.8rem;
+    color: #94a3b8;
+    }
+    .status-indicator {
+    text-align: center;
+    padding: 20px;
+    font-weight: 600;
+    color: #64748b;
+    }
+    /*kotak zoom*/
+    .konten-zoom {
+    border: 1px solid #ccc;
+    
+    /* Mengubah skala: 1 = normal, 0.8 = zoom out 80%, 1.2 = zoom in 120% */
+    transform: scale(0.8); 
+    
+    /* Menentukan titik tumpu zoom (misal: pojok kiri atas) */
+    transform-origin: center ; 
+    transition: transform 0.3s ease; /* Efek halus saat merubah ukuran */
+    background: #ffffff;
+    text-align: center ;
+    padding: 10px;
+    width: 100%;
+    border-radius: 5px;
+    box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+    }
+    
+    /* Efek Zoom In saat kursor diarahkan (Hover) */
+    .konten-zoom:hover {
+    transform: scale(1.1);
+    }
+    
+ 
