@@ -1,12 +1,12 @@
 class mycssmyjs extends HTMLElement {
   connectedCallback() {
     this.innerHTML = `
-<link rel="stylesheet" href="../css/global.css">
-<link rel="stylesheet" href="../css/beranda.css">
-<link rel="stylesheet" href="../css/postingan.css">
-<script src="../javascript/common.js" defer></script>
-<script src="../javascript/beranda.js" defer></script>
-<script src="../javascript/postingan.js defer"></script>
+<link rel="stylesheet" href="/css/global.css">
+<link rel="stylesheet" href="/css/beranda.css">
+<link rel="stylesheet" href="/css/postingan.css">
+<script src="/Javascript/common.js" defer></script>
+<script src="/Javascript/beranda.js" defer></script>
+<script src="/Javascript/postingan.js defer"></script>
     `;
   }
 }
