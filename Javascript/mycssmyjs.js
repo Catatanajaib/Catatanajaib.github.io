@@ -6,7 +6,7 @@ class mycssmyjs extends HTMLElement {
 <link rel="stylesheet" href="/css/postingan.css">
 <script src="/Javascript/common.js" defer></script>
 <script src="/Javascript/beranda.js" defer></script>
-<script src="/Javascript/postingan.js defer"></script>
+<script src="/Javascript/postingan.js" defer></script>
     `;
   }
 }
