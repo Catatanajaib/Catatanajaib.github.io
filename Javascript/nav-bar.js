@@ -10,9 +10,9 @@ class NavBar extends HTMLElement {
 			<li><a href="index.html" class="active">Beranda</a></li>
 			<!-- Menu dengan trigger modal (pakai data-target) -->
 			<li><a href="#" class="open-modal-btn" data-target="PenelusuranModal">Penelusuran</a></li>
-			<li><a href="/postingan.html">Postingan </a></li>
+			<li><a href="/html/postingan.html">Postingan </a></li>
 			<li><a href="#">Kategori</a></li>
-			<li><a href="/artikel.html">Berita</a></li>
+			<li><a href="/html/artikel.html">Berita</a></li>
 			<li><a href="#" class="open-modal-btn" data-target="AboutModal">Kontak</a></li>
 		</ul>
 </nav>
