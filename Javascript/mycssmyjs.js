@@ -1,24 +1,24 @@
 class mycssmyjs extends HTMLElement {
   connectedCallback() {
-    // 1. Masukkan CSS via innerHTML (CSS tetap jalan via innerHTML)
+    // 1. Masukkan file CSS via innerHTML
     this.innerHTML = `
       <link rel="stylesheet" href="/css/global.css">
       <link rel="stylesheet" href="/css/beranda.css">
       <link rel="stylesheet" href="/css/postingan.css">
     `;
 
-    // 2. Buat dan tempelkan tag <script> secara dinamis
-    const jsFiles = [
+    // 2. Suntikkan file JavaScript satu per satu agar dieksekusi browser
+    const scripts = [
       '/Javascript/common.js',
       '/Javascript/beranda.js',
       '/Javascript/postingan.js'
     ];
 
-    jsFiles.forEach(src => {
+    scripts.forEach(src => {
       const script = document.createElement('script');
       script.src = src;
       script.defer = true;
-      document.head.appendChild(script); // Script disuntikkan ke <head> agar dieksekusi browser
+      document.head.appendChild(script);
     });
   }
 }
