@@ -12,16 +12,6 @@ class PostCard extends HTMLElement {
 
         <div class="post-content">
 <style>
-/* Container Utama Artikel */
-.post-body {
-  font-family: 'Segoe UI', Roboto, Helvetica, Arial, sans-serif;
-  font-size: 16px;
-  line-height: 1.8;
-  color: #333333;
-  max-width: 800px;
-  margin: 0 auto;
-  padding: 15px;
-}
 
 /* Pengaturan Judul Sub-Topik */
 .post-body h2 {
