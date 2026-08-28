@@ -114,7 +114,7 @@ class PostCardElement extends HTMLElement {
 
         <article class="post-body">
           <h2>Inspirasi Desain Rumah Simpel, Sederhana, dan Tetap Mempesona</h2>
-          <p>Berikut beberapa desain menarik rumah yang simpel,... <a href="..html/artikel.html">baca lebih lengkap</a></p>
+          <p>Berikut beberapa desain menarik rumah yang simpel,... <a href="/html/artikel.html">baca lebih lengkap</a></p>
           
           <div class="konten-zoom">
             <img src="https://picsum.photos/600/300?random=1" alt="Foto Postingan 1" />
