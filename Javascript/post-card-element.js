@@ -1,4 +1,4 @@
-class PostCard extends HTMLElement {
+class PostCardElement HTMLElement {
   connectedCallback() {
     this.innerHTML = `
 <style>
@@ -264,9 +264,9 @@ atOptions = {
   }
 }
 
-customElements.define('post-card', PostCard);
+customElements.define('post-card-element', PostCardElement);
 
 // untuk memanggil 
-// <post-card></post-card>
+// <post-card-element></post-card-element>
 
-//  <script src="post-card-component.js"></script>
+//  <script src="post-card-element.js"></script>
