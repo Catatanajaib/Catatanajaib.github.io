@@ -12,7 +12,7 @@ class NavBar extends HTMLElement {
 			<li><a href="#" class="open-modal-btn" data-target="PenelusuranModal">Penelusuran</a></li>
 			<li><a href="html/postingan.html">Postingan </a></li>
 			<li><a href="#">Kategori</a></li>
-			<li><a href="feed-artikel/feed-artikel.htmlhtml">Berita</a></li>
+			<li><a href="feed-artikel/feed-artikel.html">Berita</a></li>
 			<li><a href="#" class="open-modal-btn" data-target="AboutModal">Kontak</a></li>
 		</ul>
 </nav>
