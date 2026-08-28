@@ -18,9 +18,9 @@ document.addEventListener('DOMContentLoaded', () => {
       <div style="background: #fffdf5; border: 1px dashed #f59e0b; padding: 16px; border-radius: 12px; text-align: center; margin-bottom: 24px;">
         <span style="font-size: 0.75rem; color: #b45309; font-weight: bold; text-transform: uppercase; letter-spacing: 1px;">Sponsor / Iklan</span>
         <div style="margin-top: 10px;">
-          <a href="#" target="_blank" rel="nofollow noopener" style="text-decoration: none; color: inherit;">
+          <a href="https://app.seabank.co.id/app/main?module=router&type=me&sub_type=referral&login=true&referralCode=LHZEHN" target="_blank" rel="nofollow noopener" onclik.window-open="/html/referalseabank.html" style="text-decoration: none; color: inherit;">
             <img src="https://picsum.photos/600/150?random=99" alt="Iklan" style="width: 100%; max-height: 140px; object-fit: cover; border-radius: 8px; margin-bottom: 8px;">
-            <p style="font-weight: 600; font-size: 0.95rem; color: #1e293b;">Dapatkan Promo Spesial Domain & Hosting Hari Ini!</p>
+            <p style="font-weight: 600; font-size: 0.95rem; color: #1e293b;">Mau punya rekening perbankan digital yang serba gratis, aman, dan langsung kasih bonus saldo saat pendaftaran? </p>
           </a>
         </div>
       </div>
