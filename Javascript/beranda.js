@@ -1,16 +1,49 @@
 document.addEventListener('DOMContentLoaded', () => {
   const databasePostingan = [
-    { id: 1, judul: "Panduan Membangun Website Cepat & Responsif", ringkasan: "Pelajari teknik optimasi performa web dan struktur HTML yang efisien.", kategori: "Web Dev", gambar: "https://picsum.photos/600/300?random=1", url: "#", tanggal: "24 Agu 2026" },
-    { id: 2, judul: "Mengenal Cara Kerja Cloudflare & DNS Management", ringkasan: "Bagaimana cara menghubungkan domain kustom dan melindungi server.", kategori: "Networking", gambar: "https://picsum.photos/600/300?random=2", url: "#", tanggal: "22 Agu 2026" },
-    { id: 3, judul: "Tips Monetisasi Konten Blog untuk Pemula", ringkasan: "Langkah-langkah mendaftarkan blog ke jaringan iklan online.", kategori: "Blogging", gambar: "https://picsum.photos/600/300?random=3", url: "#", tanggal: "20 Agu 2026" }
+    { 
+      id: 1, 
+      name: "Admin Dev",
+      judul: "Panduan Membangun Website Cepat & Responsif", 
+      ringkasan: "Pelajari teknik optimasi performa web dan struktur HTML yang efisien.", 
+      kategori: "Web Dev", 
+      gambar: "https://picsum.photos/600/300?random=1", 
+      url: "#", 
+      date: "24 Agu 2026",
+      like: 12,
+      comment: 5
+    },
+    { 
+      id: 2, 
+      name: "Network Pro",
+      judul: "Mengenal Cara Kerja Cloudflare & DNS Management", 
+      ringkasan: "Bagaimana cara menghubungkan domain kustom dan melindungi server.", 
+      kategori: "Networking", 
+      gambar: "https://picsum.photos/600/300?random=2", 
+      url: "#", 
+      date: "22 Agu 2026",
+      like: 8,
+      comment: 2
+    },
+    { 
+      id: 3, 
+      name: "Blogger Hub",
+      judul: "Tips Monetisasi Konten Blog untuk Pemula", 
+      ringkasan: "Langkah-langkah mendaftarkan blog ke jaringan iklan online.", 
+      kategori: "Blogging", 
+      gambar: "https://picsum.photos/600/300?random=3", 
+      url: "#", 
+      date: "20 Agu 2026",
+      like: 25,
+      comment: 10
+    }
   ];
 
   let indexData = 0;
-  const itemPerScroll = 2;
+  const itemPerScroll = 1;
   const container = document.getElementById('posts-container');
   const sentinel = document.getElementById('scroll-sentinel');
+  let observer; // Deklarasi tunggal
 
-  // FUNGSI MEMBUAT KOTAK IKLAN OTOMATIS
   function buatKotakIklan() {
     const adBox = document.createElement('div');
     adBox.className = 'post-card';
@@ -20,7 +53,7 @@ document.addEventListener('DOMContentLoaded', () => {
         <div style="margin-top: 10px;">
           <a href="https://app.seabank.co.id/app/main?module=router&type=me&sub_type=referral&login=true&referralCode=LHZEHN" target="_blank" rel="nofollow noopener" onclik.window-open="/html/referalseabank.html" style="text-decoration: none; color: inherit;">
             <img src="https://picsum.photos/600/150?random=99" alt="Iklan" style="width: 100%; max-height: 140px; object-fit: cover; border-radius: 8px; margin-bottom: 8px;">
-            <p style="font-weight: 600; font-size: 0.95rem; color: #1e293b;">Mau punya rekening perbankan digital yang serba gratis, aman, dan langsung kasih bonus saldo saat pendaftaran? </p>
+            <p style="font-weight: 600; font-size: 0.95rem; color: #1e293b;">Mau punya rekening perbankan digital yang serba gratis, aman, dan langsung kasih bonus saldo saat pendaftaran. Disini tempatnya!</p>
           </a>
         </div>
       </div>
@@ -41,18 +74,43 @@ document.addEventListener('DOMContentLoaded', () => {
       indexData++;
       const article = document.createElement('article');
       article.className = 'post-card';
-      article.innerHTML = `
-        <img src="${post.gambar}" alt="${post.judul}" class="post-thumb" loading="lazy">
-        <div class="post-content">
-          <span class="post-tag">${post.kategori}</span>
+
+      article.innerHTML = ` 
+        <header class="post-header"> 
+          <img src="${post.gambar}" alt="Foto Profil" class="avatar"> 
+          <div class="user-info"> 
+            <h4 class="username">${post.name}</h4>
+            <span class="postdate">${post.date} &bull; publik</span>
+          </div>
+        </header>
+
+        <div class="post-body">
           <h2 class="post-title"><a href="${post.url}">${post.judul}</a></h2>
           <p class="post-excerpt">${post.ringkasan}</p>
-          <div class="post-meta">Dipublikasikan pada ${post.tanggal}</div>
+
+          <div class="konten-zoom">
+            <img src="${post.gambar}" alt="Foto Postingan" class="post-thumb" loading="lazy" />
+          </div>
+
+          <div class="post-stats">
+            <span>👍 <strong>${post.like}</strong> Suka</span>
+            <span><strong>${post.comment}</strong> Komentar</span>
+          </div>
+
+          <footer class="post-actions">
+            <button class="action-btn" onclick="toggleLike()">👍 Suka</button>
+            <button class="action-btn" onclick="scrollToComments()">💬 Komentar</button>
+            <button class="action-btn" onclick="sharePost()">↗️ Bagikan</button>
+          </footer>
+        </div>
+
+        <div class="post-content">
+          <span class="post-tag">${post.kategori}</span>
         </div>
       `;
+
       if (container) container.appendChild(article);
 
-      // SISIPKAN KOTAK IKLAN SETIAP POSTINGAN DIMUAT
       if (indexData % 2 === 0) {
         const iklan = buatKotakIklan();
         if (container) container.appendChild(iklan);
@@ -60,7 +118,7 @@ document.addEventListener('DOMContentLoaded', () => {
     });
   }
 
-  let observer;
+  // Inisialisasi IntersectionObserver tanpa keyword 'let'
   if (sentinel) {
     observer = new IntersectionObserver((entries) => {
       entries.forEach(entry => {
@@ -73,62 +131,4 @@ document.addEventListener('DOMContentLoaded', () => {
     observer.observe(sentinel);
   }
 });
-
- //<!-- SCRIPT JAVASCRIPT FITUR LIKE, KOMEN, DAN SHARE -->
-let isLiked = false;
-let rawLikes = 128000000;
-
-// 1. Fungsi Format Angka ke Ribu (rb) atau Juta (jt)
-function formatNumber(num) {
-  if (num >= 1000000) return (num / 1000000).toFixed(0) + 'jt';
-  if (num >= 1000) return (num / 1000).toFixed(0) + 'rb';
-  return num;
-}
-
-// Tampilkan format angka langsung saat halaman selesai dimuat
-document.addEventListener("DOMContentLoaded", function() {
-  document.getElementById('like-count').innerText = formatNumber(rawLikes);
-});
-
-// 2. Fungsi Tombol Like
-function toggleLike() {
-  const likeBtn = document.getElementById('btn-like');
-  const likeText = document.getElementById('btn-like-text');
-  const likeCountElem = document.getElementById('like-count');
-
-  if (!isLiked) {
-    rawLikes++;
-    likeBtn.classList.add('active');
-    likeText.innerText = 'Disukai';
-    isLiked = true;
-  } else {
-    rawLikes--;
-    likeBtn.classList.remove('active');
-    likeText.innerText = 'Suka';
-    isLiked = false;
-  }
-  likeCountElem.innerText = formatNumber(rawLikes);
-}
-
-// 3. Fungsi Scroll ke Kolom Komentar
-function scrollToComments() {
-  const commentSection = document.getElementById('kolom-komentar');
-  if (commentSection) {
-    commentSection.scrollIntoView({ behavior: 'smooth' });
-  } else {
-    alert('Silakan tulis komentar Anda di bagian bawah artikel!');
-  }
-}
-
-// 4. Fungsi Bagikan Artikel
-function sharePost() {
-  if (navigator.share) {
-    navigator.share({
-      title: document.title,
-      url: window.location.href
-    });
-  } else {
-    navigator.clipboard.writeText(window.location.href);
-    alert('Link artikel berhasil disalin!');
-  }
-}
+        
