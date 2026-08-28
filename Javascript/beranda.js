@@ -73,3 +73,62 @@ document.addEventListener('DOMContentLoaded', () => {
     observer.observe(sentinel);
   }
 });
+
+ //<!-- SCRIPT JAVASCRIPT FITUR LIKE, KOMEN, DAN SHARE -->
+let isLiked = false;
+let rawLikes = 128000000;
+
+// 1. Fungsi Format Angka ke Ribu (rb) atau Juta (jt)
+function formatNumber(num) {
+  if (num >= 1000000) return (num / 1000000).toFixed(0) + 'jt';
+  if (num >= 1000) return (num / 1000).toFixed(0) + 'rb';
+  return num;
+}
+
+// Tampilkan format angka langsung saat halaman selesai dimuat
+document.addEventListener("DOMContentLoaded", function() {
+  document.getElementById('like-count').innerText = formatNumber(rawLikes);
+});
+
+// 2. Fungsi Tombol Like
+function toggleLike() {
+  const likeBtn = document.getElementById('btn-like');
+  const likeText = document.getElementById('btn-like-text');
+  const likeCountElem = document.getElementById('like-count');
+
+  if (!isLiked) {
+    rawLikes++;
+    likeBtn.classList.add('active');
+    likeText.innerText = 'Disukai';
+    isLiked = true;
+  } else {
+    rawLikes--;
+    likeBtn.classList.remove('active');
+    likeText.innerText = 'Suka';
+    isLiked = false;
+  }
+  likeCountElem.innerText = formatNumber(rawLikes);
+}
+
+// 3. Fungsi Scroll ke Kolom Komentar
+function scrollToComments() {
+  const commentSection = document.getElementById('kolom-komentar');
+  if (commentSection) {
+    commentSection.scrollIntoView({ behavior: 'smooth' });
+  } else {
+    alert('Silakan tulis komentar Anda di bagian bawah artikel!');
+  }
+}
+
+// 4. Fungsi Bagikan Artikel
+function sharePost() {
+  if (navigator.share) {
+    navigator.share({
+      title: document.title,
+      url: window.location.href
+    });
+  } else {
+    navigator.clipboard.writeText(window.location.href);
+    alert('Link artikel berhasil disalin!');
+  }
+}
