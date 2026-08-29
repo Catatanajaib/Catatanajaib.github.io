@@ -1,0 +1,410 @@
+/* ==========================================================================
+   1. RESET & PENGATURAN DASAR (GLOBAL STYLES)
+   ========================================================================== */
+
+/* Mengaktifkan scroll halus saat melakukan navigasi anchor link */
+html {
+  scroll-behavior: smooth;
+}
+
+/* Reset margin, padding, dan penetapan font dasar untuk seluruh elemen */
+* {
+  margin: 0;
+  padding: 0;
+  box-sizing: border-box; /* Memastikan padding & border tidak menambah lebar elemen */
+  font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+}
+
+/* Tampilan utama halaman (Body) */
+body {
+  background: DarkTurquoise; /* Warna latar belakang utama */
+  text-align: center;
+  height: auto;
+  width: 100%;
+  max-width: 800px; /* Batas lebar maksimal halaman */
+  margin: 0 auto;  /* Mengatur tata letak ke tengah secara horizontal */
+  padding-top: 90px; /* Memberi ruang di atas agar konten tidak tertutup Navbar fixed */
+}
+
+
+/* ==========================================================================
+   2. NAVIGASI BAR (NAVBAR) & MODAL
+   ========================================================================== */
+
+/* Container Utama Navbar */
+.navbar {
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  align-items: center;
+  gap: 8px;
+  position: fixed; /* Membuat navbar menempel di atas saat di-scroll */
+  top: 0;
+  left: 0;
+  width: 100%;
+  z-index: 1000; /* Memastikan navbar berada di atas elemen lainnya */
+  background-color: transparent; 
+  padding: 10px 0;
+  transition: transform 0.3s ease; /* Efek transisi saat navbar tersembunyi */
+}
+
+/* Sembunyikan navbar ke atas (digunakan via JavaScript saat scroll down) */
+.navbar--hidden {
+  transform: translateY(-100%);
+}
+
+/* Logo Navbar */
+h4.logo {
+  font-size: 1.5rem;
+  font-weight: 700;
+  color: #ffffff;
+  letter-spacing: 0.5px;
+  margin: 0;
+  text-align: center;
+}
+
+/* Container Menu/Link Navigasi */
+.nav-links {
+  list-style: none;
+  display: flex;
+  gap: 1.5rem;
+  background-color: #ffffff;
+  padding: 8px 24px;
+  border-radius: 20px;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.15);
+}
+
+/* Styling Link Navigasi */
+.nav-links a {
+  text-decoration: none;
+  color: #555555;
+  font-weight: 600;
+  font-size: 0.95rem;
+  position: relative;
+  padding: 0.5rem 0;
+  transition: color 0.3s ease;
+}
+
+/* Garis bawah animasi untuk Link Navigasi */
+.nav-links a::after {
+  content: '';
+  position: absolute;
+  width: 0;
+  height: 2px;
+  bottom: 0;
+  left: 0;
+  background-color: #2575fc;
+  transition: width 0.3s ease;
+}
+
+/* Efek Hover & Status Aktif pada Menu Navigasi */
+.nav-links a:hover,
+.nav-links a.active {
+  color: #2575fc;
+}
+
+.nav-links a:hover::after,
+.nav-links a.active::after {
+  width: 100%;
+}
+
+/* --- Modal Penelusuran / About --- */
+
+/* Latar Belakang Modal (Overlay) */
+.modal {
+  display: none; /* Tersembunyi secara bawaan, ditampilkan via JS */
+  position: fixed;
+  z-index: 1000;
+  left: 0;
+  top: 0;
+  width: 100%;
+  height: 100%;
+  background-color: rgba(0, 0, 0, 0.5); /* Efek gelap transparan */
+  justify-content: center;
+  align-items: center;
+}
+
+/* Kotak Konten Modal */
+.modal-content {
+  background-color: #fff;
+  margin: 10% auto;
+  padding: 25px;
+  width: 80%;
+  max-width: 500px;
+  border-radius: 8px;
+  position: relative;
+  box-shadow: 0 4px 10px rgba(0,0,0,0.3);
+}
+
+/* Tombol Tutup (X) pada Modal */
+.close-btn {
+  position: absolute;
+  right: 15px;
+  top: 10px;
+  font-size: 24px;
+  font-weight: bold;
+  cursor: pointer;
+  color: #888;
+}
+
+.close-btn:hover {
+  color: #000;
+}
+
+
+/* ==========================================================================
+   3. FORM INPUT POSTINGAN
+   ========================================================================== */
+
+/* Container Form Buat Postingan */
+.post-container {
+  background: #ffffff;
+  text-align: left;
+  padding: 15px;
+  width: 100%;
+  border-radius: 8px;
+  box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+  margin-bottom: 20px;
+}
+
+.post-container h2 {
+  margin-bottom: 15px;
+  font-size: 20px;
+  color: #333333;
+}
+
+/* Grup Elemen Form (Label & Input) */
+.form-group {
+  margin-bottom: 15px;
+}
+
+.form-group label {
+  display: block;
+  margin-bottom: 5px;
+  font-weight: bold;
+  color: #555555;
+}
+
+/* Input Teks & Textarea */
+.form-group input,
+.form-group textarea {
+  width: 100%;
+  padding: 10px;
+  border: 1px solid #ccc;
+  border-radius: 4px;
+  box-sizing: border-box;
+}
+
+.form-group textarea {
+  text-align: left;
+  resize: none; /* Mencegah user merubah ukuran kotak textarea secara manual */
+}
+
+/* Tombol Kirim / Publish Postingan */
+.btn-post {
+  background-color: #007bff;
+  color: white;
+  padding: 10px 15px;
+  border: none;
+  border-radius: 4px;
+  cursor: pointer;
+  width: 100%;
+  font-size: 16px;
+}
+
+.btn-post:hover {
+  background-color: #0056b3;
+}
+
+
+/* ==========================================================================
+   4. CARD POSTINGAN & KOMPONEN FEED
+   ========================================================================== */
+
+/* Container Pembungkus Daftar Postingan */
+.container {
+  max-width: 680px;
+  margin: 40px auto;
+  padding: 0 16px;
+}
+
+/* Kotak / Kartu Postingan */
+.post-card {
+  background: #ffffff;
+  border-radius: 12px;
+  overflow: hidden;
+  margin-bottom: 24px;
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.05);
+  transition: transform 0.2s ease;
+}
+
+/* Efek Terangkat saat Kartu Postingan di-hover */
+.post-card:hover {
+  transform: translateY(-2px);
+}
+
+/* Header Postingan (Profil Pengguna & Waktu) */
+.post-header {
+  display: flex;
+  align-items: center;
+  padding: 14px 16px;
+}
+
+/* Foto Profil / Avatar */
+.avatar {
+  width: 44px;
+  height: 44px;
+  border-radius: 50%;
+  object-fit: cover;
+  margin-right: 12px;
+}
+
+/* Informasi Pengguna (Nama & Tanggal) */
+.user-info h4 {
+  font-size: 15px;
+  font-weight: 600;
+  color: #050505;
+}
+
+.user-info span {
+  font-size: 12px;
+  color: #65676b;
+}
+
+/* Isi Teks Postingan */
+.post-content {
+  padding: 0 16px 12px;
+  font-size: 14px;
+  line-height: 1.5;
+  color: #1c1e21;
+  text-align: left;
+}
+
+/* Gambar/Media dalam Postingan */
+.post-media img {
+  width: 100%;
+  height: auto;
+  display: block;
+  max-height: 400px;
+  object-fit: cover;
+}
+
+/* Area Meta Data & Badge Tambahan */
+.post-meta { 
+  text-align: left;
+  font-size: 0.85em; 
+  color: #666; 
+  margin-bottom: 8px; 
+  padding: 10px; 
+}
+
+.badge { 
+  text-align: left; 
+  background: #ffc107; 
+  color: #000; 
+  padding: 2px 6px; 
+  border-radius: 5px; 
+  font-size: 0.75em; 
+  margin-left: 5px;
+}
+
+/* Area Statistik (Jumlah Like, Komentar, & Share) */
+.post-stats {
+  display: flex;
+  justify-content: space-between;
+  padding: 10px 16px;
+  font-size: 13px;
+  color: #65676b;
+  border-bottom: 1px solid #e4e6eb;
+}
+
+/* Container Tombol Interaksi (Like, Komen, Bagikan) */
+.post-actions {
+  display: flex;
+  justify-content: space-around;
+  padding: 6px 0;
+  border-bottom: 1px solid #e4e6eb;
+}
+
+/* Styling Tombol Interaksi */
+.action-btn {
+  flex: 1;
+  background: transparent;
+  border: none;
+  padding: 10px 8px;
+  border-radius: 6px;
+  font-weight: 600;
+  color: #65676b;
+  cursor: pointer;
+  font-size: 14px;
+  transition: background-color 0.2s, transform 0.1s ease;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 6px;
+}
+
+/* Efek Hover & Klik pada Tombol Interaksi */
+.action-btn:hover {
+  background-color: #f2f2f2;
+}
+
+.action-btn:active {
+  transform: scale(0.95); /* Efek tombol tertekan */
+}
+
+/* Tampilan Tombol Like saat Aktif (Sudah Di-like) */
+.action-btn.active {
+  color: #0866ff; /* Warna biru Facebook */
+}
+
+.action-btn.active .btn-icon {
+  animation: bounce 0.3s ease; /* Memicu animasi bounce pada ikon */
+}
+
+
+/* ==========================================================================
+   5. ELEMEN TAMBAHAN, INDIKATOR, & ANIMASI
+   ========================================================================== */
+
+/* Indikator Loading untuk Infinite Scroll */
+.status-indicator {
+  text-align: center;
+  padding: 20px;
+  font-weight: 600;
+  color: #64748b;
+}
+
+/* Kotak Konten dengan Efek Zoom Saat Hover */
+.konten-zoom {
+  border: 1px solid #ccc;
+  transform: scale(0.8); 
+  transform-origin: center; 
+  transition: transform 0.3s ease;
+  background: #ffffff;
+  text-align: center;
+  padding: 10px;
+  width: 100%;
+  border-radius: 5px;
+  box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+}
+
+.konten-zoom:hover {
+  transform: scale(1.1);
+}
+
+/* Box Call-To-Action / Informasi di Akhir */
+.call-to-action {
+  background-color: #f0fdf4;
+  border-left: 4px solid #22c55e;
+  padding: 15px 20px;
+  margin-top: 30px;
+  border-radius: 4px;
+}
+
+/* Keyframes Animasi Membal (Bounce) untuk Ikon Like */
+@keyframes bounce {
+  0% { transform: scale(1); }
+  50% { transform: scale(1.3); }
+  100% { transform: scale(1); }
+}
