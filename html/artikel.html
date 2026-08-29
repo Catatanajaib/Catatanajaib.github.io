@@ -10,10 +10,35 @@
 	
 </head>
 <body>
-<script src="/Javascript/nav-bar.js" defer></script>
-<nav-bar></nav-bar>
+<navbar></navbar>
+
+<div id="AboutModal" class="modal">
+  <div class="modal-content">
+    <span class="close-btn">&times;</span>
+    <h2>Tentang Kami</h2>
+    <p>Miftahul Mujib - 081910240675</p>
+  </div>
+</div>
+
+<div id="PenelusuranModal" class="modal">
+  <div class="modal-content">
+    <span class="close-btn">&times;</span>
+    <h2>Catatan Ajaib</h2>
+    <form class="search-container" action="https://www.google.com/search" method="GET" target="_blank">
+      <div class="form-group">
+        <label for="content">Penelusuran</label>
+        <textarea id="content" name="q" rows="4" class="search-input" placeholder="Apa yang ingin kamu cari?" required></textarea>
+      </div>
+      <button type="submit" class="btn-post search-button"><span>Cari</span></button>
+    </form>
+  </div>
+</div>
+
+<script src="javascript/navbar.js" defer></script>
+<script src="javascript/modalhandler.js"defer></script>
+	
   
-<post-card></post-card>
+<post-card-component2></post-card-component2>
 <div class="konten-zoom">
 	
 	<script>
@@ -27,6 +52,6 @@
 	</script>
 	<script src="https://www.highperformanceformat.com/c7ceecf9be42bb2b182175415809298d/invoke.js"></script>
 </div>
-<script src="/Javascript/post-card-component2.js"></script>
+<script src="javascript/post-card-component2.js"></script>
 </body>
 </html>
