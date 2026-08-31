@@ -54,11 +54,11 @@ document.addEventListener('DOMContentLoaded', () => {
   const databasePostingan = [
     { 
       id: 1, 
-      name: "Admin Dev",
+      name: "Miftah98",
       judul: "hadiah pengguna baru digital banking", 
       ringkasan: "Masukkan kode ini saat pendaftaran untuk klaim bonus kamu!", 
       kategori: "dana kaget", 
-      gambar: "https://picsum.photos/600/300?random=1", 
+      gambar: "/html/referral.png", 
       url: "https://catatanajaib.github.io/html/referalseabank.html", 
       date: "24 Agu 2026",
       like: 12,
