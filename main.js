@@ -117,7 +117,7 @@ document.addEventListener('DOMContentLoaded', () => {
 
       article.innerHTML = ` 
         <header class="post-header"> 
-          <img src="${post.gambar}" alt="Foto Profil" class="avatar"> 
+          <img src="${post.gambar}" alt="Foto profil ${post.name}"" class="avatar"> 
           <div class="user-info"> 
             <h4 class="username">${post.name}</h4>
             <span class="postdate">${post.date} &bull; Publik</span>
