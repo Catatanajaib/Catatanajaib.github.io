@@ -106,7 +106,7 @@
         </div>
 
         <!-- Postingan Statis 1 -->
-        <article class="post-card">
+        <article class="post-card" data-post-id="static-1>
             <header class="post-header">
                 <img src="https://picsum.photos/600/300?random=5" alt="Foto Profil" class="avatar">
                 <div class="user-info">
@@ -134,6 +134,16 @@
                 <button class="action-btn" onclick="sharePost()">↗️ Bagikan</button>
             </footer>
         </article>
+
+        <!-- WADAH KOMENTAR TEMPORER (7 HARI) -->
+		<div id="comment-section-static-1" class="comment-section" style="display:none; padding: 15px; border-top: 1px solid #eee; text-align: left;">
+		<div class="comments-list" id="comments-list-static-1"></div>
+		<form onsubmit="handleCommentSubmit(event, 'static-1')" style="margin-top: 10px; display: flex; gap: 8px;">
+		<input type="text" placeholder="Tulis komentar (hapus otomatis 7 hari)..." required style="flex: 1; padding: 8px; border: 1px solid #ccc; border-radius: 4px;">
+		<button type="submit" style="padding: 8px 12px; background: #007bff; color: white; border: none; border-radius: 4px; cursor: pointer;">Kirim</button>
+		</form>
+		</div>
+    </article>
         
         <!-- Postingan Statis 2 -->
         <article class="post-card">
