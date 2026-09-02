@@ -1,63 +1,26 @@
 /* ==========================================================================
-   1. INTERAKSI UTAMA & MODAL HANDLER
+   MAIN.JS - FITUR UTAMA & FEED
    ========================================================================== */
 
 document.addEventListener('DOMContentLoaded', () => {
 
-  // A. HANDLER MODAL (Pencarian & Kontak/About)
-  // Gunakan Event Delegation agar tombol navbar selalu terdeteksi
-  document.addEventListener('click', (e) => {
-    // Buka Modal
-    const targetBtn = e.target.closest('.open-modal-btn');
-    if (targetBtn) {
-      e.preventDefault();
-      const modalId = targetBtn.getAttribute('data-target');
-      const targetModal = document.getElementById(modalId);
-      if (targetModal) {
-        targetModal.style.display = 'block';
+  // A. NAVBAR AUTO-HIDE SAAT SCROLL
+  const navbar = document.querySelector(".navbar");
+  let lastScrollY = window.scrollY;
+
+  if (navbar) {
+    window.addEventListener("scroll", () => {
+      const currentScrollY = window.scrollY;
+      if (currentScrollY > lastScrollY && currentScrollY > 50) {
+        navbar.classList.add("navbar--hidden");
+      } else {
+        navbar.classList.remove("navbar--hidden");
       }
-    }
+      lastScrollY = currentScrollY;
+    });
+  }
 
-    // Tutup Modal via Tombol Close (X)
-    if (e.target.classList.contains('close-btn')) {
-      const modal = e.target.closest('.modal');
-      if (modal) {
-        modal.style.display = 'none';
-      }
-    }
-
-    // Tutup Modal saat Klik Area Luar (Overlay)
-    if (e.target.classList.contains('modal')) {
-      e.target.style.display = 'none';
-    }
-  });
-
-   
-// B. NAVBAR AUTO-HIDE SAAT SCROLL
-const navbar = document.querySelector(".navbar");
-let lastScrollY = window.scrollY;
-
-if (navbar) {
-  window.addEventListener("scroll", () => {
-    const currentScrollY = window.scrollY;
-
-    // Jika di-scroll ke bawah dan sudah melewati 50px
-    if (currentScrollY > lastScrollY && currentScrollY > 50) {
-      navbar.classList.add("navbar--hidden");
-    } else {
-      // Jika di-scroll ke atas
-      navbar.classList.remove("navbar--hidden");
-    }
-
-    lastScrollY = currentScrollY;
-  });
-}
-
-
-  // ------------------------------------------------------------------------
-  // C. INFINITE SCROLL FEED
-  // ------------------------------------------------------------------------
-  
+  // B. INFINITE SCROLL FEED
   const databasePostingan = [
     { 
       id: 1, 
@@ -104,18 +67,15 @@ if (navbar) {
   let observer;
 
   function muatPostinganBerikutnya() {
-  if (!container) return;
-  
-  const dataBatch = databasePostingan.slice(indexData, indexData + itemPerScroll);
-  
-  if (dataBatch.length === 0) {
-  if (sentinel) sentinel.textContent = 'Semua postingan telah dimuat.';
-  if (observer) observer.disconnect(); // Hentikan pemantauan scroll secara total
-  return;
-  }
-  
-  // ... sisa kode perulangan pembuatan postingan tetap sama ...
-  }
+    if (!container) return;
+    
+    const dataBatch = databasePostingan.slice(indexData, indexData + itemPerScroll);
+    
+    if (dataBatch.length === 0) {
+      if (sentinel) sentinel.textContent = 'Semua postingan telah dimuat.';
+      if (observer) observer.disconnect();
+      return;
+    }
 
     dataBatch.forEach((post) => {
       indexData++;
@@ -124,7 +84,7 @@ if (navbar) {
 
       article.innerHTML = ` 
         <header class="post-header"> 
-          <img src="${post.gambar}" alt="Foto profil ${post.name}"" class="avatar"> 
+          <img src="${post.gambar}" alt="Foto profil ${post.name}" class="avatar"> 
           <div class="user-info"> 
             <h4 class="username">${post.name}</h4>
             <span class="postdate">${post.date} &bull; Publik</span>
@@ -156,8 +116,8 @@ if (navbar) {
     });
   }
 
-  // Inisialisasi IntersectionObserver untuk Infinite Scroll
-  if (sentinel) {
+  // Observer untuk Infinite Scroll
+  if (container && sentinel) {
     observer = new IntersectionObserver((entries) => {
       entries.forEach(entry => {
         if (entry.isIntersecting) {
@@ -165,28 +125,11 @@ if (navbar) {
         }
       });
     }, { rootMargin: '200px' });
-
+    
     observer.observe(sentinel);
   }
-     
-  if (container && sentinel) {
-  // Jalankan logika Infinite Scroll hanya jika kontainer ditemukan
-  const observer = new IntersectionObserver((entries) => {
-  entries.forEach(entry => {
-  if (entry.isIntersecting) {
-  setTimeout(() => muatPostinganBerikutnya(), 300);
-  }
-  });
-  }, { rootMargin: '200px' });
-  
-  observer.observe(sentinel);
-  }
-  
-  });
 
-  // ------------------------------------------------------------------------
-  // D. POSTINGAN TEMPORER (LOCALSTORAGE)
-  // ------------------------------------------------------------------------
+  // C. POSTINGAN TEMPORER (LOCALSTORAGE)
   const STORAGE_KEY = 'temp_posts_data';
   const THREE_DAYS_MS = 3 * 24 * 60 * 60 * 1000;
   const postsFeed = document.getElementById('postsFeed');
@@ -196,7 +139,7 @@ if (navbar) {
     return text
       .replace(/&/g, "&amp;")
       .replace(/</g, "&lt;")
-      .replace(/>/g, "&gt;")
+      .replace(/ >/g, "&gt;")
       .replace(/"/g, "&quot;")
       .replace(/'/g, "&#039;");
   }
@@ -275,7 +218,7 @@ if (navbar) {
 });
 
 /* ==========================================================================
-   2. FUNGSI UTILS GLOBAL
+   FUNGSI UTILS GLOBAL
    ========================================================================== */
 function handleCommentSubmit(event, postId) {
   event.preventDefault();
@@ -318,4 +261,5 @@ function sharePost() {
     navigator.clipboard.writeText(window.location.href);
     alert('Link berhasil disalin ke clipboard!');
   }
-        }
+                     }
+           
