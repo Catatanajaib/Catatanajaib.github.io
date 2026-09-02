@@ -385,12 +385,16 @@ h4.logo {
   text-align: center;
   padding: 10px;
   width: 100%;
+  overflow: hidden;
   border-radius: 5px;
   box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
 }
 
-.konten-zoom:hover {
-  transform: scale(1.1);
+.konten-zoom img{
+	transition: tranform 0.3s ease
+
+.konten-zoom:hover img {
+  tranform: scale (1.8);
 }
 
 /* Box Call-To-Action / Informasi di Akhir */
@@ -407,4 +411,4 @@ h4.logo {
   0% { transform: scale(1); }
   50% { transform: scale(1.3); }
   100% { transform: scale(1); }
-}
+   }
