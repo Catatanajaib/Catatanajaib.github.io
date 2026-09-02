@@ -17,13 +17,11 @@ html {
 
 /* Tampilan utama halaman (Body) */
 body {
-  background: DarkTurquoise; /* Warna latar belakang utama */
+  background: DarkTurquoise;
   text-align: center;
-  height: auto;
   width: 100%;
-  max-width: 800px; /* Batas lebar maksimal halaman */
-  margin: 0 auto;  /* Mengatur tata letak ke tengah secara horizontal */
-  padding-top: 90px; /* Memberi ruang di atas agar konten tidak tertutup Navbar fixed */
+  margin: 0; /* Ubah dari margin: 0 auto */
+  padding-top: 90px;
 }
 
 
@@ -38,17 +36,16 @@ body {
   justify-content: center;
   align-items: center;
   gap: 8px;
-  position: fixed; /* Membuat navbar menempel di atas saat di-scroll */
+  position: fixed;
   top: 0;
   left: 0;
   width: 100%;
-  z-index: 1000; /* Memastikan navbar berada di atas elemen lainnya */
-  background-color: transparent; 
+  z-index: 1000;
+  background-color: DarkTurquoise; /* Beri warna latar agar konten di bawahnya tertutup saat di-scroll */
   padding: 10px 0;
-  transition: transform 0.3s ease; /* Efek transisi saat navbar tersembunyi */
+  transition: transform 0.3s ease;
 }
 
-/* Sembunyikan navbar ke atas (digunakan via JavaScript saat scroll down) */
 .navbar--hidden {
   transform: translateY(-100%);
 }
