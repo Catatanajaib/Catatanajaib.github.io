@@ -158,6 +158,27 @@ document.addEventListener('DOMContentLoaded', () => {
 
     observer.observe(sentinel);
   }
+     /* SAFEGUARD infinity scroll*/
+  document.addEventListener('DOMContentLoaded', () => {
+  
+  // Safeguard untuk Infinite Scroll jika elemennya tidak ada di halaman artikel ini
+  const container = document.getElementById('posts-container');
+  const sentinel = document.getElementById('scroll-sentinel');
+  
+  if (container && sentinel) {
+  // Jalankan logika Infinite Scroll hanya jika kontainer ditemukan
+  const observer = new IntersectionObserver((entries) => {
+  entries.forEach(entry => {
+  if (entry.isIntersecting) {
+  setTimeout(() => muatPostinganBerikutnya(), 300);
+  }
+  });
+  }, { rootMargin: '200px' });
+  
+  observer.observe(sentinel);
+  }
+  
+  });
 
   // ------------------------------------------------------------------------
   // D. POSTINGAN TEMPORER (LOCALSTORAGE)
