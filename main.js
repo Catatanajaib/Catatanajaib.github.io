@@ -32,20 +32,27 @@ document.addEventListener('DOMContentLoaded', () => {
     }
   });
 
-  // B. NAVBAR AUTO-HIDE SAAT SCROLL
-  const navbar = document.querySelector(".navbar");
-  let lastScrollY = window.scrollY;
+   
+// B. NAVBAR AUTO-HIDE SAAT SCROLL
+const navbar = document.querySelector(".navbar");
+let lastScrollY = window.scrollY;
 
-  if (navbar) {
-    window.addEventListener("scroll", () => {
-      if (window.scrollY > lastScrollY && window.scrollY > 50) {
-        navbar.classList.add("navbar--hidden");
-      } else {
-        navbar.classList.remove("navbar--hidden");
-      }
-      lastScrollY = window.scrollY;
-    });
-  }
+if (navbar) {
+  window.addEventListener("scroll", () => {
+    const currentScrollY = window.scrollY;
+
+    // Jika di-scroll ke bawah dan sudah melewati 50px
+    if (currentScrollY > lastScrollY && currentScrollY > 50) {
+      navbar.classList.add("navbar--hidden");
+    } else {
+      // Jika di-scroll ke atas
+      navbar.classList.remove("navbar--hidden");
+    }
+
+    lastScrollY = currentScrollY;
+  });
+}
+
 
   // ------------------------------------------------------------------------
   // C. INFINITE SCROLL FEED
