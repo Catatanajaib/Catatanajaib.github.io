@@ -5,7 +5,7 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
 
     <meta name="description" content="Pernahkah kamu memperhatikan hal-hal yang ada disekitar kita? Ya itulah sebabnya mengapa saya membuat ini. Ada kalanya hal itu datang disaat kita membutuhkan nya, tetapi terkadang keadaan yang telah terjadi menghapuskan apa yang telah kita pelajari. Mungkin saja ini akan berguna." />
-    <meta property="og:image" content="gambar/catatan ajaib.jpg" />
+    <meta property="og:image" content="https://picsum.photos/600/300?random=5" />
     <meta property="og:description" content="Pernahkah kamu memperhatikan hal-hal yang ada disekitar kita? Ya itulah sebabnya mengapa saya membuat ini. Ada kalanya hal itu datang disaat kita membutuhkan nya, tetapi terkadang keadaan yang telah terjadi menghapuskan apa yang telah kita pelajari. Mungkin saja ini akan berguna." />
     <meta property="og:title" content="Catatan Ajaib" />
     <base href="./">
@@ -48,14 +48,15 @@
         <form class="search-container" action="https://www.google.com/search" method="GET" target="_blank">
             <div class="form-group">
                 <label for="search-query">Penelusuran</label>
-                <textarea 
+                <input type ="text"
                     id="search-query" 
                     name="q" 
                     rows="3" 
                     class="search-input" 
                     placeholder="Apa yang ingin kamu cari?" 
                     required
-                ></textarea>
+                >
+               
             </div>
          
             <button type="submit" class="btn-post search-button">
@@ -92,19 +93,18 @@
         <div id="postsFeed"></div>
 
         <!-- Widget Iklan Top -->
-        <div class="konten-zoom" style="margin-bottom: 24px;">
-            <script>
-            atOptions = {
-                'key' : 'c7ceecf9be42bb2b182175415809298d',
-                'format' : 'iframe',
-                'height' : 60,
-                'width' : 468,
-                'params' : {}
-            };
-            </script>
-            <script src="https://www.highperformanceformat.com/c7ceecf9be42bb2b182175415809298d/invoke.js"></script>
-        </div>
-
+<div class="konten-zoom" style="margin-bottom: 24px;">
+    <script type="text/javascript">
+        atOptions = {
+            'key' : 'c7ceecf9be42bb2b182175415809298d',
+            'format' : 'iframe',
+            'height' : 60,
+            'width' : 468,
+            'params' : {}
+        };
+    </script>
+    <script type="text/javascript" src="https://www.highperformanceformat.com/c7ceecf9be42bb2b182175415809298d/invoke.js"></script>
+</div>
         <!-- Postingan Statis 1 -->
         <article class="post-card" data-post-id="static-1">
             <header class="post-header">
@@ -133,7 +133,7 @@
                 <button class="action-btn" onclick="scrollToComments()">💬 Komentar</button>
                 <button class="action-btn" onclick="sharePost()">↗️ Bagikan</button>
             </footer>
-		</article>
+         </article>
 
 	        <!-- WADAH KOMENTAR TEMPORER (7 HARI) -->
 			<div id="comment-section-static-1" class="comment-section" style="display:none; padding: 15px; border-top: 1px solid #eee; text-align: left;">
@@ -182,11 +182,11 @@
 
     </main>
     
-    <main class="container">
+    
 		<post-card-element></post-card-element>
 		<script src="javascript/post-card-element.js"></script>
-    </main>
+    
     <!-- 2. Cukup panggil 1 File JS Gabungan di bagian paling bawah -->
-    <script src="main.js" defer></script>
+    <script src="main.js" ></script>
 </body>
-</html>
+				</html>
