@@ -97,15 +97,18 @@ document.addEventListener('DOMContentLoaded', () => {
   let observer;
 
   function muatPostinganBerikutnya() {
-    if (!container) return;
-
-    const dataBatch = databasePostingan.slice(indexData, indexData + itemPerScroll);
-
-    if (dataBatch.length === 0) {
-      if (sentinel) sentinel.textContent = 'Semua postingan telah dimuat.';
-      if (observer && sentinel) observer.unobserve(sentinel);
-      return;
-    }
+  if (!container) return;
+  
+  const dataBatch = databasePostingan.slice(indexData, indexData + itemPerScroll);
+  
+  if (dataBatch.length === 0) {
+  if (sentinel) sentinel.textContent = 'Semua postingan telah dimuat.';
+  if (observer) observer.disconnect(); // Hentikan pemantauan scroll secara total
+  return;
+  }
+  
+  // ... sisa kode perulangan pembuatan postingan tetap sama ...
+  }
 
     dataBatch.forEach((post) => {
       indexData++;
@@ -308,4 +311,4 @@ function sharePost() {
     navigator.clipboard.writeText(window.location.href);
     alert('Link berhasil disalin ke clipboard!');
   }
-}
+        }
