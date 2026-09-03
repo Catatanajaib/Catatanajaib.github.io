@@ -28,8 +28,8 @@ document.addEventListener('DOMContentLoaded', () => {
       judul: "hadiah pengguna baru digital banking", 
       ringkasan: "Masukkan kode ini saat pendaftaran untuk klaim bonus kamu!", 
       kategori: "dana kaget", 
-      gambar: "https://catatanajaib.github.io/html/Referral.png", 
-      url: "https://catatanajaib.github.io/html/referalseabank.html", 
+      gambar: "https://catatanajaib.github.io/assets/images/referral.png", 
+      url: "https://catatanajaib.github.io/pages/referalseabank.html", 
       date: "24 Agu 2026",
       like: 12,
       comment: 5
