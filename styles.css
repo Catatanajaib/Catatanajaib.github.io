@@ -409,3 +409,32 @@ h4.logo {
   50% { transform: scale(1.3); }
   100% { transform: scale(1); }
    }
+
+/* ==========================================
+   TATA LETAK RESPONSIF (HP & LAPTOP)
+   ========================================== */
+
+/* Gaya dasar wadah utama untuk layar HP */
+.main-container, .article-card {
+    width: 90%;             /* Mengikuti 90% lebar layar di HP */
+    max-width: 600px;       /* Batas lebar maksimal di HP */
+    margin: 0 auto 20px;    /* Otomatis posisi di tengah layar secara horizontal */
+    transition: all 0.3s ease;
+}
+
+/* Penyesuaian khusus tampilan Laptop/Tablet (Layar > 768px) */
+@media (min-width: 768px) {
+    .main-container, .article-card {
+        max-width: 850px;   /* Diperlebar agar tampilan di laptop lebih pas */
+        padding: 24px;      /* Memberikan ruang dalam kartu yang lebih lega */
+    }
+}
+/* MENCEGAH BROWSER MEMAKSA MODE GELAP AUTOMATIS */
+:root {
+    color-scheme: light; /* Memastikan browser selalu merender dalam mode terang */
+}
+
+body {
+    background-color: #00bcd4; /* Latar belakang toska milikmu */
+    color: #2b2b2b;            /* Warna teks utama */
+		}
