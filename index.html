@@ -1,0 +1,184 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Catatan Ajaib</title>
+
+    <!-- Meta Tags untuk SEO dan Open Graph -->
+    <meta name="description" content="Pernahkah kamu memperhatikan hal-hal yang ada disekitar kita? Ya itulah sebabnya mengapa saya membuat ini. Ada kalanya hal itu datang disaat kita membutuhkan nya, tetapi terkadang keadaan yang telah terjadi menghapuskan apa yang telah kita pelajari. Mungkin saja ini akan berguna." />
+    <meta property="og:title" content="Catatan Ajaib" />
+    <meta property="og:description" content="Pernahkah kamu memperhatikan hal-hal yang ada disekitar kita? Ya itulah sebabnya mengapa saya membuat ini. Ada kalanya hal itu datang disaat kita membutuhkan nya, tetapi terkadang keadaan yang telah terjadi menghapuskan apa yang telah kita pelajari. Mungkin saja ini akan berguna." />
+    <meta property="og:image" content="https://picsum.photos/600/300?random=5" />
+    
+    <base href="./">
+
+    <!-- Stylesheet Utama -->
+    <link rel="stylesheet" href="styles.css">
+
+    <!-- Script Pendukung (Di-load setelah HTML selesai dibaca) -->
+    <script src="assets/js/navbar.js" defer></script>
+    <script src="assets/js/modalhandler.js" defer></script>
+    <script src="assets/js/post-card-element.js" defer></script>
+    <script src="assets/js/main.js" defer></script>
+</head>
+<body>
+
+    <!-- Web Component Navbar & Modal Otomatis -->
+    <my-navbar></my-navbar>
+
+    <!-- KONTAINER UTAMA -->
+    <main class="container">
+
+        <!-- Form Input Postingan Baru -->
+        <div class="post-container">
+            <h2>Buat Postingan Baru</h2>
+            <form id="postForm">
+                <div class="form-group">
+                    <label for="username">Nama:</label>
+                    <input type="text" id="username" placeholder="Tulis nama kamu..." required>
+                </div>
+                <div class="form-group">
+                    <label for="content">Isi Postingan:</label>
+                    <textarea id="content" rows="4" placeholder="Apa yang ingin kamu bagikan?" required></textarea>
+                </div>
+                <button type="submit" class="btn-post">Kirim</button>
+            </form>
+        </div>
+
+        <!-- Slot Feed Postingan Temporer (Via LocalStorage) -->
+        <div id="postsFeed"></div>
+
+        <!-- Widget Iklan Top -->
+        <div class="konten-zoom" style="margin-bottom: 24px; text-align: center; overflow-x: auto;">
+            <script type="text/javascript">
+                atOptions = {
+                    'key' : 'c7ceecf9be42bb2b182175415809298d',
+                    'format' : 'iframe',
+                    'height' : 60,
+                    'width' : 468,
+                    'params' : {}
+                };
+            </script>
+            <script type="text/javascript" src="https://www.highperformanceformat.com/c7ceecf9be42bb2b182175415809298d/invoke.js"></script>
+        </div>
+
+        <!-- Postingan Statis 1 -->
+        <article class="post-card" data-post-id="static-1">
+            <header class="post-header">
+                <img src="https://picsum.photos/600/300?random=5" alt="Foto Profil" class="avatar">
+                <div class="user-info">
+                    <h4>Miftahul Mujib</h4>
+                    <span>2 jam yang lalu &bull; Publik</span>
+                </div>
+            </header>
+            
+            <div class="post-content">
+                Pernahkah kamu memperhatikan hal-hal yang ada disekitar kita? Ya itulah sebabnya mengapa saya membuat ini. Ada kalanya hal itu datang disaat kita membutuhkan nya, tetapi terkadang keadaan yang telah terjadi menghapuskan apa yang telah kita pelajari. Mungkin saja ini akan berguna.☕🍰
+            </div>
+            
+            <div class="post-media">
+                <img src="https://picsum.photos/600/300?random=7" alt="Foto Postingan">
+            </div>
+            
+            <div class="post-stats">
+                <span>👍 128jt Suka</span>
+                <span>904rb Komentar</span>
+            </div>
+            
+            <footer class="post-actions">
+                <button class="action-btn" onclick="toggleLike(this)">👍 Suka</button>
+                <button class="action-btn" onclick="scrollToComments('comment-section-static-1')">💬 Komentar</button>
+                <button class="action-btn" onclick="sharePost()">↗️ Bagikan</button>
+            </footer>
+
+            <!-- WADAH KOMENTAR TEMPORER (7 HARI) -->
+            <div id="comment-section-static-1" class="comment-section" style="display:none; padding: 15px; border-top: 1px solid #eee; text-align: left;">
+                <div class="comments-list" id="comments-list-static-1"></div>
+                <form onsubmit="handleCommentSubmit(event, 'static-1')" style="margin-top: 10px; display: flex; gap: 8px;">
+                    <input type="text" placeholder="Tulis komentar (hapus otomatis 7 hari)..." required style="flex: 1; padding: 8px; border: 1px solid #ccc; border-radius: 4px;">
+                    <button type="submit" style="padding: 8px 12px; background: #007bff; color: white; border: none; border-radius: 4px; cursor: pointer;">Kirim</button>
+                </form>
+            </div>
+        </article>
+        
+        <!-- Postingan Statis 2 -->
+        <article class="post-card" data-post-id="static-2">
+            <header class="post-header">
+                <img src="https://picsum.photos/600/300?random=9" alt="Foto Profil" class="avatar">
+                <div class="user-info">
+                    <h4>Miftahul Mujib</h4>
+                    <span>2 jam yang lalu &bull; Publik</span>
+                </div>
+            </header>
+            
+            <div class="post-content">
+                Pernahkah kamu menginginkan agar bisa withdraw tanpa banyak persyaratan, ya aku juga berpikiran sama dengan kamu. aku tidak tahu apakah ada web yang seperti itu, aku main <a href="https://www.acphnbv.com/?code=NSCJFNSP" target="_blank" rel="noopener">disini</a> tapi aku gak tau gimana dengan withdraw nya.
+            </div>
+
+            <div class="post-media">
+                <img src="https://picsum.photos/600/300?random=5" alt="Foto Postingan">
+            </div>
+            
+            <div class="post-stats">
+                <span>👍 28rb Suka</span>
+                <span>104rb Komentar</span>
+            </div>
+            
+            <footer class="post-actions">
+                <button class="action-btn" onclick="toggleLike(this)">👍 Suka</button>
+                <button class="action-btn" onclick="scrollToComments('comment-section-static-2')">💬 Komentar</button>
+                <button class="action-btn" onclick="sharePost()">↗️ Bagikan</button>
+            </footer>
+
+            <!-- WADAH KOMENTAR TEMPORER POST 2 -->
+            <div id="comment-section-static-2" class="comment-section" style="display:none; padding: 15px; border-top: 1px solid #eee; text-align: left;">
+                <div class="comments-list" id="comments-list-static-2"></div>
+                <form onsubmit="handleCommentSubmit(event, 'static-2')" style="margin-top: 10px; display: flex; gap: 8px;">
+                    <input type="text" placeholder="Tulis komentar (hapus otomatis 7 hari)..." required style="flex: 1; padding: 8px; border: 1px solid #ccc; border-radius: 4px;">
+                    <button type="submit" style="padding: 8px 12px; background: #007bff; color: white; border: none; border-radius: 4px; cursor: pointer;">Kirim</button>
+                </form>
+            </div>
+        </article>
+
+        <!-- Wadah Infinite Scroll & Indikator (Posisi Paling Bawah) -->
+        <div id="posts-container"></div>
+        <div id="scroll-sentinel" class="status-indicator">Memuat postingan...</div>
+		
+        <!-- Artikel 1: Desain Rumah -->
+        <!-- Artikel 1 di index.html -->
+        <post-card 
+        title="Inspirasi Desain Rumah Minimalis Modern 2026"
+        date="Dipublikasikan Hari Ini"
+        highlight="Hemat Biaya & Tetap Elegan!"
+        excerpt="Temukan denah rumah idaman dengan pencahayaan alami maksimal dan penataan ruang yang efisien untuk lahan terbatas."
+        link="pages/desain-rumah-sederhana.html">
+        </post-card>
+
+        <!-- WIDGET IKLAN ADSTERRA (Pemisah Antara Artikel 1 & 2) -->
+        <div class="konten-zoom" style="margin: 24px 0; text-align: center; overflow-x: auto;">
+            <script type="text/javascript">
+                atOptions = {
+                    'key' : 'c7ceecf9be42bb2b182175415809298d',
+                    'format' : 'iframe',
+                    'height' : 60,
+                    'width' : 468,
+                    'params' : {}
+                };
+            </script>
+            <script type="text/javascript" src="https://www.highperformanceformat.com/c7ceecf9be42bb2b182175415809298d/invoke.js"></script>
+        </div>
+
+        <!-- Artikel 2: Harga Minyak -->
+        <post-card 
+            title="Berapa Harga Minyak di Indonesia saat Ini?"
+            date="Update Terbaru"
+            highlight="Tren CPO Tembus Rp15.688/kg & TBS Petani Naik!"
+            excerpt="Cek rincian harga lengkap minyak sawit, minyak kayu putih, minyak tanah, hingga minyak jelantah dari tahun ke tahun di sini."
+            link="pages/artikel-berapa-harga-minyak.html">
+        </post-card>
+
+    </main>
+
+</body>
+</html>
