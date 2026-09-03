@@ -2,15 +2,38 @@
 <html lang="id">
 <head>
     <meta charset="UTF-8">
+    <!-- Memastikan website responsive dan cepat di HP -->
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Catatan Ajaib</title>
-
-    <!-- Meta Tags untuk SEO dan Open Graph -->
-    <meta name="description" content="Pernahkah kamu memperhatikan hal-hal yang ada disekitar kita? Ya itulah sebabnya mengapa saya membuat ini. Ada kalanya hal itu datang disaat kita membutuhkan nya, tetapi terkadang keadaan yang telah terjadi menghapuskan apa yang telah kita pelajari. Mungkin saja ini akan berguna." />
-    <meta property="og:title" content="Catatan Ajaib" />
-    <meta property="og:description" content="Pernahkah kamu memperhatikan hal-hal yang ada disekitar kita? Ya itulah sebabnya mengapa saya membuat ini. Ada kalanya hal itu datang disaat kita membutuhkan nya, tetapi terkadang keadaan yang telah terjadi menghapuskan apa yang telah kita pelajari. Mungkin saja ini akan berguna." />
-    <meta property="og:image" content="https://picsum.photos/600/300?random=5" />
     
+    <!-- 1. SEO UTAMA: Judul dan Deskripsi yang terbaca di Google -->
+    <title>Catatan Ajaib - Berita, Fakta, Etalase </title>
+    <meta name="description" content="Kumpulan catatan yang hilang , tutorial pemrograman, berita terbaru, inspirasi desain rumah minimalis modern yang bermanfaat dan mudah dipahami.">
+    <meta name="keywords" content="catatan ajaib, berita nyata, tutorial pemrograman, desain rumah minimalis, blog berita, rekayasa industri, ilmu pengetahuan, jual beli, sejarah, fakta dan teknologi, informasi, etalase toko.">
+    <meta name="author" content="Catatan Ajaib">
+
+    <!-- 2. OPEN GRAPH (SMM): Agar tampilan menarik saat link dibagikan di media sosial -->
+    <meta property="og:title" content="Catatan Ajaib - Berita & etalase">
+    <meta property="og:description" content="Pernahkah kamu memperhatikan hal-hal yang ada disekitar kita? Ya itulah sebabnya mengapa saya membuat ini. Ada kalanya hal itu datang disaat kita membutuhkan nya, tetapi terkadang keadaan yang telah terjadi menghapuskan apa yang telah kita pelajari. Mungkin saja ini akan berguna.☕🍰
+    .">
+    <meta property="og:type" content="website">
+
+    <!-- 3. STRUCTURED DATA (JSON-LD): Memberi tahu Google struktur website kita -->
+    <script type="application/ld+json">
+    {
+      "@context": "https://schema.org",
+      "@type": "WebSite",
+      "name": "Catatan Ajaib",
+      "url": "https://catatanajaib.github.io",
+      "potentialAction": {
+        "@type": "SearchAction",
+        "target": "https://catatanajaib.github.io/search?q={search_term_string}",
+        "query-input": "required name=search_term_string"
+      }
+    }
+    </script>
+
+    <link rel="stylesheet" href="styles.css">
+
     <base href="./">
 
     <!-- Stylesheet Utama -->
@@ -179,6 +202,9 @@
         </post-card>
 
     </main>
-
+<footer>
+        <p>&copy; 2026 Catatan Ajaib. Hak Cipta Dilindungi. </p>
+    </footer>
 </body>
-</html>
+						</html>
+									 
