@@ -60,21 +60,28 @@
     <!-- KONTAINER UTAMA -->
     <main class="container">
 
-        <!-- Form Input Postingan Baru -->
-        <div class="post-container">
-            <h2>Buat Postingan Baru</h2>
-            <form id="postForm">
-                <div class="form-group">
-                    <label for="username">Nama:</label>
-                    <input type="text" id="username" placeholder="Tulis nama kamu..." required>
-                </div>
-                <div class="form-group">
-                    <label for="content">Isi Postingan:</label>
-                    <textarea id="content" rows="4" placeholder="Apa yang ingin kamu bagikan?" required></textarea>
-                </div>
-                <button type="submit" class="btn-post">Kirim</button>
-            </form>
+    <!-- Form Input Postingan Baru (Hanya Tampil Jika Sudah Login) -->
+<div class="post-container" id="create-post-box" style="display: none;">
+    <h2>Buat Postingan Baru</h2>
+    <form id="postForm">
+        <div class="form-group">
+            <label for="username">Nama Pengirim:</label>
+            <!-- Field nama dijadikan read-only karena otomatis mengambil nama akun pengguna yang login -->
+            <input type="text" id="username" placeholder="Nama kamu..." readonly style="background-color: #f0f0f0;">
         </div>
+        <div class="form-group">
+            <label for="content">Isi Postingan:</label>
+            <textarea id="content" rows="4" placeholder="Apa yang ingin kamu bagikan?" required></textarea>
+        </div>
+        <button type="submit" class="btn-post">Kirim Postingan</button>
+    </form>
+</div>
+  
+<!-- Pesan Peringatan Jika Pengguna Belum Login -->
+<div class="post-container" id="login-required-box" style="display: block; text-align: center;">
+    <p style="color: #666; margin-bottom: 15px;">Anda harus masuk ke akun Anda terlebih dahulu untuk dapat menulis postingan.</p>
+    <a class="btn-post" style="display: block; width: auto; padding: 10px 20px;">Geser ke kiri untuk daftar / login</a>
+</div>
         
         <!-- Area Menampilkan Postingan -->
         <div id="postsFeed">Memuat postingan...
