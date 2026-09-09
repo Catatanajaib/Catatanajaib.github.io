@@ -1,6 +1,39 @@
 /* ==========================================================================
    1. RESET & PENGATURAN DASAR (GLOBAL STYLES)
    ========================================================================== */
+   
+/*PENATAAN HORIZONTAL SCROLL (GESER SAMPING) */
+
+/* 1. Atur HTML & Body agar tidak memunculkan scrollbar ganda */
+html, body {
+  overflow-x: hidden; /* Mencegah overflow liar */
+  margin: 0;
+  padding: 0;
+  width: 100%;
+}
+
+/* 2. Pembungkus Utama Geser Samping */
+.horizontal-slider {
+  display: flex;
+  width: 100vw;
+  height: 100vh;
+  overflow-x: auto;
+  overflow-y: hidden;
+  scroll-snap-type: x mandatory; /* Memastikan geseran pas per section */
+  scroll-behavior: smooth;
+}
+
+/* 3. Setiap Section / Halaman Layar */
+.slide-page {
+  flex: 0 0 100vw; /* Setiap halaman memenuhi 100% lebar layar */
+  width: 100vw;
+  height: 100vh;
+  overflow-y: auto; /* Scroll vertikal tetap aktif di dalam masing-masing halaman */
+  scroll-snap-align: start;
+  box-sizing: border-box;
+  padding-top: 10px; /* Menjaga jarak dari Navbar */
+}
+
 
 /* Mengaktifkan scroll halus saat melakukan navigasi anchor link */
 html {
@@ -261,6 +294,7 @@ h4.logo {
   font-size: 15px;
   font-weight: 600;
   color: #050505;
+  text-align: left;
 }
 
 .user-info span {

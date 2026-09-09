@@ -1,0 +1,61 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Akun - Catatan Ajaib</title>
+    <!-- Menghubungkan ke CSS Utama -->
+    <link rel="stylesheet" href="../styles.css">
+    
+    <!-- Pustaka JS Supabase Official -->
+    <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+    
+    <!-- Memanggil Script Pendaftaran & Login -->
+    <script src="../assets/js/pendaftaran.js" defer></script>
+</head>
+<body>
+    <main class="container">
+        
+        <div class="post-container">
+            <h2 id="judul-form" style="text-align: center;">Daftar Akun Baru</h2>
+        </div>
+
+        <!-- Pesan Notifikasi (Sukses / Gagal) -->
+        <div id="pesan-notif" style="display: none; padding: 10px; margin-bottom: 15px; border-radius: 4px; text-align: center;"></div>
+        
+        <div class="post-container">
+            <form id="form-pendaftaran">
+                <!-- Field Username (Khusus Pendaftaran) -->
+                <div id="group-username" style="margin-bottom: 15px;">
+                    <label for="username">Nama Pengguna</label>
+                    <input type="text" id="username" required placeholder="Masukkan username" style="width: 100%; padding: 8px; margin-top: 5px; box-sizing: border-box;">
+                </div>
+
+                <!-- Field Email -->
+                <div style="margin-bottom: 15px;">
+                    <label for="email">Email:</label>
+                    <input type="email" id="email" required placeholder="Masukkan alamat email" style="width: 100%; padding: 8px; margin-top: 5px; box-sizing: border-box;">
+                </div>
+
+                <!-- Field Password -->
+                <div style="margin-bottom: 20px;">
+                    <label for="password">Kata Sandi:</label>
+                    <input type="password" id="password" required minlength="6" placeholder="Minimal 6 karakter" style="width: 100%; padding: 8px; margin-top: 5px; box-sizing: border-box;">
+                </div>
+
+                <!-- Tombol Submit -->
+                <button type="submit" id="btn-submit" style="width: 100%; padding: 10px; background-color: #28a745; color: white; border: none; border-radius: 4px; cursor: pointer; font-weight: bold;">
+                    Daftar Sekarang
+                </button>
+            </form>
+
+            <!-- Tautan Pengalih Mode -->
+            <div style="text-align: center; margin-top: 15px;">
+                <span id="teks-pengalih">Sudah punya akun?</span>
+                <a href="#" id="link-pengalih" style="color: #007bff; text-decoration: underline; cursor: pointer;">Login di sini</a>
+            </div>
+        </div>
+
+    </main>
+</body>
+</html>

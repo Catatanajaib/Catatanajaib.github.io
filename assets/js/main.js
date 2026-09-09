@@ -1,3 +1,5 @@
+console.log("File main.js berhasil dimuat!");
+
 /* ==========================================================================
    MAIN.JS - FITUR UTAMA & FEED
    ========================================================================== */
@@ -20,7 +22,9 @@ document.addEventListener('DOMContentLoaded', () => {
     });
   }
 
+  // ==========================================================================
   // B. INFINITE SCROLL FEED
+  // ==========================================================================
   const databasePostingan = [
     { 
       id: 1, 
@@ -67,10 +71,12 @@ document.addEventListener('DOMContentLoaded', () => {
   let observer;
 
   function muatPostinganBerikutnya() {
+    // Jika tidak ada container 'posts-container' di halaman ini, hentikan fungsi
     if (!container) return;
     
     const dataBatch = databasePostingan.slice(indexData, indexData + itemPerScroll);
     
+    // Jika semua data di array sudah ditampilkan
     if (dataBatch.length === 0) {
       if (sentinel) sentinel.textContent = 'Semua postingan telah dimuat.';
       if (observer) observer.disconnect();
@@ -81,6 +87,7 @@ document.addEventListener('DOMContentLoaded', () => {
       indexData++;
       const article = document.createElement('article');
       article.className = 'post-card';
+      article.style.marginBottom = '20px';
 
       article.innerHTML = ` 
         <header class="post-header"> 
@@ -116,15 +123,19 @@ document.addEventListener('DOMContentLoaded', () => {
     });
   }
 
-  // Observer untuk Infinite Scroll
+  // Inisialisasi hanya jika halaman memiliki elemen 'posts-container' dan 'scroll-sentinel'
   if (container && sentinel) {
+    // Panggil 1 kali di awal agar postingan pertama langsung dimuat
+    muatPostinganBerikutnya();
+
+    // Aktifkan pemantauan scroll untuk postingan berikutnya
     observer = new IntersectionObserver((entries) => {
       entries.forEach(entry => {
         if (entry.isIntersecting) {
-          setTimeout(() => muatPostinganBerikutnya(), 300);
+          muatPostinganBerikutnya();
         }
       });
-    }, { rootMargin: '200px' });
+    }, { rootMargin: '100px' });
     
     observer.observe(sentinel);
   }

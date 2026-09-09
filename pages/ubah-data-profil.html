@@ -1,0 +1,89 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Ubah Data Profil</title>
+  <!-- Menghubungkan ke file CSS utama -->
+  <link rel="stylesheet" href="../styles.css">
+  <link rel="stylesheet" href="./ubah-data-profil.css">
+  
+</head>
+<body>
+<div class="horizontal-slider">
+<section class="slide-page">
+    <main class="container">
+  <div class="profile-container">
+    <div class="profile-card">
+      <div class="card-header">
+        <h2>Ubah Data Profil</h2>
+        <p>Perbarui informasi akun Anda di bawah ini.</p>
+      </div>
+
+      <!-- Formulir Edit Profil -->
+      <form id="formUbahProfil" novalidate>
+        
+        <div class="form-group">
+          <label for="namaLengkap">Nama Lengkap</label>
+          <input 
+            type="text" 
+            id="namaLengkap" 
+            name="namaLengkap" 
+            placeholder="Masukkan nama lengkap" 
+            required
+          >
+          <small class="error-message" id="errNama"></small>
+        </div>
+
+        <div class="form-group">
+          <label for="email">Alamat Email</label>
+          <input 
+            type="email" 
+            id="email" 
+            name="email" 
+            placeholder="contoh@email.com" 
+            required
+          >
+          <small class="error-message" id="errEmail"></small>
+        </div>
+
+        <div class="form-group">
+          <label for="telepon">Nomor Telepon</label>
+          <input 
+            type="tel" 
+            id="telepon" 
+            name="telepon" 
+            placeholder="081234567890"
+          >
+        </div>
+
+        <div class="form-group">
+          <label for="bio">Bio Ringkas</label>
+          <textarea 
+            id="bio" 
+            name="bio" 
+            rows="4" 
+            placeholder="Tuliskan sedikit tentang diri Anda..."
+          ></textarea>
+        </div>
+
+        <!-- Tombol Aksi -->
+        <div class="button-group">
+          <a href="../index.html" class="btn btn-secondary">Batal</a>
+          <button type="submit" class="btn btn-primary">Simpan Perubahan</button>
+        </div>
+
+      </form>
+    </div>
+  </div>
+
+  <!-- Menghubungkan ke file JavaScript -->
+  <script src="./ubah-data-profil.js"></script>
+  </main>
+  </section>
+  
+  <section class="slide-page">
+    
+  </section>
+</body>
+</html>
