@@ -54,13 +54,13 @@ body {
   text-align: center;
   width: 100%;
   margin: 0; /* Ubah dari margin: 0 auto */
-  padding-top: 90px;
+  padding-top: 50px;
 }
 
 
-/* ==========================================================================
-   2. NAVIGASI BAR (NAVBAR) & MODAL
-   ========================================================================== */
+/*==================================
+2. NAVIGASI BAR (NAVBAR) & MODAL
+====================================*/
 
 /* Container Utama Navbar */
 .navbar {
@@ -448,21 +448,42 @@ h4.logo {
    TATA LETAK RESPONSIF (HP & LAPTOP)
    ========================================== */
 
-/* Gaya dasar wadah utama untuk layar HP */
-.main-container, .article-card {
-    width: 90%;             /* Mengikuti 90% lebar layar di HP */
-    max-width: 600px;       /* Batas lebar maksimal di HP */
-    margin: 0 auto 20px;    /* Otomatis posisi di tengah layar secara horizontal */
+/* Gaya dasar wadah utama untuk HP (1 kolom memanjang) */
+.main-container {
+    width: 90%;
+    max-width: 500px;       /* Ukuran pas untuk HP */
+    margin: 0 auto 20px;
     transition: all 0.3s ease;
 }
 
-/* Penyesuaian khusus tampilan Laptop/Tablet (Layar > 768px) */
-@media (min-width: 768px) {
-    .main-container, .article-card {
-        max-width: 850px;   /* Diperlebar agar tampilan di laptop lebih pas */
-        padding: 24px;      /* Memberikan ruang dalam kartu yang lebih lega */
+.article-card {
+    width: 100%;
+    margin-bottom: 20px;    /* Jarak antar kartu di HP */
+    background: #ffffff;
+    border-radius: 12px;
+    padding: 16px;
+    box-sizing: border-box;
+}
+
+/* Penyesuaian khusus Laptop/Desktop (Layar > 768px atau 1024px) */
+@media (min-width: 992px) {
+    .main-container {
+        max-width: 1200px;                  /* Diperlebar agar memanfaatkan layar laptop */
+        display: grid;                       /* Mengaktifkan mode Grid */
+        grid-template-columns: repeat(3, 1fr); /* Membagi menjadi 3 KOLOM SEJAJAR */
+        gap: 20px;                           /* Jarak rapi antar kartu (horizontal & vertikal) */
+        margin: 0 auto 30px;
+    }
+
+    .article-card {
+        margin-bottom: 0;                   /* Menghilangkan margin bawah karena sudah ada 'gap' */
+        height: 100%;                        /* Membuat semua tinggi kartu seragam */
+        display: flex;
+        flex-direction: column;
+        justify-content: space-between;
     }
 }
+
 /* MENCEGAH BROWSER MEMAKSA MODE GELAP AUTOMATIS */
 :root {
     color-scheme: light; /* Memastikan browser selalu merender dalam mode terang */

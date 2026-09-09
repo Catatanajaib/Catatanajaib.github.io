@@ -61,6 +61,7 @@
     <main class="container">
 
     <!-- Form Input Postingan Baru (Hanya Tampil Jika Sudah Login) -->
+<div class="article-card">
 <div class="post-container" id="create-post-box" style="display: none;">
     <h2>Buat Postingan Baru</h2>
     <form id="postForm">
@@ -95,8 +96,9 @@
             </script>
             <script type="text/javascript" src="https://www.highperformanceformat.com/c7ceecf9be42bb2b182175415809298d/invoke.js"></script>
         </div>
-
+</div>
         <!--Tema utama halaman dan Deskripsi -->
+        <div class="article-card">
         <article class="post-card" data-post-id="static-1">
             <header class="post-header">
                 <img src="https://picsum.photos/600/300?random=5" alt="Foto Profil" class="avatar">
@@ -124,7 +126,7 @@
                 <button class="action-btn" onclick="scrollToComments('comment-section-static-1')">💬 Komentar</button>
                 <button class="action-btn" onclick="sharePost()">↗️ Bagikan</button>
             </footer>
-
+        
             <!-- WADAH KOMENTAR TEMPORER (7 HARI) -->
             <div id="comment-section-static-1" class="comment-section" style="display:none; padding: 15px; border-top: 1px solid #eee; text-align: left;">
                 <div class="comments-list" id="comments-list-static-1"></div>
@@ -134,7 +136,8 @@
                 </form>
             </div>
         </article>
-        
+        </div>
+        <div class="article-card">
         <article class="post-card" data-post-id="static-2">
             <header class="post-header">
                 <img src="https://picsum.photos/600/300?random=5" alt="Foto Profil" class="avatar">
@@ -172,12 +175,15 @@
                 </form>
             </div>
         </article>
-
+        </div>
+        <div class="article-card">
         <!-- Wadah Infinite Scroll & Indikatornya di index html-->
         <div id="posts-container"></div>
         <div id="scroll-sentinel" style="text-align:center; padding: 20px;">Memuat postingan...</div>
-
+        </div>
+        
         <!-- Artikel di index.html -->
+        <div class="article-card">
         <post-card 
         title="Inspirasi Desain Rumah Minimalis Modern 2026"
         date="Dipublikasikan Hari Ini"
@@ -207,7 +213,7 @@
             excerpt="Cek rincian harga lengkap minyak sawit, minyak kayu putih, minyak tanah, hingga minyak jelantah dari tahun ke tahun di sini."
             link="pages/artikel-berapa-harga-minyak.html">
         </post-card>
-
+        </div>
     </main>
 <footer>
         <p>&copy; 2026 Catatan Ajaib. Hak Cipta Dilindungi. </p>
