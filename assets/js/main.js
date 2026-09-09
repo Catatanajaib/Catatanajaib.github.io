@@ -1,12 +1,14 @@
 console.log("File main.js berhasil dimuat!");
 
 /* ==========================================================================
-   MAIN.JS - FITUR UTAMA & FEED
+   MAIN.JS - FITUR UTAMA, FEED, & INTEGRASI SUPABASE
    ========================================================================== */
 
 document.addEventListener('DOMContentLoaded', () => {
 
+  // ------------------------------------------------------------------------
   // A. NAVBAR AUTO-HIDE SAAT SCROLL
+  // ------------------------------------------------------------------------
   const navbar = document.querySelector(".navbar");
   let lastScrollY = window.scrollY;
 
@@ -22,9 +24,9 @@ document.addEventListener('DOMContentLoaded', () => {
     });
   }
 
-  // ==========================================================================
-  // B. INFINITE SCROLL FEED
-  // ==========================================================================
+  // ------------------------------------------------------------------------
+  // B. INFINITE SCROLL FEED (DATA DUMMY)
+  // ------------------------------------------------------------------------
   const databasePostingan = [
     { 
       id: 1, 
@@ -71,12 +73,10 @@ document.addEventListener('DOMContentLoaded', () => {
   let observer;
 
   function muatPostinganBerikutnya() {
-    // Jika tidak ada container 'posts-container' di halaman ini, hentikan fungsi
     if (!container) return;
     
     const dataBatch = databasePostingan.slice(indexData, indexData + itemPerScroll);
     
-    // Jika semua data di array sudah ditampilkan
     if (dataBatch.length === 0) {
       if (sentinel) sentinel.textContent = 'Semua postingan telah dimuat.';
       if (observer) observer.disconnect();
@@ -123,12 +123,9 @@ document.addEventListener('DOMContentLoaded', () => {
     });
   }
 
-  // Inisialisasi hanya jika halaman memiliki elemen 'posts-container' dan 'scroll-sentinel'
   if (container && sentinel) {
-    // Panggil 1 kali di awal agar postingan pertama langsung dimuat
     muatPostinganBerikutnya();
 
-    // Aktifkan pemantauan scroll untuk postingan berikutnya
     observer = new IntersectionObserver((entries) => {
       entries.forEach(entry => {
         if (entry.isIntersecting) {
@@ -140,7 +137,9 @@ document.addEventListener('DOMContentLoaded', () => {
     observer.observe(sentinel);
   }
 
-  // C. POSTINGAN TEMPORER (LOCALSTORAGE)
+  // ------------------------------------------------------------------------
+  // C. POSTINGAN TEMPORER (LOCALSTORAGE & AKUN LOGIN)
+  // ------------------------------------------------------------------------
   const STORAGE_KEY = 'temp_posts_data';
   const THREE_DAYS_MS = 3 * 24 * 60 * 60 * 1000;
   const postsFeed = document.getElementById('postsFeed');
@@ -150,7 +149,7 @@ document.addEventListener('DOMContentLoaded', () => {
     return text
       .replace(/&/g, "&amp;")
       .replace(/</g, "&lt;")
-      .replace(/ >/g, "&gt;")
+      .replace(/>/g, "&gt;")
       .replace(/"/g, "&quot;")
       .replace(/'/g, "&#039;");
   }
@@ -172,13 +171,14 @@ document.addEventListener('DOMContentLoaded', () => {
     postsFeed.innerHTML = activePosts.map(post => {
       const dateString = new Date(post.createdAt).toLocaleString('id-ID');
       const sisaWaktuJam = Math.round((THREE_DAYS_MS - (now - post.createdAt)) / (1000 * 60 * 60));
-      
+      const statusBadge = post.isLoggedIn ? '<span class="badge" style="background:#28a745; color:white;">Pengguna Login</span>' : '';
+
       return `
         <article class="post-card" style="margin-bottom:20px;">
           <header class="post-header">
-            <img src="https://picsum.photos/600/300?random=99" alt="Avatar" class="avatar">
+            <img src="https://picsum.photos/600/300?random=${post.id % 100}" alt="Avatar" class="avatar">
             <div class="user-info">
-              <h4>${escapeHtml(post.username)}</h4>
+              <h4>${escapeHtml(post.username)} ${statusBadge}</h4>
               <span>${dateString} &bull; Sisa waktu: ${sisaWaktuJam} jam</span>
             </div>
           </header>
@@ -196,23 +196,37 @@ document.addEventListener('DOMContentLoaded', () => {
   }
 
   if (postForm) {
-    postForm.addEventListener('submit', function(e) {
+    postForm.addEventListener('submit', async function(e) {
       e.preventDefault();
 
       const usernameInput = document.getElementById('username');
       const contentInput = document.getElementById('content');
 
-      if (!usernameInput || !contentInput) return;
+      if (!contentInput) return;
 
-      const username = usernameInput.value.trim();
       const content = contentInput.value.trim();
+      if (!content) return;
 
-      if (!username || !content) return;
+      let finalUsername = usernameInput ? usernameInput.value.trim() : '';
+      let isUserLoggedIn = false;
+
+      if (typeof supabaseClient !== 'undefined' && supabaseClient) {
+        const { data: { session } } = await supabaseClient.auth.getSession();
+        if (session && session.user) {
+          isUserLoggedIn = true;
+          finalUsername = session.user.user_metadata?.username || session.user.email.split('@')[0];
+        }
+      }
+
+      if (!finalUsername) {
+        finalUsername = 'Pengunjung Anonim';
+      }
 
       const newPost = {
         id: Date.now(),
-        username: username,
+        username: finalUsername,
         content: content,
+        isLoggedIn: isUserLoggedIn,
         createdAt: new Date().getTime()
       };
 
@@ -226,10 +240,11 @@ document.addEventListener('DOMContentLoaded', () => {
   }
 
   loadPosts();
-});
+
+}); // <-- PENUTUP BLOK DOMContentLoaded SEBELUMNYA HILANG DI SINI
 
 /* ==========================================================================
-   FUNGSI UTILS GLOBAL
+   FUNGSI UTILS GLOBAL (DITULIS DI LUAR BINDING DOM)
    ========================================================================== */
 function handleCommentSubmit(event, postId) {
   event.preventDefault();
@@ -272,5 +287,4 @@ function sharePost() {
     navigator.clipboard.writeText(window.location.href);
     alert('Link berhasil disalin ke clipboard!');
   }
-                     }
-           
+}
