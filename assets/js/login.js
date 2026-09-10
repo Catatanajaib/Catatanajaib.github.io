@@ -1,3 +1,4 @@
+//login, daftar, posting, komentar 
 // ==========================================
 // 1. INISIALISASI SUPABASE
 // ==========================================
@@ -5,6 +6,9 @@ const SUPABASE_URL = 'https://qcopjasrzjubbgjnxidv.supabase.co';
 const SUPABASE_ANON_KEY = 'sb_publishable_YFS1w6HfZbyg-F6QoxISFw_b62yHMO6';
 
 const supabaseClient = window.supabase ? window.supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY) : null;
+
+// Variable global untuk menyimpan username aktif
+let currentUsername = "Pengunjung Anonim";
 
 document.addEventListener("DOMContentLoaded", () => {
     if (!supabaseClient) {
@@ -29,23 +33,16 @@ document.addEventListener("DOMContentLoaded", () => {
     const btnSendReset = document.getElementById("btn-send-reset");
     const btnCancelForgot = document.getElementById("btn-cancel-forgot");
 
-    // --- ELEMEN UI LOGOUT ---
-    const btnLogout = document.getElementById("btn-logout");
-
     // --- ELEMEN UI FORM POSTINGAN BARU ---
     const createPostBox = document.getElementById("create-post-box");
     const loginRequiredBox = document.getElementById("login-required-box");
     const usernameInput = document.getElementById("username");
     const postForm = document.getElementById("postForm");
 
-    // Variable global untuk menyimpan username aktif
-    let currentUsername = "";
-
     // ==========================================
     // 2. FUNGSI CEK STATUS SESI & PROFILE
     // ==========================================
     async function checkUserSession() {
-        // 1. Cek user yang sedang aktif
         const { data: { user }, error: authError } = await supabaseClient.auth.getUser();
 
         if (authError || !user) {
@@ -53,25 +50,20 @@ document.addEventListener("DOMContentLoaded", () => {
             return;
         }
 
-        // 2. Ambil data profil dari tabel 'profiles'
         const { data: profile } = await supabaseClient
             .from('profiles')
             .select('username')
             .eq('id', user.id)
-            .maybeSingle(); // Menggunakan maybeSingle agar tidak error jika baris belum ada
+            .maybeSingle();
 
-        // 3. Urutan prioritas username:
-        // Tabel profiles -> user_metadata -> Potongan Depan Email -> Default "Pengguna"
         currentUsername = profile?.username 
             || user.user_metadata?.username 
             || user.email?.split('@')[0] 
             || "Pengguna";
 
-        // 4. Tampilkan ke UI
         updateUIForLoggedInUser(user, currentUsername);
     }
 
-    // Fungsi memperbarui tampilan saat pengguna SUDAH login
     function updateUIForLoggedInUser(user, username) {
         if (boxAuth) boxAuth.style.display = "none";
         if (boxProfil) boxProfil.style.display = "block";
@@ -79,19 +71,18 @@ document.addEventListener("DOMContentLoaded", () => {
         if (profileEmail) profileEmail.textContent = user.email || "-";
         if (profileName) profileName.textContent = username;
 
-        // Tampilan Form Postingan
         if (createPostBox) createPostBox.style.display = "block";
         if (loginRequiredBox) loginRequiredBox.style.display = "none";
         if (usernameInput) usernameInput.value = username;
     }
 
-    // Fungsi memperbarui tampilan saat pengguna BELUM login
     function updateUIForLoggedOutUser() {
         if (boxAuth) boxAuth.style.display = "block";
         if (boxProfil) boxProfil.style.display = "none";
 
         if (createPostBox) createPostBox.style.display = "none";
         if (loginRequiredBox) loginRequiredBox.style.display = "block";
+        currentUsername = "Pengunjung Anonim";
     }
 
     function showNotification(message, isError = false) {
@@ -117,10 +108,7 @@ document.addEventListener("DOMContentLoaded", () => {
                 btnSubmitLogin.textContent = "Memproses...";
             }
 
-            const { error } = await supabaseClient.auth.signInWithPassword({
-                email: email,
-                password: password,
-            });
+            const { error } = await supabaseClient.auth.signInWithPassword({ email, password });
 
             if (btnSubmitLogin) {
                 btnSubmitLogin.disabled = false;
@@ -131,15 +119,13 @@ document.addEventListener("DOMContentLoaded", () => {
                 showNotification("Gagal Masuk: " + error.message, true);
             } else {
                 showNotification("Login berhasil! Memuat profil...", false);
-                setTimeout(() => {
-                    checkUserSession(); // Muat ulang sesi & username dari tabel profiles
-                }, 1000);
+                setTimeout(checkUserSession, 1000);
             }
         });
     }
 
     // ==========================================
-    // 4. LUPA / RESET KATA SANDI
+    // 4. RESET KATA SANDI
     // ==========================================
     if (btnShowForgot && boxForgot) {
         btnShowForgot.addEventListener("click", (e) => {
@@ -178,6 +164,7 @@ document.addEventListener("DOMContentLoaded", () => {
     // ==========================================
     // 5. PROSES LOGOUT
     // ==========================================
+    const btnLogout = document.getElementById("btnLogout");
     if (btnLogout) {
         btnLogout.addEventListener("click", async () => {
             const { error } = await supabaseClient.auth.signOut();
@@ -213,15 +200,14 @@ document.addEventListener("DOMContentLoaded", () => {
             }
 
             try {
-                // Gunakan currentUsername yang didapat dari tabel profiles
                 const { error } = await supabaseClient
                     .from('posts')
                     .insert([
                         {
                             user_id: session.user.id,
-                            author_name: currentUsername,
+                            username: currentUsername,
                             content: contentText,
-                            created_at: new Date().toISOString()
+                            is_logged_in: true
                         }
                     ]);
 
@@ -230,9 +216,7 @@ document.addEventListener("DOMContentLoaded", () => {
                 alert("Postingan berhasil diterbitkan!");
                 postForm.reset();
 
-                if (usernameInput) {
-                    usernameInput.value = currentUsername;
-                }
+                if (usernameInput) usernameInput.value = currentUsername;
 
                 if (typeof loadPosts === "function") {
                     loadPosts();
@@ -245,6 +229,130 @@ document.addEventListener("DOMContentLoaded", () => {
         });
     }
 
-    // Jalankan pemeriksaan sesi pertama kali saat halaman dimuat
+    // Jalankan pemeriksaan sesi awal
     checkUserSession();
 });
+
+// ==========================================
+// 7. SISTEM KOMENTAR & UTILS GLOBAL
+// ==========================================
+
+function escapeHtml(text) {
+  if (!text) return '';
+  return text
+    .replace(/&/g, "&amp;")
+    .replace(/</g, "&lt;")
+    .replace(/>/g, "&gt;")
+    .replace(/"/g, "&quot;")
+    .replace(/'/g, "&#039;");
+}
+
+async function toggleComments(postId) {
+  const section = document.getElementById(`comment-section-${postId}`);
+  if (!section) return;
+
+  const isHidden = section.style.display === 'none' || section.style.display === '';
+  section.style.display = isHidden ? 'block' : 'none';
+
+  if (isHidden) {
+    await fetchCommentsForPost(postId);
+    subscribeToRealtimeComments(postId);
+  }
+}
+
+// Mengambil komentar sekaligus menghitung total komentar
+async function fetchCommentsForPost(postId) {
+  const listEl = document.getElementById(`comments-list-${postId}`);
+  if (!listEl) return;
+
+  if (!supabaseClient) {
+    listEl.innerHTML = '<p style="font-size:12px; color:red;">Koneksi Supabase belum siap.</p>';
+    return;
+  }
+
+  // Ambil 10 komentar pertama & Hitung total komentar (Count)
+  const { data, count, error } = await supabaseClient
+    .from('comments')
+    .select('*', { count: 'exact' })
+    .eq('post_id', String(postId))
+    .order('created_at', { ascending: true })
+    .range(0, 9);
+
+  if (error) {
+    console.error('Error fetching comments:', error);
+    listEl.innerHTML = '<p style="font-size:12px; color:red;">Gagal memuat komentar.</p>';
+    return;
+  }
+
+  renderComments(listEl, data);
+}
+
+function renderComments(containerEl, commentsArray) {
+  if (!commentsArray || commentsArray.length === 0) {
+    containerEl.innerHTML = '<p style="font-size:12px; color:#888;">Belum ada komentar. Tulis sesuatu!</p>';
+    return;
+  }
+
+  containerEl.innerHTML = commentsArray.map(c => `
+    <div style="margin-bottom:8px; font-size:13px; background:#f8f9fa; padding:8px 12px; border-radius:6px; border:1px solid #eee;">
+      <div style="display:flex; justify-content:space-between; align-items:center;">
+        <strong style="color:#333;">${escapeHtml(c.author_name || c.username || 'Anonim')}</strong>
+        <span style="font-size:10px; color:#999;">${new Date(c.created_at).toLocaleString('id-ID', { hour: '2-digit', minute: '2-digit', day: 'numeric', month: 'short' })}</span>
+      </div>
+      <p style="margin:4px 0 0 0; color:#444; line-height:1.4;">${escapeHtml(c.content)}</p>
+    </div>
+  `).join('');
+}
+
+async function handleCommentSubmit(event, postId) {
+  event.preventDefault();
+  const form = event.target;
+  const input = form.querySelector('input');
+  const submitBtn = form.querySelector('button');
+  const content = input ? input.value.trim() : '';
+
+  if (!content) return;
+
+  let authorName = currentUsername || 'Pengunjung Anonim';
+
+  if (submitBtn) submitBtn.disabled = true;
+
+  const { error } = await supabaseClient
+    .from('comments')
+    .insert([
+      {
+        post_id: String(postId),
+        author_name: authorName,
+        content: content
+      }
+    ]);
+
+  if (submitBtn) submitBtn.disabled = false;
+
+  if (error) {
+    alert('Gagal mengirim komentar: ' + error.message);
+  } else {
+    input.value = '';
+    fetchCommentsForPost(postId); // Refresh list komentar
+  }
+}
+
+function subscribeToRealtimeComments(postId) {
+  if (!supabaseClient) return;
+
+  supabaseClient
+    .channel(`public:comments:${postId}`)
+    .on(
+      'postgres_changes',
+      {
+        event: 'INSERT',
+        schema: 'public',
+        table: 'comments',
+        filter: `post_id=eq.${postId}`
+      },
+      () => {
+        fetchCommentsForPost(postId);
+      }
+    )
+    .subscribe();
+}

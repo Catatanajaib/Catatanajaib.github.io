@@ -5,6 +5,7 @@ console.log("File main.js berhasil dimuat!");
    ========================================================================== */
 
 document.addEventListener('DOMContentLoaded', () => {
+    loadPosts();
 
   // ------------------------------------------------------------------------
   // A. NAVBAR AUTO-HIDE SAAT SCROLL
@@ -29,7 +30,7 @@ document.addEventListener('DOMContentLoaded', () => {
   // ------------------------------------------------------------------------
   const databasePostingan = [
     { 
-      id: 1, 
+      id: "dummy-1", 
       name: "Miftah98",
       judul: "hadiah pengguna baru digital banking", 
       ringkasan: "Masukkan kode ini saat pendaftaran untuk klaim bonus kamu!", 
@@ -41,7 +42,7 @@ document.addEventListener('DOMContentLoaded', () => {
       comment: 5
     },
     { 
-      id: 2, 
+      id: "dummy-2", 
       name: "Network Pro",
       judul: "Mengenal Cara Kerja Cloudflare & DNS Management", 
       ringkasan: "Bagaimana cara menghubungkan domain kustom dan melindungi server.", 
@@ -53,7 +54,7 @@ document.addEventListener('DOMContentLoaded', () => {
       comment: 2
     },
     { 
-      id: 3, 
+      id: "dummy-3", 
       name: "Blogger Hub",
       judul: "Tips Monetisasi Konten Blog untuk Pemula", 
       ringkasan: "Langkah-langkah mendaftarkan blog ke jaringan iklan online.", 
@@ -113,9 +114,18 @@ document.addEventListener('DOMContentLoaded', () => {
 
           <footer class="post-actions">
             <button class="action-btn" onclick="toggleLike(this)">👍 Suka</button>
-            <button class="action-btn" onclick="scrollToComments()">💬 Komentar</button>
+            <button class="action-btn" onclick="scrollToComments('comment-section-${post.id}')">💬 Komentar</button>
             <button class="action-btn" onclick="sharePost()">↗️ Bagikan</button>
           </footer>
+
+          <!-- WADAH KOMENTAR HASIL INFINITE SCROLL -->
+          <div id="comment-section-${post.id}" class="comment-section" style="display:none; padding: 15px; border-top: 1px solid #eee; text-align: left;">
+            <div class="comments-list" id="comments-list-${post.id}"></div>
+            <form onsubmit="handleCommentSubmit(event, '${post.id}')" style="margin-top: 10px; display: flex; gap: 8px;">
+              <input type="text" placeholder="Tulis komentar..." required style="flex: 1; padding: 8px; border: 1px solid #ccc; border-radius: 4px;">
+              <button type="submit" style="padding: 8px 12px; background: #007bff; color: white; border: none; border-radius: 4px; cursor: pointer;">Kirim</button>
+            </form>
+          </div>
         </div>
       `;
 
@@ -137,154 +147,89 @@ document.addEventListener('DOMContentLoaded', () => {
     observer.observe(sentinel);
   }
 
-  // ------------------------------------------------------------------------
-  // C. POSTINGAN TEMPORER (LOCALSTORAGE & AKUN LOGIN)
-  // ------------------------------------------------------------------------
-  const STORAGE_KEY = 'temp_posts_data';
-  const THREE_DAYS_MS = 3 * 24 * 60 * 60 * 1000;
-  const postsFeed = document.getElementById('postsFeed');
-  const postForm = document.getElementById('postForm');
+}); // <-- PENUTUP EVENT DOMContentLoaded DI SINI!
+// ==========================================
+// FUNGSI MEMUAT & MENAMPILKAN POSTINGAN
+// ==========================================
+async function loadPosts() {
+  const postsContainer = document.getElementById("posts-container"); // Pastikan ID ini ada di HTML kamu
+  if (!postsContainer) return;
 
-  function escapeHtml(text) {
-    return text
-      .replace(/&/g, "&amp;")
-      .replace(/</g, "&lt;")
-      .replace(/>/g, "&gt;")
-      .replace(/"/g, "&quot;")
-      .replace(/'/g, "&#039;");
+  postsContainer.innerHTML = "<p style='text-align:center;'>Memuat postingan...</p>";
+
+  // Ambil data postingan dari tabel 'posts'
+  const { data: posts, error } = await supabaseClient
+    .from('posts')
+    .select('*')
+    .order('created_at', { ascending: false }); // Postingan terbaru di atas
+
+  if (error) {
+    console.error("Gagal memuat postingan:", error.message);
+    postsContainer.innerHTML = "<p style='color:red;'>Gagal memuat postingan.</p>";
+    return;
   }
 
-  function loadPosts() {
-    if (!postsFeed) return;
-    
-    const savedPosts = JSON.parse(localStorage.getItem(STORAGE_KEY) || '[]');
-    const now = new Date().getTime();
-    
-    const activePosts = savedPosts.filter(post => (now - post.createdAt) < THREE_DAYS_MS);
-    localStorage.setItem(STORAGE_KEY, JSON.stringify(activePosts));
-
-    if (activePosts.length === 0) {
-      postsFeed.innerHTML = '';
-      return;
-    }
-
-    postsFeed.innerHTML = activePosts.map(post => {
-      const dateString = new Date(post.createdAt).toLocaleString('id-ID');
-      const sisaWaktuJam = Math.round((THREE_DAYS_MS - (now - post.createdAt)) / (1000 * 60 * 60));
-      const statusBadge = post.isLoggedIn ? '<span class="badge" style="background:#28a745; color:white;">Pengguna Login</span>' : '';
-
-      return `
-        <article class="post-card" style="margin-bottom:20px;">
-          <header class="post-header">
-            <img src="https://picsum.photos/600/300?random=${post.id % 100}" alt="Avatar" class="avatar">
-            <div class="user-info">
-              <h4>${escapeHtml(post.username)} ${statusBadge}</h4>
-              <span>${dateString} &bull; Sisa waktu: ${sisaWaktuJam} jam</span>
-            </div>
-          </header>
-          <div class="post-content" style="padding:15px; text-align:left;">
-            ${escapeHtml(post.content)}
-          </div>
-          <footer class="post-actions">
-            <button class="action-btn" onclick="toggleLike(this)">👍 Suka</button>
-            <button class="action-btn" onclick="scrollToComments()">💬 Komentar</button>
-            <button class="action-btn" onclick="sharePost()">↗️ Bagikan</button>
-          </footer>
-        </article>
-      `;
-    }).join('');
+  if (!posts || posts.length === 0) {
+    postsContainer.innerHTML = "<p style='text-align:center;'>Belum ada postingan.</p>";
+    return;
   }
 
-  if (postForm) {
-    postForm.addEventListener('submit', async function(e) {
-      e.preventDefault();
-
-      const usernameInput = document.getElementById('username');
-      const contentInput = document.getElementById('content');
-
-      if (!contentInput) return;
-
-      const content = contentInput.value.trim();
-      if (!content) return;
-
-      let finalUsername = usernameInput ? usernameInput.value.trim() : '';
-      let isUserLoggedIn = false;
-
-      if (typeof supabaseClient !== 'undefined' && supabaseClient) {
-        const { data: { session } } = await supabaseClient.auth.getSession();
-        if (session && session.user) {
-          isUserLoggedIn = true;
-          finalUsername = session.user.user_metadata?.username || session.user.email.split('@')[0];
-        }
-      }
-
-      if (!finalUsername) {
-        finalUsername = 'Pengunjung Anonim';
-      }
-
-      const newPost = {
-        id: Date.now(),
-        username: finalUsername,
-        content: content,
-        isLoggedIn: isUserLoggedIn,
-        createdAt: new Date().getTime()
-      };
-
-      const savedPosts = JSON.parse(localStorage.getItem(STORAGE_KEY) || '[]');
-      savedPosts.unshift(newPost);
-      localStorage.setItem(STORAGE_KEY, JSON.stringify(savedPosts));
-
-      postForm.reset();
-      loadPosts();
+  // Render daftar postingan
+  postsContainer.innerHTML = posts.map(post => {
+    // Penyesuaian nama pembuat postingan (mengakomodasi author_name atau username)
+    const author = escapeHtml(post.author_name || post.username || 'Anonim');
+    const content = escapeHtml(post.content);
+    const date = new Date(post.created_at).toLocaleString('id-ID', {
+      day: 'numeric',
+      month: 'short',
+      year: 'numeric',
+      hour: '2-digit',
+      minute: '2-digit'
     });
-  }
 
-  loadPosts();
+    return `
+      <div class="article-card">
+<article class="post-card">
+  <header class="post-header">
+    <img src="https://picsum.photos/600/300?random=5" alt="Foto Profil" class="avatar">
+    <div class="user-info">
+      <h4>${author}</h4>
+      <span>${date}</span>
+    </div>
+  </header>
+  <div class="post-content">${content}</div>
+  <div class="post-media">
+    <img src="https://picsum.photos/600/300?random=7" alt="Foto Postingan">
+  </div>
+  <div class="post-stats">
+    <span>👍 128jt Suka</span>
+    <span>904rb Komentar</span>
+  </div>
+<!-- Action Buttons -->
+  
+  <footer class="post-actions">
+    <button class="action-btn" onclick="toggleLike(this)">👍 Suka</button>
+    <button class="action-btn" onclick="sharePost()">↗️ Bagikan</button>
+    
 
-}); // <-- PENUTUP BLOK DOMContentLoaded SEBELUMNYA HILANG DI SINI
+        <!-- Action Buttons -->
+        <button onclick="toggleComments('${post.id}')" style="background: none; border: none; color: #007bff; cursor: pointer; padding: 0; font-size: 13px;">
+          💬 Komentar
+        </button>
 
-/* ==========================================================================
-   FUNGSI UTILS GLOBAL (DITULIS DI LUAR BINDING DOM)
-   ========================================================================== */
-function handleCommentSubmit(event, postId) {
-  event.preventDefault();
-  const form = event.target;
-  const input = form.querySelector('input');
-  const commentText = input.value.trim();
-
-  if (!commentText) return;
-
-  const listContainer = document.getElementById(`comments-list-${postId}`);
-  if (listContainer) {
-    const newComment = document.createElement('div');
-    newComment.style.padding = '4px 0';
-    newComment.textContent = commentText;
-    listContainer.appendChild(newComment);
-  }
-
-  form.reset();
-}
-
-function toggleLike(btnElement) {
-  if (btnElement) {
-    btnElement.classList.toggle('active');
-    btnElement.innerHTML = btnElement.classList.contains('active') ? '👍 Disukai' : '👍 Suka';
-  }
-}
-
-function scrollToComments(sectionId) {
-  const commentSection = document.getElementById(sectionId);
-  if (commentSection) {
-    commentSection.style.display = 'block';
-    commentSection.scrollIntoView({ behavior: 'smooth' });
-  }
-}
-
-function sharePost() {
-  if (navigator.share) {
-    navigator.share({ title: document.title, url: window.location.href });
-  } else {
-    navigator.clipboard.writeText(window.location.href);
-    alert('Link berhasil disalin ke clipboard!');
-  }
+        <!-- Area Komentar (Default Sembunyi) -->
+        <div id="comment-section-${post.id}" style="display: none; margin-top: 12px; padding-top: 10px; border-top: 1px solid #eee;">
+          <div id="comments-list-${post.id}" style="margin-bottom: 10px;">
+            <p style="font-size: 12px; color: #888;">Memuat komentar...</p>
+          </div>
+          
+          <!-- Form Tambah Komentar -->
+          <form onsubmit="handleCommentSubmit(event, '${post.id}')" style="display: flex; gap: 6px;">
+            <input type="text" placeholder="Tulis komentar..." required style="flex: 1; padding: 6px 10px; font-size: 12px; border: 1px solid #ccc; border-radius: 4px;">
+            <button type="submit" style="padding: 6px 12px; font-size: 12px; background: #007bff; color: white; border: none; border-radius: 4px; cursor: pointer;">Kirim</button>
+          </form>
+        </div>
+      </div>
+    `;
+  }).join('');
 }
