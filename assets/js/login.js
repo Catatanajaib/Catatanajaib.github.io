@@ -1,11 +1,9 @@
 // ==========================================
 // 1. INISIALISASI SUPABASE
 // ==========================================
-// Isikan URL dan ANON_KEY proyek Supabase milikmu di sini
 const SUPABASE_URL = 'https://qcopjasrzjubbgjnxidv.supabase.co';
 const SUPABASE_ANON_KEY = 'sb_publishable_YFS1w6HfZbyg-F6QoxISFw_b62yHMO6';
 
-// Memastikan SDK Supabase telah dimuat di halaman HTML
 const supabaseClient = window.supabase ? window.supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY) : null;
 
 document.addEventListener("DOMContentLoaded", () => {
@@ -40,47 +38,62 @@ document.addEventListener("DOMContentLoaded", () => {
     const usernameInput = document.getElementById("username");
     const postForm = document.getElementById("postForm");
 
+    // Variable global untuk menyimpan username aktif
+    let currentUsername = "";
+
     // ==========================================
-    // 2. CEK STATUS SESI PENGGUNA (AUTO LOGIN)
+    // 2. FUNGSI CEK STATUS SESI & PROFILE
     // ==========================================
     async function checkUserSession() {
-        const { data: { session }, error } = await supabaseClient.auth.getSession();
-        
-        if (session && session.user) {
-            updateUIForLoggedInUser(session.user);
-        } else {
+        // 1. Cek user yang sedang aktif
+        const { data: { user }, error: authError } = await supabaseClient.auth.getUser();
+
+        if (authError || !user) {
             updateUIForLoggedOutUser();
+            return;
         }
+
+        // 2. Ambil data profil dari tabel 'profiles'
+        const { data: profile } = await supabaseClient
+            .from('profiles')
+            .select('username')
+            .eq('id', user.id)
+            .maybeSingle(); // Menggunakan maybeSingle agar tidak error jika baris belum ada
+
+        // 3. Urutan prioritas username:
+        // Tabel profiles -> user_metadata -> Potongan Depan Email -> Default "Pengguna"
+        currentUsername = profile?.username 
+            || user.user_metadata?.username 
+            || user.email?.split('@')[0] 
+            || "Pengguna";
+
+        // 4. Tampilkan ke UI
+        updateUIForLoggedInUser(user, currentUsername);
     }
 
     // Fungsi memperbarui tampilan saat pengguna SUDAH login
-    function updateUIForLoggedInUser(user) {
-        // Tampilan Auth & Profil
+    function updateUIForLoggedInUser(user, username) {
         if (boxAuth) boxAuth.style.display = "none";
         if (boxProfil) boxProfil.style.display = "block";
-        if (profileEmail) profileEmail.textContent = user.email || "-";
         
-        const displayName = user.user_metadata?.username || user.email.split('@')[0];
-        if (profileName) profileName.textContent = displayName;
+        if (profileEmail) profileEmail.textContent = user.email || "-";
+        if (profileName) profileName.textContent = username;
 
         // Tampilan Form Postingan
         if (createPostBox) createPostBox.style.display = "block";
         if (loginRequiredBox) loginRequiredBox.style.display = "none";
-        if (usernameInput) usernameInput.value = displayName;
+        if (usernameInput) usernameInput.value = username;
     }
 
     // Fungsi memperbarui tampilan saat pengguna BELUM login
     function updateUIForLoggedOutUser() {
-        // Tampilan Auth & Profil
         if (boxAuth) boxAuth.style.display = "block";
         if (boxProfil) boxProfil.style.display = "none";
 
-        // Tampilan Form Postingan
         if (createPostBox) createPostBox.style.display = "none";
         if (loginRequiredBox) loginRequiredBox.style.display = "block";
     }
 
-    // Fungsi menampilkan notifikasi login
     function showNotification(message, isError = false) {
         if (!loginNotif) return;
         loginNotif.style.display = "block";
@@ -104,7 +117,7 @@ document.addEventListener("DOMContentLoaded", () => {
                 btnSubmitLogin.textContent = "Memproses...";
             }
 
-            const { data, error } = await supabaseClient.auth.signInWithPassword({
+            const { error } = await supabaseClient.auth.signInWithPassword({
                 email: email,
                 password: password,
             });
@@ -119,7 +132,7 @@ document.addEventListener("DOMContentLoaded", () => {
             } else {
                 showNotification("Login berhasil! Memuat profil...", false);
                 setTimeout(() => {
-                    updateUIForLoggedInUser(data.user);
+                    checkUserSession(); // Muat ulang sesi & username dari tabel profiles
                 }, 1000);
             }
         });
@@ -183,7 +196,6 @@ document.addEventListener("DOMContentLoaded", () => {
         postForm.addEventListener("submit", async (event) => {
             event.preventDefault();
 
-            // Memastikan kembali sesi login masih aktif sebelum menyimpan
             const { data: { session } } = await supabaseClient.auth.getSession();
 
             if (!session) {
@@ -201,13 +213,13 @@ document.addEventListener("DOMContentLoaded", () => {
             }
 
             try {
-                // Simpan postingan ke tabel 'posts'
-                const { data, error } = await supabaseClient
+                // Gunakan currentUsername yang didapat dari tabel profiles
+                const { error } = await supabaseClient
                     .from('posts')
                     .insert([
                         {
                             user_id: session.user.id,
-                            author_name: session.user.user_metadata?.username || session.user.email.split('@')[0],
+                            author_name: currentUsername,
                             content: contentText,
                             created_at: new Date().toISOString()
                         }
@@ -218,12 +230,10 @@ document.addEventListener("DOMContentLoaded", () => {
                 alert("Postingan berhasil diterbitkan!");
                 postForm.reset();
 
-                // Isi kembali nama pengguna setelah form di-reset
                 if (usernameInput) {
-                    usernameInput.value = session.user.user_metadata?.username || session.user.email.split('@')[0];
+                    usernameInput.value = currentUsername;
                 }
 
-                // Jalankan fungsi memuat ulang postingan jika fungsi tersebut ada di project
                 if (typeof loadPosts === "function") {
                     loadPosts();
                 }

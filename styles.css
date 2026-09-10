@@ -422,10 +422,11 @@ h4.logo {
 }
 
 .konten-zoom img{
-	transition: tranform 0.3s ease
+	transition: tranform 0.3s ease;
+}
 
 .konten-zoom:hover img {
-  tranform: scale (1.8);
+  transform: scale(1.8);
 }
 
 /* Box Call-To-Action / Informasi di Akhir */

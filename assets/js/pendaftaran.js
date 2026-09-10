@@ -1,3 +1,4 @@
+
 // ==========================================================================
 // LOGIKA PENDAFTARAN & LOGIN AKUN CATATAN AJAIB (SUPABASE AUTH & PROFILES)
 // ==========================================================================
@@ -92,36 +93,24 @@ document.addEventListener('DOMContentLoaded', () => {
 
                 } else {
                     // ================= LOGIKA PENDAFTARAN =================
-                    // Langkah A: Daftarkan Email & Password ke Supabase Auth
+                    // Cukup 1 kali signUp, sertakan username di options.data
                     const { data: authData, error: authError } = await supabaseClient.auth.signUp({
                         email: email,
-                        password: password
+                        password: password,
+                        options: {
+                            data: {
+                                username: username // Username akan otomatis ditangkap oleh SQL Trigger
+                            }
+                        }
                     });
 
                     if (authError) throw authError;
 
-                    // Langkah B: Simpan Username ke Tabel Profiles di Database
-                    if (authData.user) {
-                        const userId = authData.user.id;
-
-                        const { error: profileError } = await supabaseClient
-                            .from('profiles')
-                            .insert([
-                                { 
-                                    id: userId, 
-                                    username: username,
-                                    bio: 'Halo, aku pengguna baru!' 
-                                }
-                            ]);
-
-                        if (profileError) throw profileError;
-
-                        tampilkanPesan('Pendaftaran berhasil! Mengalihkan ke halaman utama...', 'sukses');
-                        
-                        setTimeout(() => {
-                            window.location.href = '../index.html';
-                        }, 2000);
-                    }
+                    tampilkanPesan('Pendaftaran berhasil! Mengalihkan ke halaman utama...', 'sukses');
+                    
+                    setTimeout(() => {
+                        window.location.href = '../index.html';
+                    }, 2000);
                 }
 
             } catch (error) {
