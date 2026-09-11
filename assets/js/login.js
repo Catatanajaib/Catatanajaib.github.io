@@ -289,7 +289,7 @@ async function fetchCommentsForPost(postId) {
 
 function renderComments(containerEl, commentsArray) {
   if (!commentsArray || commentsArray.length === 0) {
-    containerEl.innerHTML = '<p style="font-size:12px; color:#888;">Belum ada komentar. Tulis sesuatu!</p>';
+    containerEl.innerHTML = '<p style="font-size:12px; color: white;">Belum ada komentar. Tulis sesuatu!</p>';
     return;
   }
 
@@ -313,16 +313,25 @@ async function handleCommentSubmit(event, postId) {
 
   if (!content) return;
 
-  let authorName = currentUsername || 'Pengunjung Anonim';
-
   if (submitBtn) submitBtn.disabled = true;
 
+  // 1. Ambil session user yang sedang aktif
+  const { data: { session } } = await supabaseClient.auth.getSession();
+
+  if (!session) {
+    alert('Kamu harus login terlebih dahulu untuk mengirim komentar!');
+    if (submitBtn) submitBtn.disabled = false;
+    return;
+  }
+
+  // 2. Kirim komentar lengkap dengan user_id
   const { error } = await supabaseClient
     .from('comments')
     .insert([
       {
         post_id: String(postId),
-        author_name: authorName,
+        user_id: session.user.id, // Wajib diisi agar lolos RLS
+        author_name: currentUsername || 'Pengguna',
         content: content
       }
     ]);
@@ -336,6 +345,7 @@ async function handleCommentSubmit(event, postId) {
     fetchCommentsForPost(postId); // Refresh list komentar
   }
 }
+
 
 function subscribeToRealtimeComments(postId) {
   if (!supabaseClient) return;

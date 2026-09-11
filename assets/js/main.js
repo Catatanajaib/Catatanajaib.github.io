@@ -188,8 +188,7 @@ async function loadPosts() {
     });
 
     return `
-      <div class="article-card">
-<article class="post-card">
+<article class="post-card" data-post-id="">
   <header class="post-header">
     <img src="https://picsum.photos/600/300?random=5" alt="Foto Profil" class="avatar">
     <div class="user-info">
@@ -209,27 +208,28 @@ async function loadPosts() {
   
   <footer class="post-actions">
     <button class="action-btn" onclick="toggleLike(this)">👍 Suka</button>
-    <button class="action-btn" onclick="sharePost()">↗️ Bagikan</button>
-    
-
-        <!-- Action Buttons -->
-        <button onclick="toggleComments('${post.id}')" style="background: none; border: none; color: #007bff; cursor: pointer; padding: 0; font-size: 13px;">
+  <!-- Action Buttons -->
+    <button onclick="toggleComments('${post.id}')" style="background: none; border: none; color: #007bff; cursor: pointer; padding: 0; font-size: 13px;">
           💬 Komentar
-        </button>
+    </button>
+    <button class="action-btn" onclick="sharePost()">↗️ Bagikan</button>
+  </footer>
+  
+  <!-- Area Komentar (Default Sembunyi) -->
+    <div id="comment-section-${post.id}" style="display: none; margin-top: 12px; padding-top: 10px; background-color: #00bcd4; border-top: 1px solid #eee;">
 
-        <!-- Area Komentar (Default Sembunyi) -->
-        <div id="comment-section-${post.id}" style="display: none; margin-top: 12px; padding-top: 10px; border-top: 1px solid #eee;">
-          <div id="comments-list-${post.id}" style="margin-bottom: 10px;">
-            <p style="font-size: 12px; color: #888;">Memuat komentar...</p>
-          </div>
           
-          <!-- Form Tambah Komentar -->
-          <form onsubmit="handleCommentSubmit(event, '${post.id}')" style="display: flex; gap: 6px;">
+      <div id="comments-list-${post.id}" style="margin-bottom: 10px; text-align: left;">
+        <p style="font-size: 12px; color: #888;">Memuat komentar...</p>
+      </div>
+      <!-- Form Tambah Komentar -->
+      <form onsubmit="handleCommentSubmit(event, '${post.id}')" style="display: flex; gap: 6px;">
             <input type="text" placeholder="Tulis komentar..." required style="flex: 1; padding: 6px 10px; font-size: 12px; border: 1px solid #ccc; border-radius: 4px;">
             <button type="submit" style="padding: 6px 12px; font-size: 12px; background: #007bff; color: white; border: none; border-radius: 4px; cursor: pointer;">Kirim</button>
           </form>
-        </div>
       </div>
+    </footer>
+  </article>
     `;
   }).join('');
 }
