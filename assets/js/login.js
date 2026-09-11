@@ -164,7 +164,7 @@ document.addEventListener("DOMContentLoaded", () => {
     // ==========================================
     // 5. PROSES LOGOUT
     // ==========================================
-    const btnLogout = document.getElementById("btnLogout");
+    const btnLogout = document.getElementById("btn-logout");
     if (btnLogout) {
         btnLogout.addEventListener("click", async () => {
             const { error } = await supabaseClient.auth.signOut();
