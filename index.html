@@ -38,17 +38,20 @@
 
     <!-- Script Utama & Pendukung (Di-load setelah HTML selesai dibaca) -->
     <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/matter-js/0.19.0/matter.min.js" defer></script>
     <script src="assets/js/login.js" defer></script>
-
+    <script src="assets/js/pisical.js" defer></script>
     <script src="assets/js/navbar.js" defer></script>
     <script src="assets/js/modalhandler.js" defer></script>
     <script src="assets/js/post-card-element.js" defer></script>
     <script src="assets/js/main.js" defer></script>
+    
 </head>
 <body>
 
     <!-- Web Component Navbar & Modal Otomatis -->
     <my-navbar></my-navbar>
+<button id="btn-permission">Aktifkan Sensor </button>
 
         <!-- KONTAINER UTAMA GESER SAMPING -->
 <div class="horizontal-slider">
@@ -60,7 +63,7 @@
     <!-- Form Input Postingan Baru (Hanya Tampil Jika Sudah Login) -->
 <div class="article-card">
 <div class="post-container" id="create-post-box" style="display: none;">
-    <h2>Buat Postingan Baru</h2>
+    <h2 class="falling-item water-item">Buat Postingan Baru</h2>
     <form id="postForm">
         <div class="form-group">
             <label for="content"></label>

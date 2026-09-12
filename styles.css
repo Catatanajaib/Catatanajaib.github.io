@@ -497,3 +497,60 @@ h4.logo {
     color-scheme: light; /* Memastikan browser selalu merender dalam mode terang */
 }
 
+    .falling-item {
+      position: absolute;
+      padding: 12px 20px;
+      font-weight: bold;
+      user-select: none;
+      will-change: transform;
+      text-align: center;
+    }
+
+    /* 1. AIR (Water) - Licin & Memantul */
+    .water-item {
+      background: rgba(0, 180, 255, 0.85);
+      color: #fff;
+      border-radius: 30px;
+      border: 2px solid #80d8ff;
+      box-shadow: 0 0 10px rgba(0, 180, 255, 0.5);
+    }
+
+    /* 2. UDARA (Air) - Transparan & Ringan */
+    .air-item {
+      background: rgba(255, 255, 255, 0.2);
+      color: #e0f7fa;
+      border-radius: 15px;
+      border: 1px dashed #ffffff;
+      backdrop-filter: blur(4px);
+      box-shadow: 0 0 8px rgba(255, 255, 255, 0.3);
+    }
+
+    /* 3. API (Fire) - Burning Glowing Effect */
+    .fire-item {
+      background: linear-gradient(135deg, #ff4e50, #f9d423);
+      color: #fff;
+      border-radius: 8px;
+      box-shadow: 0 0 15px rgba(255, 78, 80, 0.8);
+    }
+
+    /* 4. TANAH (Earth) - Padat & Berat */
+    .earth-item {
+      background: #5d4037;
+      color: #d7ccc8;
+      border-radius: 4px;
+      border: 3px solid #3e2723;
+      box-shadow: 2px 2px 5px rgba(0, 0, 0, 0.5);
+    }
+
+    #btn-permission {
+      position: fixed;
+      top: 10px;
+      left: 10px;
+      z-index: 1000;
+      padding: 10px 15px;
+      background: #28a745;
+      color: white;
+      border: none;
+      border-radius: 5px;
+      font-weight: bold;
+    }
