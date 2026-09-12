@@ -303,6 +303,12 @@ h4.logo {
   color: #65676b;
 }
 
+.user-info .btn-chat-right {
+  margin-left: auto; /* Mendorong tombol ke posisi paling kanan */
+  font-size: 12px;
+  padding: 4px 10px;
+}
+
 /* Isi Teks Postingan */
 .post-content {
   padding: 0 16px 12px;

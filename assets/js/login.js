@@ -234,7 +234,7 @@ document.addEventListener("DOMContentLoaded", () => {
 });
 
 // ==========================================
-// 7. SISTEM KOMENTAR & UTILS GLOBAL
+// 7. SISTEM KOMENTAR & UTILS GLOBAL (NESTED)
 // ==========================================
 
 function escapeHtml(text) {
@@ -260,7 +260,7 @@ async function toggleComments(postId) {
   }
 }
 
-// Mengambil komentar sekaligus menghitung total komentar
+// Mengambil komentar & menyusun hirarki (Parent - Child)
 async function fetchCommentsForPost(postId) {
   const listEl = document.getElementById(`comments-list-${postId}`);
   if (!listEl) return;
@@ -270,13 +270,12 @@ async function fetchCommentsForPost(postId) {
     return;
   }
 
-  // Ambil 10 komentar pertama & Hitung total komentar (Count)
-  const { data, count, error } = await supabaseClient
+  // Ambil seluruh komentar untuk post_id ini
+  const { data: comments, error } = await supabaseClient
     .from('comments')
-    .select('*', { count: 'exact' })
+    .select('*')
     .eq('post_id', String(postId))
-    .order('created_at', { ascending: true })
-    .range(0, 9);
+    .order('created_at', { ascending: true });
 
   if (error) {
     console.error('Error fetching comments:', error);
@@ -284,27 +283,84 @@ async function fetchCommentsForPost(postId) {
     return;
   }
 
-  renderComments(listEl, data);
-}
-
-function renderComments(containerEl, commentsArray) {
-  if (!commentsArray || commentsArray.length === 0) {
-    containerEl.innerHTML = '<p style="font-size:12px; color: white;">Belum ada komentar. Tulis sesuatu!</p>';
+  if (!comments || comments.length === 0) {
+    listEl.innerHTML = '<p style="font-size:12px; color: white;">Belum ada komentar. Tulis sesuatu!</p>';
     return;
   }
 
-  containerEl.innerHTML = commentsArray.map(c => `
-    <div style="margin-bottom:8px; font-size:13px; background:#f8f9fa; padding:8px 12px; border-radius:6px; border:1px solid #eee;">
-      <div style="display:flex; justify-content:space-between; align-items:center;">
-        <strong style="color:#333;">${escapeHtml(c.author_name || c.username || 'Anonim')}</strong>
-        <span style="font-size:10px; color:#999;">${new Date(c.created_at).toLocaleString('id-ID', { hour: '2-digit', minute: '2-digit', day: 'numeric', month: 'short' })}</span>
-      </div>
-      <p style="margin:4px 0 0 0; color:#444; line-height:1.4;">${escapeHtml(c.content)}</p>
-    </div>
-  `).join('');
+  // Pisahkan komentar utama dan balasan berdasarkan parent_id
+  const parentComments = comments.filter(c => !c.parent_id);
+  const replies = comments.filter(c => c.parent_id);
+
+  listEl.innerHTML = parentComments.map(parent => {
+    const childReplies = replies.filter(r => String(r.parent_id) === String(parent.id));
+    return renderCommentTree(parent, childReplies, postId);
+  }).join('');
 }
 
-async function handleCommentSubmit(event, postId) {
+// Render tampilan Komentar Utama beserta Balasannya
+function renderCommentTree(parent, replies, postId) {
+  const author = escapeHtml(parent.author_name || parent.username || 'Anonim');
+  const content = escapeHtml(parent.content);
+  const time = new Date(parent.created_at).toLocaleString('id-ID', { hour: '2-digit', minute: '2-digit', day: 'numeric', month: 'short' });
+
+  // HTML daftar balasan komentar (di-indent ke kanan)
+  const repliesHTML = replies.map(reply => {
+    const rAuthor = escapeHtml(reply.author_name || reply.username || 'Anonim');
+    const rContent = escapeHtml(reply.content);
+    const rTime = new Date(reply.created_at).toLocaleString('id-ID', { hour: '2-digit', minute: '2-digit', day: 'numeric', month: 'short' });
+
+    return `
+      <div style="margin-top: 6px; margin-left: 18px; padding: 6px 10px; background: #ffffff; border-left: 3px solid #007bff; border-radius: 4px; font-size: 12px; text-align: left;">
+        <div style="display:flex; justify-content:space-between; align-items:center;">
+          <strong style="color:#333;">${rAuthor}</strong>
+          <span style="font-size:10px; color:#999;">${rTime}</span>
+        </div>
+        <p style="margin:4px 0 0 0; color:#444; line-height:1.4;">${rContent}</p>
+      </div>
+    `;
+  }).join('');
+
+  return `
+    <div style="margin-bottom: 8px; font-size: 13px; background: #f8f9fa; padding: 8px 12px; border-radius: 6px; border: 1px solid #eee; text-align: left;">
+      <div style="display:flex; justify-content:space-between; align-items:center;">
+        <strong style="color:#333;">${author}</strong>
+        <span style="font-size:10px; color:#999;">${time}</span>
+      </div>
+      <p style="margin:4px 0 6px 0; color:#444; line-height:1.4;">${content}</p>
+
+      <!-- Tombol Balas -->
+      <button onclick="toggleReplyForm('${parent.id}')" style="background:none; border:none; color:#007bff; font-size:11px; cursor:pointer; padding:0; font-weight:bold;">
+        ↩ Balas
+      </button>
+
+      <!-- Form Input Balasan (Default Sembunyi) -->
+      <div id="reply-form-${parent.id}" style="display:none; margin-top:8px;">
+        <form onsubmit="handleCommentSubmit(event, '${postId}', '${parent.id}')" style="display:flex; gap:6px;">
+          <input type="text" placeholder="Tulis balasan..." required style="flex:1; padding:6px; font-size:11px; border:1px solid #ccc; border-radius:4px;">
+          <button type="submit" style="padding:6px 10px; font-size:11px; background:#28a745; color:white; border:none; border-radius:4px; cursor:pointer;">Kirim</button>
+        </form>
+      </div>
+
+      <!-- Wadah Balasan Komentar -->
+      <div class="replies-container">
+        ${repliesHTML}
+      </div>
+    </div>
+  `;
+}
+
+// Buka/Tutup Form Balasan Komentar
+function toggleReplyForm(commentId) {
+  const formBox = document.getElementById(`reply-form-${commentId}`);
+  if (formBox) {
+    const isHidden = formBox.style.display === 'none' || formBox.style.display === '';
+    formBox.style.display = isHidden ? 'block' : 'none';
+  }
+}
+
+// Handler submit komentar utama maupun balasan (dilihat dari parameter parentId)
+async function handleCommentSubmit(event, postId, parentId = null) {
   event.preventDefault();
   const form = event.target;
   const input = form.querySelector('input');
@@ -315,7 +371,7 @@ async function handleCommentSubmit(event, postId) {
 
   if (submitBtn) submitBtn.disabled = true;
 
-  // 1. Ambil session user yang sedang aktif
+  // 1. Cek Sesi Auth
   const { data: { session } } = await supabaseClient.auth.getSession();
 
   if (!session) {
@@ -324,17 +380,22 @@ async function handleCommentSubmit(event, postId) {
     return;
   }
 
-  // 2. Kirim komentar lengkap dengan user_id
+  // 2. Susun Payload
+  const payload = {
+    post_id: String(postId),
+    user_id: session.user.id,
+    author_name: currentUsername || 'Pengguna',
+    content: content
+  };
+
+  if (parentId) {
+    payload.parent_id = parentId; // Simpan parent_id jika berupa balasan
+  }
+
+  // 3. Simpan ke Supabase
   const { error } = await supabaseClient
     .from('comments')
-    .insert([
-      {
-        post_id: String(postId),
-        user_id: session.user.id, // Wajib diisi agar lolos RLS
-        author_name: currentUsername || 'Pengguna',
-        content: content
-      }
-    ]);
+    .insert([payload]);
 
   if (submitBtn) submitBtn.disabled = false;
 
@@ -342,10 +403,9 @@ async function handleCommentSubmit(event, postId) {
     alert('Gagal mengirim komentar: ' + error.message);
   } else {
     input.value = '';
-    fetchCommentsForPost(postId); // Refresh list komentar
+    fetchCommentsForPost(postId);
   }
 }
-
 
 function subscribeToRealtimeComments(postId) {
   if (!supabaseClient) return;

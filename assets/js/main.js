@@ -121,7 +121,7 @@ document.addEventListener('DOMContentLoaded', () => {
           <!-- WADAH KOMENTAR HASIL INFINITE SCROLL -->
           <div id="comment-section-${post.id}" class="comment-section" style="display:none; padding: 15px; border-top: 1px solid #eee; text-align: left;">
             <div class="comments-list" id="comments-list-${post.id}"></div>
-            <form onsubmit="handleCommentSubmit(event, '${post.id}')" style="margin-top: 10px; display: flex; gap: 8px;">
+            <form onsubmit="handleCommentSubmit(event, '${post.id}' null)" style="margin-top: 10px; display: flex; gap: 8px;">
               <input type="text" placeholder="Tulis komentar..." required style="flex: 1; padding: 8px; border: 1px solid #ccc; border-radius: 4px;">
               <button type="submit" style="padding: 8px 12px; background: #007bff; color: white; border: none; border-radius: 4px; cursor: pointer;">Kirim</button>
             </form>
@@ -195,6 +195,7 @@ async function loadPosts() {
       <h4>${author}</h4>
       <span>${date}</span>
     </div>
+    <button class="action-btn btn-chat-right" onclick="openPrivateChat('${post.user_id}', '${author}')">Kirim Pesan</button>
   </header>
   <div class="post-content">${content}</div>
   <div class="post-media">
@@ -204,11 +205,11 @@ async function loadPosts() {
     <span>👍 128jt Suka</span>
     <span>904rb Komentar</span>
   </div>
-<!-- Action Buttons -->
   
+<!-- Action Buttons -->
   <footer class="post-actions">
     <button class="action-btn" onclick="toggleLike(this)">👍 Suka</button>
-  <!-- Action Buttons -->
+
     <button onclick="toggleComments('${post.id}')" style="background: none; border: none; color: #007bff; cursor: pointer; padding: 0; font-size: 13px;">
           💬 Komentar
     </button>
