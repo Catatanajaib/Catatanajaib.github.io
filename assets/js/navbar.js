@@ -1,3 +1,23 @@
+// ==========================================================================
+// FUNGSI PEMBANTU (Mencegah Celah Keamanan XSS - Modern Standard)
+// ==========================================================================
+function escapeHtml(text) {
+  if (text === null || text === undefined) return '';
+  
+  const htmlEscapes = {
+    '&': '&amp;',
+    '<': '&lt;',
+    '>': '&gt;',
+    '"': '&quot;',
+    "'": '&#039;',
+    '`': '&#96;',
+    '/': '&#47;'
+  };
+
+  return String(text).replace(/[&<>"'`/]/g, (match) => htmlEscapes[match]);
+}
+
+
 /* ==========================================================================
    WEB COMPONENT: NAVBAR & MODAL GABUNGAN
    ========================================================================== */
@@ -114,7 +134,7 @@ async function openPrivateChat(receiverId, receiverName) {
   const chatHeader = document.getElementById("chat-receiver-name");
 
   if (modal) modal.style.display = "block";
-  if (chatHeader) chatHeader.textContent = `Pesan: ${escapeHtml(receiverName || 'Pengguna')}`;
+  if (chatHeader) chatHeader.textContent = `Pesan: ${escapeHtml(receiverName || 'Pengguna')}`;[span_8](start_span)[span_8](end_span)
 
   await fetchPrivateMessages(receiverId);
   subscribeToPrivateChat(receiverId);
@@ -158,7 +178,7 @@ async function fetchPrivateMessages(receiverId) {
             ? 'background-color: #007bff; color: white; border-bottom-right-radius: 2px;' 
             : 'background-color: #ffffff; color: #333; border: 1px solid #ddd; border-bottom-left-radius: 2px;'
         }">
-          ${escapeHtml(msg.message)}
+          ${escapeHtml(msg.message)}[span_11](start_span)[span_11](end_span)
         </div>
         <span style="font-size: 9px; color: #999; display: block; text-align: ${isMe ? 'right' : 'left'}; margin-top: 2px;">
           ${new Date(msg.created_at).toLocaleTimeString('id-ID', { hour: '2-digit', minute: '2-digit' })}
