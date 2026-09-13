@@ -29,7 +29,7 @@ class NavBar extends HTMLElement {
     this.innerHTML = `
       <!-- NAVIGASI UTAMA -->
       <nav class="navbar">
-        <h4 class="logo">Catatan Ajaib</h4>
+        <h4 class="logo falling-item">Catatan Ajaib</h4>
         <ul class="nav-links">
           <li><a href="${basePath}index.html">Beranda</a></li>
           <li><a href="#" class="open-modal-btn" data-target="PenelusuranModal">Penelusuran</a></li>
