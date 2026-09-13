@@ -29,14 +29,22 @@ class NavBar extends HTMLElement {
     this.innerHTML = `
       <!-- NAVIGASI UTAMA -->
       <nav class="navbar">
-        <h4 class="logo falling-item">Catatan Ajaib</h4>
+        <h4 class="logo">Catatan Ajaib</h4>
         <ul class="nav-links">
-          <li><a href="${basePath}index.html">Beranda</a></li>
-          <li><a href="#" class="open-modal-btn" data-target="PenelusuranModal">Penelusuran</a></li>
-          <li><a href="${basePath}pages/postingan.html">Postingan</a></li>
-          <li><a href="${basePath}pages/berita.html">Berita</a></li>
-          <li><a href="#" class="open-modal-btn" data-target="Chat-Room">ChatRoom</a></li>
-          <li><a href="#" class="open-modal-btn" data-target="AboutModal">Kontak</a></li>
+        <li class="has-dropdown">MENU
+            <ul class="vertical-dropdown">
+              <li><a href="#" class="open-modal-btn" data-target="AboutModal">Kontak</a>
+              </li>
+              <li><a href="${basePath}pages/toko.html">TOKO</a>
+              </li>
+            </ul>
+          </li>
+          <li><a href="${basePath}index.html">BERANDA</a></li>
+          <li><a href="#" class="open-modal-btn" data-target="PenelusuranModal">CARI</a></li>
+          <li><a href="${basePath}pages/postingan.html">POSTS</a></li>
+          <li><a href="${basePath}pages/berita.html">BERITA</a></li>
+          <li><a href="#" class="open-modal-btn" data-target="Chat-Room">✉️</a></li>
+          
         </ul>
       </nav>
       
@@ -44,8 +52,8 @@ class NavBar extends HTMLElement {
       <div id="AboutModal" class="modal">
         <div class="modal-content">
           <span class="close-btn">&times;</span>
-          <h2>Tentang Kami</h2>
-          <p>Miftahul Mujib - 081910240675</p>
+            <h2>Tentang Kami</h2>
+            <p>Miftahul Mujib - 081910240675</p>
         </div>
       </div>
 

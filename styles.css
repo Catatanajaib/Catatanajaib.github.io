@@ -78,6 +78,7 @@ body {
   background-color: #00bcd4; /* Beri warna latar agar konten di bawahnya tertutup saat di-scroll */
   padding: 10px 0;
   transition: transform 0.3s ease;
+  flex-wrap: wrap;
 }
 
 .navbar--hidden {
@@ -139,6 +140,121 @@ h4.logo {
   width: 100%;
 }
 
+/* --- LOGIK SUB-MENU TERSEMBUNYI --- */
+.main-nav {
+    list-style: none;
+    display: flex;
+    gap: 20px;
+    position: relative;
+}
+
+.main-nav a {
+    text-decoration: none;
+    color: #333;
+    font-weight: 500;
+    padding: 8px 12px;
+    display: block;
+}
+
+/* Parent LI diset relative sebagai acuan posisi */
+.has-submenu {
+    position: relative;
+}
+
+/* Sub-menu awalnya disembunyikan (opacity & display/visibility) */
+.horizontal-submenu {
+    position: absolute;
+    top: 100%; /* Muncul tepat di bawah menu utama */
+    left: 0;
+    background-color: #ffffff;
+    list-style: none;
+    
+    /* Membuat susunan sub-menu menjadi HORIZONTAL */
+    display: flex; 
+    flex-direction: row; 
+    gap: 10px;
+    
+    padding: 10px;
+    border-radius: 8px;
+    box-shadow: 0 4px 15px rgba(0, 0, 0, 0.15);
+    white-space: nowrap; /* Mencegah item terlipat ke bawah */
+
+    /* Efek Sembunyi (Hidden) */
+    opacity: 0;
+    visibility: hidden;
+    transform: translateY(10px);
+    transition: all 0.3s ease;
+}
+
+/* Style item di dalam sub-menu */
+.horizontal-submenu li a {
+    background-color: #f0f2f5;
+    border-radius: 5px;
+    font-size: 14px;
+}
+
+.horizontal-submenu li a:hover {
+    background-color: #007bff;
+    color: white;
+}
+
+/* --- MENAMPILKAN SUB-MENU SAAT HOVER --- */
+.has-submenu:hover .horizontal-submenu {
+    opacity: 1;
+    visibility: visible;
+    transform: translateY(0);
+}
+
+        /* --- SUB-MENU VERTIKAL (BERJEJER KE BAWAH) --- */
+
+        /* 1. Induk <li> harus relative agar sub-menu menempel di bawahnya */
+        .has-dropdown {
+            position: relative;
+        }
+
+        /* 2. Sub-menu tersembunyi & tersusun vertikal */
+        .vertical-dropdown {
+            position: absolute;
+            top: 100%; /* Pas di bawah menu Toko */
+            left: 0;
+            background-color: #ffffff;
+            list-style: none;
+            min-width: 80px; /* Lebar kotak menu */
+            border-radius: 8px;
+            box-shadow: 0 4px 15px rgba(0, 0, 0, 0.15);
+            padding: 8px 0;
+            
+            /* Dibuat Flexbox Vertikal (kebawah) */
+            display: flex;
+            flex-direction: column; 
+
+            /* Sembunyikan secara bawaan */
+            opacity: 0;
+            visibility: hidden;
+            transform: translateY(10px);
+            transition: all 0.2s ease-in-out;
+            gap:10px;
+        }
+
+        /* 3. Tampilan item di dalam sub-menu */
+        .vertical-dropdown li a {
+            padding: 10px 16px;
+            color: #444;
+            font-size: 14px;
+        }
+
+        .vertical-dropdown li a:hover {
+            background-color: #f0f2f5;
+            color: #007bff;
+        }
+
+        /* 4. Tampilkan sub-menu saat mouse mengarah ke menu Toko */
+        .has-dropdown:hover .vertical-dropdown {
+            opacity: 1;
+            visibility: visible;
+            transform: translateY(0);
+        }
+        
 /* --- Modal Penelusuran / About --- */
 
 /* Latar Belakang Modal (Overlay) */

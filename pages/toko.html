@@ -1,0 +1,143 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Katalog Produk</title>
+    <link rel="stylesheet" href="../styles.css">
+
+    <!-- Memanggil JS dari folder assets/js -->
+    <script src="../assets/js/navbar.js" defer></script>
+    <script src="../assets/js/modalhandler.js" defer></script>
+    <script src="../assets/js/post-card-element.js" defer></script>
+    <script src="../assets/js/main.js" defer></script>
+    <style>
+        /* Container Produk */
+
+        
+        .page-title {
+            text-align: center;
+            margin-bottom: 30px;
+            color: #222;
+        }
+
+        .product-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+            gap: 25px;
+        }
+
+        /* Kartu Produk */
+        .product-card {
+            background: #fff;
+            border-radius: 12px;
+            overflow: hidden;
+            box-shadow: 0 4px 12px rgba(0,0,0,0.05);
+            transition: transform 0.2s;
+            display: flex;
+            flex-direction: column;
+        }
+
+        .product-card:hover {
+            transform: translateY(-5px);
+        }
+
+        .product-image {
+            width: 100%;
+            height: 200px;
+            object-fit: cover;
+            background-color: #eee;
+        }
+
+        .product-info {
+            padding: 20px;
+            display: flex;
+            flex-direction: column;
+            flex-grow: 1;
+        }
+
+        .product-title {
+            font-size: 18px;
+            color: #333;
+            margin-bottom: 8px;
+        }
+
+        .product-price {
+            font-size: 16px;
+            font-weight: bold;
+            color: #28a745;
+            margin-bottom: 12px;
+        }
+
+        .product-description {
+            font-size: 14px;
+            color: #666;
+            margin-bottom: 20px;
+            flex-grow: 1;
+            line-height: 1.4;
+        }
+
+        .btn-buy {
+            display: block;
+            text-align: center;
+            background-color: #25d366; /* Warna khas WhatsApp */
+            color: white;
+            text-decoration: none;
+            padding: 10px;
+            border-radius: 6px;
+            font-weight: bold;
+            transition: background 0.2s;
+        }
+
+        .btn-buy:hover {
+            background-color: #1eb954;
+        }
+    </style>
+</head>
+<body>
+    <!-- Navigasi -->
+<my-navbar></my-navbar>
+    <!-- Katalog Produk -->
+    <div class="container">
+        <h1 class="page-title">Katalog Produk</h1>
+
+        <div class="product-grid">
+            
+            <!-- Produk 1 -->
+            <div class="product-card">
+                <img src="https://via.placeholder.com/300x200" alt="Produk 1" class="product-image">
+                <div class="product-info">
+                    <h3 class="product-title">Kemeja Polos Casual</h3>
+                    <div class="product-price">Rp 120.000</div>
+                    <p class="product-description">Bahan katun adem, cocok untuk aktivitas harian maupun formal.</p>
+                    <a href="https://wa.me/6281910240675?text=Halo,%20saya%20mau%20pesan%20Kemeja%20Polos%20Casual%20(Rp%20120.000)" target="_blank" class="btn-buy">Beli via WhatsApp</a>
+                </div>
+            </div>
+
+            <!-- Produk 2 -->
+            <div class="product-card">
+                <img src="https://via.placeholder.com/300x200" alt="Produk 2" class="product-image">
+                <div class="product-info">
+                    <h3 class="product-title">Sepatu Sneaker Lokal</h3>
+                    <div class="product-price">Rp 250.000</div>
+                    <p class="product-description">Sol empuk, desain elegan, dan tahan lama untuk pemakaian harian.</p>
+                    <a href="https://wa.me/6281910240675?text=Halo,%20saya%20mau%20pesan%20Sepatu%20Sneaker%20Lokal%20(Rp%20250.000)" target="_blank" class="btn-buy">Beli via WhatsApp</a>
+                </div>
+            </div>
+
+            <!-- Produk 3 -->
+            <div class="product-card">
+                <img src="https://via.placeholder.com/300x200" alt="Produk 3" class="product-image">
+                <div class="product-info">
+                    <h3 class="product-title">Tas Ransel Laptop</h3>
+                    <div class="product-price">Rp 180.000</div>
+                    <p class="product-description">Dilengkapi kompartemen laptop 15 inci dan bahan tahan air.</p>
+                    <a href="https://wa.me/6281910240675?text=Halo,%20saya%20mau%20pesan%20Tas%20Ransel%20Laptop%20(Rp%20180.000)" target="_blank" class="btn-buy">Beli via WhatsApp</a>
+                </div>
+            </div>
+
+        </div>
+    </div>
+
+</body>
+</html>
