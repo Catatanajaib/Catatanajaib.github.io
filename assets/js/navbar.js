@@ -37,12 +37,12 @@ class NavBar extends HTMLElement {
               <li><a href="${basePath}pages/toko.html">TOKO</a></li>
             </ul>
           </li>
-          <li><a href="#" onclick="openChatFromNavbar(); return false;">💬 ChatsRoom</a></l
+          <li><a href="#" onclick="openChatFromNavbar(); return false;">💬 ChatsRoom</a></li>
           <li><a href="${basePath}index.html">BERANDA</a></li>
           <li><a href="#" class="open-modal-btn" data-target="PenelusuranModal">CARI</a></li>
           <li><a href="${basePath}pages/postingan.html">POSTS</a></li>
           <li><a href="${basePath}pages/berita.html">BERITA</a></li>
-          i>
+          
         </ul>
       </nav>
       
