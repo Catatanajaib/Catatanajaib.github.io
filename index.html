@@ -39,12 +39,13 @@
     <!-- Script Utama & Pendukung (Di-load setelah HTML selesai dibaca) -->
     <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/matter-js/0.19.0/matter.min.js" defer></script>
+    
     <script src="assets/js/login.js" defer></script>
+    <script src="assets/js/main.js" defer></script>
     <script src="assets/js/pisical.js" defer></script>
     <script src="assets/js/navbar.js" defer></script>
     <script src="assets/js/modalhandler.js" defer></script>
     <script src="assets/js/post-card-element.js" defer></script>
-    <script src="assets/js/main.js" defer></script>
     <script src="assets/js/pendaftaran.js" defer></script>
     <script src="assets/js/ubah-data-profil.js"defer></script>
     
@@ -96,8 +97,8 @@
         </div>
         
 <!-- Area Menampilkan Postingan -->
-<div class="article-card" id="posts-contaiter"></div>
-</div>
+<div class="article-card" id="posts-container"></div>
+
         <!--Tema utama halaman dan Deskripsi -->
 <div class="article-card">
 <article class="post-card" data-post-id="static-1">
@@ -177,6 +178,7 @@
             </div>
         </article>
         </div>
+        
         <div class="article-card">
         <!-- Wadah Infinite Scroll & Indikatornya di index html-->
         <div id="post-article-container"></div>
