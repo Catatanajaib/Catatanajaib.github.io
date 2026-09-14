@@ -1,13 +1,5 @@
 Console.log("File main.js berhasil dimuat!");
 
-/* ==========================================================================
-   MAIN.JS - FITUR UTAMA, FEED, & INTEGRASI SUPABASE
-   ========================================================================== */
-
-document.addEventListener('DOMContentLoaded', () => {
-    // Jalankan fungsi loadPosts setelah DOM siap
-    loadPosts();
-
   // ------------------------------------------------------------------------
   // A. NAVBAR AUTO-HIDE SAAT SCROLL
   // ------------------------------------------------------------------------
@@ -26,9 +18,21 @@ document.addEventListener('DOMContentLoaded', () => {
     });
   }
 
-  // ------------------------------------------------------------------------
-  // B. INFINITE SCROLL FEED (DATA DUMMY)
-  // ------------------------------------------------------------------------
+// ==========================================
+// FUNGSI MEMUAT & MENAMPILKAN POSTINGAN
+// ==========================================
+document.addEventListener('DOMContentLoaded', () => {
+  // 1. Inisialisasi Pemuatan Data Supabase
+  loadPosts();
+
+  // 2. Inisialisasi Feed Dummy / Infinite Scroll
+  initInfiniteScrollFeed();
+});
+
+/* ==========================================================================
+   A. LOGIKA INFINITE SCROLL FEED (#post-article-container)
+   ========================================================================== */
+function initInfiniteScrollFeed() {
   const databasePostingan = [
     { 
       id: "dummy-1", 
@@ -74,9 +78,9 @@ document.addEventListener('DOMContentLoaded', () => {
   const sentinel = document.getElementById('scroll-sentinel');
   let observer;
 
+  if (!container) return;
+
   function muatPostinganBerikutnya() {
-    if (!container) return;
-    
     const dataBatch = databasePostingan.slice(indexData, indexData + itemPerScroll);
     
     if (dataBatch.length === 0) {
@@ -90,8 +94,8 @@ document.addEventListener('DOMContentLoaded', () => {
       const article = document.createElement('article');
       article.className = 'post-card';
       article.style.marginBottom = '20px';
+      article.setAttribute('data-post-id', post.id);
 
-      // PERBAIKAN: Ditambahkan koma pada handleCommentSubmit(event, '${post.id}', null)
       article.innerHTML = ` 
         <header class="post-header"> 
           <img src="${post.gambar}" alt="Foto profil ${post.name}" class="avatar"> 
@@ -120,10 +124,9 @@ document.addEventListener('DOMContentLoaded', () => {
             <button class="action-btn" onclick="sharePost()">↗️ Bagikan</button>
           </footer>
 
-          <!-- WADAH KOMENTAR HASIL INFINITE SCROLL -->
           <div id="comment-section-${post.id}" class="comment-section" style="display:none; padding: 15px; border-top: 1px solid #eee; text-align: left;">
             <div class="comments-list" id="comments-list-${post.id}"></div>
-            <form onsubmit="handleCommentSubmit(event, '${post.id}', null)" style="margin-top: 10px; display: flex; gap: 8px;">
+            <form onsubmit="handleCommentSubmit(event, '${post.id}')" style="margin-top: 10px; display: flex; gap: 8px;">
               <input type="text" placeholder="Tulis komentar..." required style="flex: 1; padding: 8px; border: 1px solid #ccc; border-radius: 4px;">
               <button type="submit" style="padding: 8px 12px; background: #007bff; color: white; border: none; border-radius: 4px; cursor: pointer;">Kirim</button>
             </form>
@@ -135,9 +138,11 @@ document.addEventListener('DOMContentLoaded', () => {
     });
   }
 
-  if (container && sentinel) {
-    muatPostinganBerikutnya();
+  // Muat postingan pertama kali
+  muatPostinganBerikutnya();
 
+  // Siapkan IntersectionObserver jika elemen sentinel ada
+  if (sentinel) {
     observer = new IntersectionObserver((entries) => {
       entries.forEach(entry => {
         if (entry.isIntersecting) {
@@ -148,12 +153,11 @@ document.addEventListener('DOMContentLoaded', () => {
     
     observer.observe(sentinel);
   }
+}
 
-});
-
-// ==========================================
-// FUNGSI MEMUAT & MENAMPILKAN POSTINGAN
-// ==========================================
+/* ==========================================================================
+   B. LOGIKA SUPABASE FEED (#posts-container)
+   ========================================================================== */
 async function loadPosts() {
   const postsContainer = document.getElementById("posts-container");
   if (!postsContainer) return;
@@ -195,7 +199,6 @@ async function loadPosts() {
           <h4>${author}</h4>
           <span>${date}</span>
         </div>
-        <!-- Tombol Kirim Pesan ke Pembuat Postingan -->
         <button class="action-btn btn-chat-right" onclick="openPrivateChat('${post.user_id}', '${author}')">
           💬 Kirim Pesan
         </button>
