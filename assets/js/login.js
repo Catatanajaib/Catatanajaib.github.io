@@ -5,7 +5,10 @@
 const SUPABASE_URL = 'https://qcopjasrzjubbgjnxidv.supabase.co';
 const SUPABASE_ANON_KEY = 'sb_publishable_YFS1w6HfZbyg-F6QoxISFw_b62yHMO6';
 
-const supabaseClient = window.supabase ? window.supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY) : null;
+// Simpan ke window agar global
+window.supabaseClient = window.supabase ? window.supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY) : null;
+const supabaseClient = window.supabaseClient;
+
 
 // Variable global untuk menyimpan username aktif
 let currentUsername = "Pengunjung Anonim";

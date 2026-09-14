@@ -152,16 +152,15 @@ document.addEventListener('DOMContentLoaded', () => {
 // FUNGSI MEMUAT & MENAMPILKAN POSTINGAN
 // ==========================================
 async function loadPosts() {
-  const postsContainer = document.getElementById("posts-container"); // Pastikan ID ini ada di HTML kamu
+  const postsContainer = document.getElementById("posts-container");
   if (!postsContainer) return;
 
   postsContainer.innerHTML = "<p style='text-align:center;'>Memuat postingan...</p>";
 
-  // Ambil data postingan dari tabel 'posts'
   const { data: posts, error } = await supabaseClient
     .from('posts')
     .select('*')
-    .order('created_at', { ascending: false }); // Postingan terbaru di atas
+    .order('created_at', { ascending: false });
 
   if (error) {
     console.error("Gagal memuat postingan:", error.message);
@@ -174,9 +173,7 @@ async function loadPosts() {
     return;
   }
 
-  // Render daftar postingan
   postsContainer.innerHTML = posts.map(post => {
-    // Penyesuaian nama pembuat postingan (mengakomodasi author_name atau username)
     const author = escapeHtml(post.author_name || post.username || 'Anonim');
     const content = escapeHtml(post.content);
     const date = new Date(post.created_at).toLocaleString('id-ID', {
@@ -188,49 +185,38 @@ async function loadPosts() {
     });
 
     return `
-<article class="post-card" data-post-id="">
-  <header class="post-header">
-    <img src="https://picsum.photos/600/300?random=5" alt="Foto Profil" class="avatar">
-    <div class="user-info">
-      <h4>${author}</h4>
-      <span>${date}</span>
-    </div>
-    <button class="action-btn btn-chat-right" onclick="openPrivateChat('${post.user_id}', '${author}')">Kirim Pesan</button>
-  </header>
-  <div class="post-content">${content}</div>
-  <div class="post-media">
-    <img src="https://picsum.photos/600/300?random=7" alt="Foto Postingan">
-  </div>
-  <div class="post-stats">
-    <span>👍 128jt Suka</span>
-    <span>904rb Komentar</span>
-  </div>
-  
-<!-- Action Buttons -->
-  <footer class="post-actions">
-    <button class="action-btn" onclick="toggleLike(this)">👍 Suka</button>
-
-    <button onclick="toggleComments('${post.id}')" style="background: none; border: none; color: #007bff; cursor: pointer; padding: 0; font-size: 13px;">
-          💬 Komentar
-    </button>
-    <button class="action-btn" onclick="sharePost()">↗️ Bagikan</button>
-  </footer>
-  
-  <!-- Area Komentar (Default Sembunyi) -->
-    <div id="comment-section-${post.id}" style="display: none; margin-top: 12px; padding-top: 10px; background-color: #00bcd4; border-top: 1px solid #eee;">
-
-          
-      <div id="comments-list-${post.id}" style="margin-bottom: 10px; text-align: left;">
-        <p style="font-size: 12px; color: #888;">Memuat komentar...</p>
+    <article class="post-card" data-post-id="${post.id}">
+      <header class="post-header">
+        <img src="https://picsum.photos/600/300?random=5" alt="Foto Profil" class="avatar">
+        <div class="user-info">
+          <h4>${author}</h4>
+          <span>${date}</span>
+        </div>
+        <!-- Tombol Kirim Pesan ke Pembuat Postingan -->
+        <button class="action-btn btn-chat-right" onclick="openPrivateChat('${post.user_id}', '${author}')">
+          💬 Kirim Pesan
+        </button>
+      </header>
+      <div class="post-content">${content}</div>
+      <div class="post-media">
+        <img src="https://picsum.photos/600/300?random=7" alt="Foto Postingan">
       </div>
-      <!-- Form Tambah Komentar -->
-      <form onsubmit="handleCommentSubmit(event, '${post.id}')" style="display: flex; gap: 6px;">
-            <input type="text" placeholder="Tulis komentar..." required style="flex: 1; padding: 6px 10px; font-size: 12px; border: 1px solid #ccc; border-radius: 4px;">
-            <button type="submit" style="padding: 6px 12px; font-size: 12px; background: #007bff; color: white; border: none; border-radius: 4px; cursor: pointer;">Kirim</button>
-          </form>
+      <footer class="post-actions">
+        <button class="action-btn" onclick="toggleLike(this)">Suka</button>
+        <button class="action-btn" onclick="toggleComments('${post.id}')">Komentar</button>
+        <button class="action-btn" onclick="sharePost()">Bagikan</button>
+      </footer>
+      <div id="comment-section-${post.id}" style="display: none; margin-top: 12px; padding-top: 10px; border-top: 1px solid #eee;">
+        <div id="comments-list-${post.id}" style="margin-bottom: 10px; text-align: left;">
+          <p style="font-size: 12px; color: #888;">Memuat komentar...</p>
+        </div>
+        <form onsubmit="handleCommentSubmit(event, '${post.id}')" style="display: flex; gap: 6px;">
+          <input type="text" placeholder="Tulis komentar..." required style="flex: 1; padding: 6px 10px; font-size: 12px; border: 1px solid #ccc; border-radius: 4px;">
+          <button type="submit" style="padding: 6px 12px; font-size: 12px; background: #007bff; color: white; border: none; border-radius: 4px; cursor: pointer;">Kirim</button>
+        </form>
       </div>
-    </footer>
-  </article>
+    </article>
     `;
   }).join('');
 }
+
