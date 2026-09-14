@@ -69,7 +69,7 @@ document.addEventListener('DOMContentLoaded', () => {
 
   let indexData = 0;
   const itemPerScroll = 1;
-  const container = document.getElementById('posts-container');
+  const container = document.getElementById('post-container');
   const sentinel = document.getElementById('scroll-sentinel');
   let observer;
 
