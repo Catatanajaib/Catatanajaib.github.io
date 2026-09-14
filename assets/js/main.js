@@ -1,10 +1,11 @@
-console.log("File main.js berhasil dimuat!");
+Console.log("File main.js berhasil dimuat!");
 
 /* ==========================================================================
    MAIN.JS - FITUR UTAMA, FEED, & INTEGRASI SUPABASE
    ========================================================================== */
 
 document.addEventListener('DOMContentLoaded', () => {
+    // Jalankan fungsi loadPosts setelah DOM siap
     loadPosts();
 
   // ------------------------------------------------------------------------
@@ -69,7 +70,7 @@ document.addEventListener('DOMContentLoaded', () => {
 
   let indexData = 0;
   const itemPerScroll = 1;
-  const container = document.getElementById('post-container');
+  const container = document.getElementById('post-article-container');
   const sentinel = document.getElementById('scroll-sentinel');
   let observer;
 
@@ -90,6 +91,7 @@ document.addEventListener('DOMContentLoaded', () => {
       article.className = 'post-card';
       article.style.marginBottom = '20px';
 
+      // PERBAIKAN: Ditambahkan koma pada handleCommentSubmit(event, '${post.id}', null)
       article.innerHTML = ` 
         <header class="post-header"> 
           <img src="${post.gambar}" alt="Foto profil ${post.name}" class="avatar"> 
@@ -121,7 +123,7 @@ document.addEventListener('DOMContentLoaded', () => {
           <!-- WADAH KOMENTAR HASIL INFINITE SCROLL -->
           <div id="comment-section-${post.id}" class="comment-section" style="display:none; padding: 15px; border-top: 1px solid #eee; text-align: left;">
             <div class="comments-list" id="comments-list-${post.id}"></div>
-            <form onsubmit="handleCommentSubmit(event, '${post.id}' null)" style="margin-top: 10px; display: flex; gap: 8px;">
+            <form onsubmit="handleCommentSubmit(event, '${post.id}', null)" style="margin-top: 10px; display: flex; gap: 8px;">
               <input type="text" placeholder="Tulis komentar..." required style="flex: 1; padding: 8px; border: 1px solid #ccc; border-radius: 4px;">
               <button type="submit" style="padding: 8px 12px; background: #007bff; color: white; border: none; border-radius: 4px; cursor: pointer;">Kirim</button>
             </form>
@@ -147,7 +149,8 @@ document.addEventListener('DOMContentLoaded', () => {
     observer.observe(sentinel);
   }
 
-}); // <-- PENUTUP EVENT DOMContentLoaded DI SINI!
+});
+
 // ==========================================
 // FUNGSI MEMUAT & MENAMPILKAN POSTINGAN
 // ==========================================
@@ -219,4 +222,3 @@ async function loadPosts() {
     `;
   }).join('');
 }
-
