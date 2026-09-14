@@ -3,10 +3,6 @@
 // LOGIKA PENDAFTARAN & LOGIN AKUN CATATAN AJAIB (SUPABASE AUTH & PROFILES)
 // ==========================================================================
 
-// 1. Inisialisasi Supabase menggunakan URL dan Kunci API milikmu
-const SUPABASE_URL = 'https://qcopjasrzjubbgjnxidv.supabase.co';
-const SUPABASE_KEY = 'sb_publishable_YFS1w6HfZbyg-F6QoxISFw_b62yHMO6';
-const supabaseClient = supabase.createClient(SUPABASE_URL, SUPABASE_KEY);
 
 document.addEventListener('DOMContentLoaded', () => {
     // Elemen DOM
