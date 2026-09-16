@@ -314,7 +314,7 @@ function renderCommentTree(parent, replies, postId) {
     const rTime = new Date(reply.created_at).toLocaleString('id-ID', { hour: '2-digit', minute: '2-digit', day: 'numeric', month: 'short' });
 
     return `
-      <div style="margin-top: 6px; margin-left: 18px; padding: 6px 10px; background: #ffffff; border-left: 3px solid #007bff; border-radius: 4px; font-size: 12px; text-align: left;">
+      <div style="margin-top: 6px; margin-left: 18px; padding: 6px 10px; background-color: #00bcd4; border-left: 3px solid #007bff; border-radius: 4px; font-size: 12px; text-align: left;">
         <div style="display:flex; justify-content:space-between; align-items:center;">
           <strong style="color:#333;">${rAuthor}</strong>
           <span style="font-size:10px; color:#999;">${rTime}</span>
@@ -325,7 +325,7 @@ function renderCommentTree(parent, replies, postId) {
   }).join('');
 
   return `
-    <div style="margin-bottom: 8px; font-size: 13px; background: #f8f9fa; padding: 8px 12px; border-radius: 6px; border: 1px solid #eee; text-align: left;">
+    <div style="margin-bottom: 8px; font-size: 13px; padding: 8px 12px; background-color: yellow; border-radius: 6px; border: 1px solid #eee; text-align: left;">
       <div style="display:flex; justify-content:space-between; align-items:center;">
         <strong style="color:#333;">${author}</strong>
         <span style="font-size:10px; color:#999;">${time}</span>

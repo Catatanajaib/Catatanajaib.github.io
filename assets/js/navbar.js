@@ -16,13 +16,11 @@ function escapeHtml(text) {
 
   return String(text).replace(/[&<>"'`/]/g, (match) => htmlEscapes[match]);
 }
-
 /* ==========================================================================
-   WEB COMPONENT: NAVBAR & MODAL GLOBAL (Bisa Dibuka di Halaman Manapun)
+   WEB COMPONENT: NAVBAR & MODAL GLOBAL
    ========================================================================== */
 class NavBar extends HTMLElement {
   connectedCallback() {
-    // Deteksi otomatis apakah berada di sub-folder (/pages/)
     const isSubPage = window.location.pathname.includes('/pages/');
     const basePath = isSubPage ? '../' : './';
 
@@ -42,7 +40,6 @@ class NavBar extends HTMLElement {
           <li><a href="#" class="open-modal-btn" data-target="PenelusuranModal">CARI</a></li>
           <li><a href="${basePath}pages/postingan.html">POSTS</a></li>
           <li><a href="${basePath}pages/berita.html">BERITA</a></li>
-          
         </ul>
       </nav>
       
@@ -74,7 +71,7 @@ class NavBar extends HTMLElement {
 
       <!-- MODAL CHAT ROOM GLOBAL -->
       <div id="Chat-Room" class="modal" style="display: none;">
-        <div class="modal-content chat-modal-content" style="max-width: 700px; display: flex; height: 500px; padding: 0; overflow: hidden; border-radius: 8px;">
+        <div class="modal-content chat-modal-content" style="width: 500px; display: flex; height: 700px; padding: 0; overflow: hidden; border-radius: 8px;">
           
           <!-- Sidebar Kiri: Daftar Pengguna -->
           <div class="chat-sidebar" style="width: 35%; border-right: 1px solid #ddd; background: #f8f9fa; display: flex; flex-direction: column;">
@@ -88,11 +85,17 @@ class NavBar extends HTMLElement {
           </div>
 
           <!-- Area Kanan: Ruang Obrolan -->
-          <div class="chat-main" style="width: 65%; display: flex; flex-direction: column; background: #fff;">
+          <div class="chat-main" style="width: 65%; display: flex; flex-direction: column; background: #fff; position: relative;">
+            
             <!-- Header Chat -->
             <div class="chat-header" style="padding: 12px; border-bottom: 1px solid #ddd; display: flex; justify-content: space-between; align-items: center; background: #fff;">
               <span id="chat-receiver-name" style="font-weight: bold; font-size: 14px; color: #333;">Pilih pengguna untuk mulai chat</span>
-              <span class="close" onclick="closeChatModal()" style="cursor: pointer; font-size: 20px; font-weight: bold; color: #666;">&times;</span>
+              
+              <div style="display: flex; align-items: center; gap: 8px;">
+                <button id="btn-audio-call" onclick="startCall('audio')" disabled style="background: none; border: none; cursor: pointer; font-size: 16px; opacity: 0.5;" title="Panggilan Suara">📞</button>
+                <button id="btn-video-call" onclick="startCall('video')" disabled style="background: none; border: none; cursor: pointer; font-size: 16px; opacity: 0.5;" title="Panggilan Video">📹</button>
+                <span class="close" onclick="closeChatModal()" style="cursor: pointer; font-size: 20px; font-weight: bold; color: #666; margin-left: 8px;">&times;</span>
+              </div>
             </div>
 
             <!-- Pesan Chat -->
@@ -102,18 +105,29 @@ class NavBar extends HTMLElement {
               </p>
             </div>
 
-            <!-- Form Kirim Pesan -->
-            <form id="chat-form" onsubmit="sendPrivateMessage(event)" style="padding: 10px; border-top: 1px solid #ddd; display: flex; gap: 8px; background: #fff;">
-              <input type="text" id="chat-input" placeholder="Tulis pesan..." required style="flex: 1; padding: 8px 12px; border: 1px solid #ccc; border-radius: 20px; outline: none;" disabled>
+            <!-- Form Kirim Pesan & Lampiran Media -->
+            <form id="chat-form" onsubmit="sendPrivateMessage(event)" style="padding: 10px; border-top: 1px solid #ddd; display: flex; gap: 8px; background: #fff; align-items: center;">
+              <label for="chat-file-input" style="cursor: pointer; font-size: 18px;" title="Kirim Foto/Video">📎</label>
+              <input type="file" id="chat-file-input" style="display: none;" onchange="handleFileSelect(event)">
+              
+              <input type="text" id="chat-input" placeholder="Tulis pesan..." style="flex: 1; padding: 8px 12px; border: 1px solid #ccc; border-radius: 20px; outline: none;" disabled>
               <button type="submit" id="chat-send-btn" style="padding: 8px 16px; background: #007bff; color: white; border: none; border-radius: 20px; cursor: pointer;" disabled>Kirim</button>
             </form>
-          </div>
 
+            <!-- OVERLAY JITSI MEET CALL -->
+            <div id="jitsi-call-overlay" style="display: none; position: absolute; top: 0; left: 0; width: 100%; height: 100%; background: #000; z-index: 100; flex-direction: column;">
+              <div style="padding: 8px 12px; background: #111; color: #fff; display: flex; justify-content: space-between; align-items: center; font-size: 12px;">
+                <span id="jitsi-status-title">Panggilan Berlangsung...</span>
+                <button onclick="endJitsiCall()" style="background: #dc3545; color: white; border: none; padding: 4px 10px; border-radius: 12px; cursor: pointer; font-size: 12px;">Tutup</button>
+              </div>
+              <div id="jitsi-frame" style="flex: 1; width: 100%; height: 100%;"></div>
+            </div>
+
+          </div>
         </div>
       </div>
     `;
 
-    // Pasang Event Listener untuk modal umum (About & Cari)
     this.initModalEvents();
   }
 
@@ -127,7 +141,6 @@ class NavBar extends HTMLElement {
       });
     });
 
-    // Event listener klik di luar modal untuk menutup
     window.addEventListener('click', (e) => {
       if (e.target.classList.contains('modal')) {
         e.target.style.display = 'none';
@@ -139,35 +152,47 @@ class NavBar extends HTMLElement {
 customElements.define('my-navbar', NavBar);
 
 /* ==========================================================================
-   LOGIKA CHATROOM GLOBAL (KONTROLER)
+   LOGIKA CHATROOM GLOBAL & JITSI CALL (KONTROLER)
    ========================================================================== */
 
 let activeChatReceiverId = null;
 let chatSubscription = null;
+let activeJitsiApi = null;
+let selectedFile = null;
 
-// Helper Tutup Modal Biasa
+// Helper Modal
 function closeModalDirect(modalId) {
   const modal = document.getElementById(modalId);
   if (modal) modal.style.display = 'none';
 }
 
-// Membuka Modal Chat dari Navbar Halaman Manapun
 async function openChatFromNavbar() {
   const modal = document.getElementById('Chat-Room');
   if (modal) modal.style.display = 'block';
   await loadChatUsers();
 }
 
-// Menutup Modal Chat
 function closeChatModal() {
   const modal = document.getElementById('Chat-Room');
   if (modal) modal.style.display = 'none';
   
-  // Hapus langganan realtime jika modal ditutup
   const client = window.supabaseClient || (typeof supabaseClient !== 'undefined' ? supabaseClient : null);
   if (client && chatSubscription) {
     client.removeChannel(chatSubscription);
     chatSubscription = null;
+  }
+}
+
+// Handler Saat Memilih File Media
+function handleFileSelect(event) {
+  const file = event.target.files[0];
+  if (!file) return;
+
+  selectedFile = file;
+  const labelBtn = document.querySelector("label[for='chat-file-input']");
+  if (labelBtn) {
+    labelBtn.style.color = "#007bff";
+    labelBtn.title = `Terpilih: ${file.name}`;
   }
 }
 
@@ -190,7 +215,6 @@ async function loadChatUsers() {
     return;
   }
 
-  // Mengambil pengguna unik dari tabel posts
   const { data: posts, error } = await client
     .from('posts')
     .select('user_id, author_name, username');
@@ -220,56 +244,36 @@ async function loadChatUsers() {
 
   userListContainer.innerHTML = uniqueUsers.map(u => `
     <div class="user-chat-item" 
-         onclick="openPrivateChat('${u.id}', '${escapeHtml(u.name)}')"
+         onclick="selectUserForChat('${u.id}', '${escapeHtml(u.name)}')"
          style="padding: 10px; margin-bottom: 4px; border-radius: 6px; cursor: pointer; background: #fff; border: 1px solid #e9ecef; transition: background 0.2s;">
       <div style="font-weight: 600; font-size: 13px; color: #333;">👤 ${escapeHtml(u.name)}</div>
-      <div style="font-size: 11px; color: #888;">Klik untuk kirim pesan</div>
+      <div style="font-size: 11px; color: #888;">Klik untuk pesan & telepon</div>
     </div>
   `).join('');
 }
 
-// Membuka Obrolan Spesifik
-async function openPrivateChat(receiverId, receiverName) {
-  if (!receiverId || receiverId === 'undefined') {
-    alert("Pengguna ini tidak dapat menerima pesan pribadi.");
-    return;
-  }
+// Memilih Pengguna untuk Mengobrol
+async function selectUserForChat(userId, userName) {
+  activeChatReceiverId = userId;
 
-  const client = window.supabaseClient || (typeof supabaseClient !== 'undefined' ? supabaseClient : null);
-  if (!client) {
-    alert("Koneksi database belum siap.");
-    return;
-  }
-
-  const { data: { session } } = await client.auth.getSession();
-  if (!session) {
-    alert("Kamu harus masuk (login) terlebih dahulu untuk mengirim pesan!");
-    return;
-  }
-
-  if (session.user.id === receiverId) {
-    alert("Kamu tidak bisa mengirim pesan ke diri sendiri.");
-    return;
-  }
-
-  activeChatReceiverId = receiverId;
-
-  const modal = document.getElementById("Chat-Room");
   const chatHeader = document.getElementById("chat-receiver-name");
   const inputEl = document.getElementById("chat-input");
   const btnEl = document.getElementById("chat-send-btn");
+  const btnAudio = document.getElementById("btn-audio-call");
+  const btnVideo = document.getElementById("btn-video-call");
 
-  if (modal) modal.style.display = "block";
-  if (chatHeader) chatHeader.textContent = `Pesan: ${receiverName || 'Pengguna'}`;
-
+  if (chatHeader) chatHeader.textContent = userName;
   if (inputEl) inputEl.disabled = false;
   if (btnEl) btnEl.disabled = false;
 
-  await fetchPrivateMessages(receiverId);
-  subscribeToPrivateChat(receiverId);
+  if (btnAudio) { btnAudio.disabled = false; btnAudio.style.opacity = "1"; }
+  if (btnVideo) { btnVideo.disabled = false; btnVideo.style.opacity = "1"; }
+
+  await fetchPrivateMessages(userId);
+  subscribeToPrivateChat(userId);
 }
 
-// Mengambil Riwayat Pesan
+// Memuat Riwayat Pesan
 async function fetchPrivateMessages(receiverId) {
   const messageContainer = document.getElementById("chat-messages");
   if (!messageContainer) return;
@@ -287,7 +291,6 @@ async function fetchPrivateMessages(receiverId) {
     .order('created_at', { ascending: true });
 
   if (error) {
-    console.error('Gagal mengambil pesan:', error.message);
     messageContainer.innerHTML = '<p style="font-size:12px; color:red; text-align:center; margin:auto;">Gagal memuat pesan.</p>';
     return;
   }
@@ -299,6 +302,16 @@ async function fetchPrivateMessages(receiverId) {
 
   messageContainer.innerHTML = messages.map(msg => {
     const isMe = msg.sender_id === currentUserId;
+    let contentHtml = escapeHtml(msg.content || msg.message || '');
+
+    if (msg.file_url) {
+      if (msg.file_type === 'video') {
+        contentHtml += `<br><video src="${msg.file_url}" controls style="max-width:100%; border-radius:6px; margin-top:4px;"></video>`;
+      } else {
+        contentHtml += `<br><img src="${msg.file_url}" style="max-width:100%; border-radius:6px; margin-top:4px;" />`;
+      }
+    }
+
     return `
       <div style="align-self: ${isMe ? 'flex-end' : 'flex-start'}; max-width: 80%;">
         <div style="padding: 8px 12px; border-radius: 8px; font-size: 12px; line-height: 1.4; ${
@@ -306,7 +319,7 @@ async function fetchPrivateMessages(receiverId) {
             ? 'background-color: #007bff; color: white; border-bottom-right-radius: 2px;' 
             : 'background-color: #ffffff; color: #333; border: 1px solid #ddd; border-bottom-left-radius: 2px;'
         }">
-          ${escapeHtml(msg.message)}
+          ${contentHtml}
         </div>
         <span style="font-size: 9px; color: #999; display: block; text-align: ${isMe ? 'right' : 'left'}; margin-top: 2px;">
           ${new Date(msg.created_at).toLocaleTimeString('id-ID', { hour: '2-digit', minute: '2-digit' })}
@@ -318,54 +331,180 @@ async function fetchPrivateMessages(receiverId) {
   messageContainer.scrollTop = messageContainer.scrollHeight;
 }
 
-// Mengirim Pesan Baru
+async function uploadToR2(file) {
+  // 1. Buat FormData untuk mengirim file
+  const formData = new FormData();
+  formData.append('file', file);
+
+  // 2. Kirim ke endpoint Worker / Backend kamu
+  // Ganti URL di bawah dengan URL Cloudflare Worker / API kamu
+  const response = await fetch('https://worker-r2-kamu.workers.dev/upload', {
+    method: 'POST',
+    body: formData
+  });
+
+  if (!response.ok) {
+    throw new Error('Gagal mengunggah media ke Cloudflare R2');
+  }
+
+  const result = await response.json();
+  // Mengembalikan URL publik dari file yang berhasil diunggah (misal: https://pub-xxx.r2.dev/foto.jpg)
+  return result.fileUrl; 
+}
+
+// Mengirim Pesan (Teks & File Media)
 async function sendPrivateMessage(event) {
   event.preventDefault();
-  
-  const input = document.getElementById("chat-input");
-  const messageText = input ? input.value.trim() : "";
 
-  if (!messageText || !activeChatReceiverId) return;
+  const inputEl = document.getElementById("chat-input");
+  const fileEl = document.getElementById("chat-file-input");
+  const messageText = inputEl ? inputEl.value.trim() : "";
+  const file = selectedFile || (fileEl && fileEl.files ? fileEl.files[0] : null);
+
+  if ((!messageText && !file) || !activeChatReceiverId) return;
 
   const client = window.supabaseClient || (typeof supabaseClient !== 'undefined' ? supabaseClient : null);
+  if (!client) return;
+
   const { data: { session } } = await client.auth.getSession();
   if (!session) return;
 
+  let fileUrl = null;
+  let fileType = null;
+
+  if (file && typeof uploadToR2 === 'function') {
+    try {
+      fileUrl = await uploadToR2(file); 
+      fileType = file.type.startsWith('video/') ? 'video' : 'image';
+    } catch (uploadErr) {
+      alert("Gagal mengunggah file: " + uploadErr.message);
+      return;
+    }
+  }
   const { error } = await client
     .from('messages')
     .insert([
       {
         sender_id: session.user.id,
         receiver_id: activeChatReceiverId,
-        message: messageText
+        content: messageText,
+        file_url: fileUrl,
+        file_type: fileType
       }
     ]);
 
   if (error) {
     alert("Gagal mengirim pesan: " + error.message);
   } else {
-    input.value = "";
+    inputEl.value = "";
+    if (fileEl) fileEl.value = "";
+    selectedFile = null;
+
+    const labelBtn = document.querySelector("label[for='chat-file-input']");
+    if (labelBtn) {
+      labelBtn.style.color = "";
+      labelBtn.title = "Kirim Foto/Video";
+    }
+
     fetchPrivateMessages(activeChatReceiverId);
   }
 }
 
-// Realtime Listener Pesan Masuk
+// Menerima Pesan & Panggilan Realtime
 function subscribeToPrivateChat(receiverId) {
   const client = window.supabaseClient || (typeof supabaseClient !== 'undefined' ? supabaseClient : null);
   if (!client) return;
 
-  if (chatSubscription) client.removeChannel(chatSubscription);
+  if (chatSubscription) {
+    client.removeChannel(chatSubscription);
+  }
 
   chatSubscription = client
-    .channel('private-messages')
+    .channel(`private-chat-${receiverId}`)
     .on(
       'postgres_changes',
       { event: 'INSERT', schema: 'public', table: 'messages' },
-      (payload) => {
-        if (payload.new.sender_id === receiverId || payload.new.receiver_id === receiverId) {
+      async (payload) => {
+        const { data: { session } } = await client.auth.getSession();
+        if (!session) return;
+
+        const currentUserId = session.user.id;
+        const newMsg = payload.new;
+
+        if (
+          (newMsg.sender_id === receiverId && newMsg.receiver_id === currentUserId) ||
+          (newMsg.sender_id === currentUserId && newMsg.receiver_id === receiverId)
+        ) {
           fetchPrivateMessages(receiverId);
         }
       }
     )
+    .on('broadcast', { event: 'incoming-call' }, async (payload) => {
+      const { data: { session } } = await client.auth.getSession();
+      if (!session) return;
+
+      const myUserId = session.user.id;
+      const data = payload.payload;
+
+      if (data.targetUserId === myUserId) {
+        const accept = confirm(`${data.callerName} memanggil kamu (${data.callMode} call). Angkat?`);
+        if (accept) {
+          startCallWithRoom(data.roomName, data.callMode);
+        }
+      }
+    })
     .subscribe();
+}
+
+// Fitur Panggilan Video & Suara (Jitsi API)
+function startCall(callMode) {
+  if (!activeChatReceiverId) {
+    alert("Pilih pengguna terlebih dahulu!");
+    return;
+  }
+
+  const roomName = `Call_Room_${activeChatReceiverId}`;
+  startCallWithRoom(roomName, callMode);
+}
+
+function startCallWithRoom(roomName, callMode) {
+  const overlay = document.getElementById("jitsi-call-overlay");
+  const container = document.getElementById("jitsi-frame");
+
+  if (overlay && container) {
+    overlay.style.display = "flex";
+    container.innerHTML = "";
+
+    if (typeof JitsiMeetExternalAPI !== 'undefined') {
+      activeJitsiApi = new JitsiMeetExternalAPI("meet.jit.si", {
+        roomName: roomName,
+        width: "100%",
+        height: "100%",
+        parentNode: container,
+        configOverwrite: {
+          startWithAudioMuted: false,
+          startWithVideoMuted: callMode === 'audio',
+          prejoinPageEnabled: false
+        }
+      });
+
+      activeJitsiApi.addEventListener('readyToClose', () => {
+        endJitsiCall();
+      });
+    } else {
+      alert("Library Jitsi belum siap.");
+    }
+  }
+}
+
+function endJitsiCall() {
+  if (activeJitsiApi) {
+    activeJitsiApi.dispose();
+    activeJitsiApi = null;
+  }
+
+  const overlay = document.getElementById("jitsi-call-overlay");
+  const container = document.getElementById("jitsi-frame");
+  if (overlay) overlay.style.display = "none";
+  if (container) container.innerHTML = "";
 }
