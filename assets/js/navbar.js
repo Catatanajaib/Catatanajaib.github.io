@@ -662,15 +662,16 @@ async function startCall(callMode) {
   const currentUserId = session.user.id;
   const roomName = `CatatanAjaib_${currentUserId.slice(0, 5)}_${activeChatReceiverId.slice(0, 5)}_${Date.now()}`;
 
-  // 1. Hapus riwayat panggilan lama ke pengguna ini jika ada, lalu masukkan permintaan panggilan baru
+  // 1. Bersihkan panggilan lama
   await client.from('calls').delete().eq('receiver_id', activeChatReceiverId);
 
+  // 2. Buat entri panggilan baru
   const { data, error } = await client.from('calls').insert([
     {
       sender_id: currentUserId,
       receiver_id: activeChatReceiverId,
       room_name: roomName,
-      call_type: callMode, // Menggunakan call_type agar cocok dengan handler penerima
+      call_type: callMode,
       status: 'ringing'
     }
   ]).select().single();
@@ -682,24 +683,69 @@ async function startCall(callMode) {
 
   alert("Memanggil... Menunggu tanggapan penerima.");
 
-  // 2. Dengarkan jika Penerima Menerima/Menolak Panggilan
+  let callHandled = false;
+
+  // Fungsi untuk membuka overlay Jitsi bagi pemanggil
+  const handleCallAccepted = (room, type) => {
+    if (callHandled) return;
+    callHandled = true;
+    
+    // Hentikan penanganan listener & polling
+    if (currentCallSubscription) client.removeChannel(currentCallSubscription);
+    clearInterval(pollInterval);
+
+    // Buka overlay Jitsi di sisi pemanggil
+    startCallWithRoom(room, type);
+  };
+
+  // 3. Listen perubahan status via Realtime
   currentCallSubscription = client
-    .channel('call_status_tracker')
+    .channel(`call_status_${data.id}`)
     .on(
       'postgres_changes',
-      { event: 'UPDATE', schema: 'public', table: 'calls', filter: `id=eq.${data.id}` },
+      { 
+        event: 'UPDATE', 
+        schema: 'public', 
+        table: 'calls', 
+        filter: `id=eq.${data.id}` 
+      },
       (payload) => {
         const updatedCall = payload.new;
         if (updatedCall.status === 'accepted') {
-          startCallWithRoom(updatedCall.room_name, updatedCall.call_type);
+          handleCallAccepted(updatedCall.room_name, updatedCall.call_type);
         } else if (updatedCall.status === 'rejected') {
+          callHandled = true;
+          clearInterval(pollInterval);
+          client.removeChannel(currentCallSubscription);
           alert("Panggilan ditolak oleh penerima.");
-          endJitsiCall();
         }
       }
     )
     .subscribe();
+
+  // 4. Polling Cadangan (Memastikan overlay pemanggil tetap terbuka jika Realtime missed)
+  const pollInterval = setInterval(async () => {
+    if (callHandled) return;
+
+    const { data: checkCall } = await client
+      .from('calls')
+      .select('status, room_name, call_type')
+      .eq('id', data.id')
+      .single();
+
+    if (checkCall) {
+      if (checkCall.status === 'accepted') {
+        handleCallAccepted(checkCall.room_name, checkCall.call_type);
+      } else if (checkCall.status === 'rejected') {
+        callHandled = true;
+        clearInterval(pollInterval);
+        if (currentCallSubscription) client.removeChannel(currentCallSubscription);
+        alert("Panggilan ditolak oleh penerima.");
+      }
+    }
+  }, 2000); // Cek setiap 2 detik
 }
+
 
 //FUNGSI 4:
 function startCallWithRoom(roomName, callMode) {
