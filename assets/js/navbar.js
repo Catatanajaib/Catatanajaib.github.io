@@ -74,7 +74,7 @@ class NavBar extends HTMLElement {
         <div class="modal-content chat-modal-content" style="width: 500px; display: flex; height: 700px; padding: 0; overflow: hidden; border-radius: 8px;">
           
           <!-- Sidebar Kiri: Daftar Pengguna -->
-          <div class="chat-sidebar" style="width: 35%; border-right: 1px solid #ddd; background: #f8f9fa; display: flex; flex-direction: column;">
+          <div class="chat-sidebar" style="width: 25%; border-right: 1px solid #ddd; background: #f8f9fa; display: flex; flex-direction: column;">
             <div style="padding: 12px; border-bottom: 1px solid #ddd; font-weight: bold; background: #fff; display: flex; justify-content: space-between; align-items: center;">
               <span>💬 Percakapan</span>
               <button onclick="loadChatUsers()" style="background: none; border: none; cursor: pointer; font-size: 12px;" title="Refresh Daftar">🔄</button>
@@ -85,7 +85,7 @@ class NavBar extends HTMLElement {
           </div>
 
           <!-- Area Kanan: Ruang Obrolan -->
-          <div class="chat-main" style="width: 65%; display: flex; flex-direction: column; background: #fff; position: relative;">
+          <div class="chat-main" style="width: 75%; display: flex; flex-direction: column; background: #fff; position: relative;">
             
             <!-- Header Chat -->
             <div class="chat-header" style="padding: 12px; border-bottom: 1px solid #ddd; display: flex; justify-content: space-between; align-items: center; background: #fff;">
@@ -120,7 +120,7 @@ class NavBar extends HTMLElement {
             </form>
 
             <!-- OVERLAY JITSI MEET CALL -->
-            <div id="jitsi-call-overlay" style="display: none; position: absolute; top: 0; left: 0; width: 100%; height: 100%; background: #000; z-index: 100; flex-direction: column;">
+            <div id="jitsi-call-overlay" style="display: none; position: left; top: 0; left: 0; width: 100%; height: 75%; background: #000; z-index: 100; flex-direction: column;">
               <div style="padding: 8px 12px; background: #111; color: #fff; display: flex; justify-content: space-between; align-items: center; font-size: 12px;">
                 <span id="jitsi-status-title">Panggilan Berlangsung...</span>
                 <button onclick="endJitsiCall()" style="background: #dc3545; color: white; border: none; padding: 4px 10px; border-radius: 12px; cursor: pointer; font-size: 12px;">Tutup</button>
