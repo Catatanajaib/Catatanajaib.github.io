@@ -119,7 +119,16 @@ class NavBar extends HTMLElement {
               <button type="submit" id="chat-send-btn" style="padding: 8px 16px; background: #007bff; color: white; border: none; border-radius: 20px; cursor: pointer;" disabled>Kirim</button>
             </form>
 
-        
+            <!-- OVERLAY JITSI MEET CALL -->
+            <div id="jitsi-call-overlay" style="display: none; position: absolute; top: 0; left: 0; width: 100%; height: 100%; background: #111; z-index: 999; flex-direction: column; border-radius: 8px; overflow: hidden;">
+            <div style="padding: 10px 14px; background: #222; color: #fff; display: flex; justify-content: space-between; align-items: center; font-size: 13px; border-bottom: 1px solid #333;">
+            <span id="jitsi-status-title" style="font-weight: 500;">Panggilan Berlangsung...</span>
+            <button type="button" onclick="endJitsiCall()" style="background: #dc3545; color: white; border: none; padding: 6px 14px; border-radius: 16px; cursor: pointer; font-size: 12px; font-weight: bold;">Tutup Panggilan</button>
+            </div>
+            <div id="jitsi-frame" style="flex: 1; width: 100%; height: calc(100% - 45px);"></div>
+            </div>
+
+
           </div>
         </div>
         <div id="chat-toast-container" style="position: fixed; bottom: 20px; right: 20px; z-index: 99999; display: flex; flex-direction: column; gap: 10px;"></div>
@@ -696,11 +705,11 @@ function startCallWithRoom(roomName, callMode) {
   const container = document.getElementById("jitsi-frame");
 
   if (!overlay || !container) {
-    alert("Elemen Jitsi belum ditemukan di HTML!");
+    alert("Elemen Jitsi tidak ditemukan!");
     return;
   }
 
-  // Tampilkan container layar penuh
+  // Tampilkan overlay di atas ruang obrolan
   overlay.style.display = "flex";
   container.innerHTML = "";
 
@@ -712,7 +721,7 @@ function startCallWithRoom(roomName, callMode) {
       parentNode: container,
       configOverwrite: {
         startWithAudioMuted: false,
-        startWithVideoMuted: (callMode === 'audio'), // jika audio call, kamera mati
+        startWithVideoMuted: (callMode === 'audio'),
         disableDeepLinking: true,
         enableWelcomePage: false,
         prejoinPageEnabled: false
@@ -723,12 +732,11 @@ function startCallWithRoom(roomName, callMode) {
       }
     });
 
-    // Otomatis tutup overlay jika tombol hangup (tutup telepon) di dalam Jitsi diklik
     activeJitsiApi.addEventListener('readyToClose', () => {
       endJitsiCall();
     });
   } else {
-    alert("Library Jitsi belum dimuat. Pastikan script meet.jit.si/external_api.js sudah dipasang di HTML!");
+    alert("Script Jitsi belum dimuat. Pastikan <script src='https://meet.jit.si/external_api.js'></script> ada di index.html");
   }
 }
 
