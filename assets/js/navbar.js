@@ -703,47 +703,47 @@ function startCallWithRoom(roomName, callMode) {
   const overlay = document.getElementById("jitsi-call-overlay");
   const container = document.getElementById("jitsi-frame");
 
-  if (overlay && container) {
-    overlay.style.display = "flex";
-    container.innerHTML = "";
+  if (!overlay || !container) {
+    alert("Elemen Jitsi belum ditemukan di HTML!");
+    return;
+  }
 
-    if (typeof JitsiMeetExternalAPI !== 'undefined') {
-      activeJitsiApi = new JitsiMeetExternalAPI("meet.jit.si", {
-        roomName: roomName,
-        width: "100%",
-        height: "100%",
-        parentNode: container,
-        configOverwrite: {
-          startWithAudioMuted: false,
-          startWithVideoMuted: (callMode === 'audio'), // Audio murni jika callMode === 'audio'
-          disableDeepLinking: true,
-          enableWelcomePage: false,
-          prejoinPageEnabled: false
-        },
-        interfaceConfigOverwrite: {
-          MOBILE_APP_PROMO: false,
-          TOOLBAR_BUTTONS: ['microphone', 'camera', 'hangup', 'fullscreen']
-        }
-      });
+  // Tampilkan container layar penuh
+  overlay.style.display = "flex";
+  container.innerHTML = "";
 
-      // Saat telepon ditutup oleh pengguna
-      activeJitsiApi.addEventListener('readyToClose', () => {
-        endJitsiCall();
-      });
-    }
+  if (typeof JitsiMeetExternalAPI !== 'undefined') {
+    activeJitsiApi = new JitsiMeetExternalAPI("meet.jit.si", {
+      roomName: roomName,
+      width: "100%",
+      height: "100%",
+      parentNode: container,
+      configOverwrite: {
+        startWithAudioMuted: false,
+        startWithVideoMuted: (callMode === 'audio'), // jika audio call, kamera mati
+        disableDeepLinking: true,
+        enableWelcomePage: false,
+        prejoinPageEnabled: false
+      },
+      interfaceConfigOverwrite: {
+        MOBILE_APP_PROMO: false,
+        TOOLBAR_BUTTONS: ['microphone', 'camera', 'hangup', 'tileview', 'fullscreen']
+      }
+    });
+
+    // Otomatis tutup overlay jika tombol hangup (tutup telepon) di dalam Jitsi diklik
+    activeJitsiApi.addEventListener('readyToClose', () => {
+      endJitsiCall();
+    });
+  } else {
+    alert("Library Jitsi belum dimuat. Pastikan script meet.jit.si/external_api.js sudah dipasang di HTML!");
   }
 }
 
-//FUNGSI 5:
 function endJitsiCall() {
   if (activeJitsiApi) {
     activeJitsiApi.dispose();
     activeJitsiApi = null;
-  }
-
-  // Hapus sinyal panggilan di database
-  if (activeChatReceiverId) {
-    firebase.database().ref(`calls/${activeChatReceiverId}`).remove();
   }
 
   const overlay = document.getElementById("jitsi-call-overlay");
