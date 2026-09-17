@@ -389,21 +389,58 @@ function initGoogleDrive() {
 // Fungsi Upload File ke Google Drive
 async function uploadToGoogleDrive(file) {
   return new Promise((resolve, reject) => {
-    // Jika belum ada akses token, minta izin login Google dulu
-    if (!accessToken) {
-      tokenClient.callback = async (resp) => {
-        if (resp.error) return reject(resp);
-        accessToken = resp.access_token;
-        try {
-          const url = await executeDriveUpload(file);
-          resolve(url);
-        } catch (err) {
-          reject(err);
+    // 1. Cek apakah SDK Google sudah terisi di halaman
+    if (typeof google === 'undefined' || !google.accounts || !google.accounts.oauth2) {
+      return reject(new Error("Google API Client belum siap dimuat. Coba beberapa detik lagi."));
+    }
+
+    try {
+      // 2. Inisialisasi tokenClient secara eksplisit sebelum menentukan callback
+      const client = google.accounts.oauth2.initTokenClient({
+        client_id: '49596256372-4eoeert51u0p1ssv55f5vr851v9ia2dk.apps.googleusercontent.com', // Ganti dengan Client ID milikmu
+        scope: 'https://www.googleapis.com/auth/drive.file',
+        callback: async (tokenResponse) => {
+          if (tokenResponse.error) {
+            return reject(new Error("Gagal otorisasi Google Drive: " + tokenResponse.error));
+          }
+
+          // 3. Eksekusi Upload ke Google Drive via REST API setelah dapat Access Token
+          try {
+            const accessToken = tokenResponse.access_token;
+            const metadata = {
+              name: file.name,
+              mimeType: file.type
+            };
+
+            const formData = new FormData();
+            formData.append('metadata', new Blob([JSON.stringify(metadata)], { type: 'application/json' }));
+            formData.append('file', file);
+
+            const uploadRes = await fetch('https://www.googleapis.com/upload/drive/v3/files?uploadType=multipart&fields=id,webContentLink,webViewLink', {
+              method: 'POST',
+              headers: new Headers({ 'Authorization': 'Bearer ' + accessToken }),
+              body: formData
+            });
+
+            const fileData = await uploadRes.json();
+            
+            if (fileData.error) {
+              return reject(new Error(fileData.error.message));
+            }
+
+            // Kembalikan URL file yang berhasil diunggah
+            resolve(fileData.webViewLink || fileData.webContentLink);
+          } catch (err) {
+            reject(err);
+          }
         }
-      };
-      tokenClient.requestAccessToken({ prompt: 'consent' });
-    } else {
-      executeDriveUpload(file).then(resolve).catch(reject);
+      });
+
+      // 4. Minta token akses (Gunakan prompt empty/none agar tidak terus-terusan muncul pop-up)
+      client.requestAccessToken({ prompt: '' });
+
+    } catch (err) {
+      reject(err);
     }
   });
 }
