@@ -251,3 +251,43 @@ if (navbar) {
     lastScrollY = currentScrollY;
   });
 }
+
+//=========
+// Fungsi Menampilkan Notifikasi Toast
+//=========
+
+function showGlobalToast(title, message, onClickCallback) {
+  const container = document.getElementById("chat-toast-container");
+  if (!container) return;
+
+  const toast = document.createElement("div");
+  toast.style.cssText = `
+    background: #ffffff;
+    color: #333;
+    padding: 12px 16px;
+    border-radius: 8px;
+    box-shadow: 0 4px 12px rgba(0,0,0,0.15);
+    border-left: 4px solid #007bff;
+    min-width: 250px;
+    max-width: 320px;
+    cursor: pointer;
+    transition: all 0.3s ease;
+  `;
+
+  toast.innerHTML = `
+    <div style="font-weight: bold; font-size: 13px; margin-bottom: 4px; color: #007bff;">${escapeHtml(title)}</div>
+    <div style="font-size: 12px; color: #555; text-overflow: ellipsis; overflow: hidden; white-space: nowrap;">${escapeHtml(message)}</div>
+  `;
+
+  toast.onclick = () => {
+    if (onClickCallback) onClickCallback();
+    toast.remove();
+  };
+
+  container.appendChild(toast);
+
+  // Otomatis hilangkan setelah 5 detik
+  setTimeout(() => {
+    if (toast.parentNode) toast.remove();
+  }, 5000);
+}

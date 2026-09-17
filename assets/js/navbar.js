@@ -104,6 +104,11 @@ class NavBar extends HTMLElement {
                 Silakan pilih teman dari daftar di sebelah kiri untuk melihat percakapan.
               </p>
             </div>
+<!-- Indikator File Terpilih & Animasi Upload -->
+            <div id="file-preview-container" style="display: none; padding: 6px 12px; background: #eef5ff; border-top: 1px solid #cce5ff; font-size: 12px; align-items: center; justify-content: space-between;">
+              <span id="file-preview-name" style="color: #004085; font-weight: 500; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; max-width: 80%;"></span>
+              <button type="button" onclick="cancelSelectedFile()" style="background: none; border: none; color: #dc3545; font-weight: bold; cursor: pointer;">&times;</button>
+            </div>
 
             <!-- Form Kirim Pesan & Lampiran Media -->
             <form id="chat-form" onsubmit="sendPrivateMessage(event)" style="padding: 10px; border-top: 1px solid #ddd; display: flex; gap: 8px; background: #fff; align-items: center;">
@@ -125,6 +130,8 @@ class NavBar extends HTMLElement {
 
           </div>
         </div>
+        <div id="chat-toast-container" style="position: fixed; bottom: 20px; right: 20px; z-index: 99999; display: flex; flex-direction: column; gap: 10px;"></div>
+
       </div>
     `;
 
@@ -183,18 +190,48 @@ function closeChatModal() {
   }
 }
 
-// Handler Saat Memilih File Media
+// Memilih File & Menampilkan Indikator Pratinjau
 function handleFileSelect(event) {
   const file = event.target.files[0];
   if (!file) return;
 
   selectedFile = file;
-  const labelBtn = document.querySelector("label[for='chat-file-input']");
-  if (labelBtn) {
-    labelBtn.style.color = "#007bff";
-    labelBtn.title = `Terpilih: ${file.name}`;
+  
+  const container = document.getElementById("file-preview-container");
+  const nameEl = document.getElementById("file-preview-name");
+  
+  if (container && nameEl) {
+    nameEl.textContent = `📎 Terpilih: ${file.name} (${(file.size / (1024 * 1024)).toFixed(2)} MB)`;
+    container.style.display = "flex";
   }
 }
+
+// Batal Memilih File
+function cancelSelectedFile() {
+  selectedFile = null;
+  const fileEl = document.getElementById("chat-file-input");
+  if (fileEl) fileEl.value = "";
+  
+  const container = document.getElementById("file-preview-container");
+  if (container) container.style.display = "none";
+}
+
+// Menampilkan Animasi Sederhana Saat File Sedang Diunggah
+function setUploadLoadingState(isLoading, text = "Mengunggah file...") {
+  const container = document.getElementById("file-preview-container");
+  const nameEl = document.getElementById("file-preview-name");
+  const sendBtn = document.getElementById("chat-send-btn");
+
+  if (isLoading) {
+    if (container) container.style.display = "flex";
+    if (nameEl) nameEl.innerHTML = `⏳ <b>${text}</b> <style>@keyframes spin { 0% { transform: rotate(0deg); } 100% { transform: rotate(360deg); } } .spinner { display:inline-block; animation: spin 1s linear infinite; }</style><span class="spinner">🌀</span>`;
+    if (sendBtn) sendBtn.disabled = true;
+  } else {
+    if (container) container.style.display = "none";
+    if (sendBtn) sendBtn.disabled = false;
+  }
+}
+
 
 // Memuat Daftar Pengguna dari Supabase
 async function loadChatUsers() {
@@ -410,7 +447,8 @@ async function executeDriveUpload(file) {
 
 
 // Mengirim Pesan (Teks & File Media)
-async function sendPrivateMessage(event) {
+
+ async function sendPrivateMessage(event) {
   event.preventDefault();
 
   const inputEl = document.getElementById("chat-input");
@@ -429,25 +467,28 @@ async function sendPrivateMessage(event) {
   let fileUrl = null;
   let fileType = null;
 
-    // Proses upload file ke Google Drive jika ada file yang dipilih
   if (file) {
     try {
-      // Panggil fungsi Google Drive untuk mengunggah file
+      setUploadLoadingState(true, "Mengunggah media ke Drive...");
       fileUrl = await uploadToGoogleDrive(file); 
       fileType = file.type.startsWith('video/') ? 'video' : 'image';
     } catch (uploadErr) {
       alert("Gagal mengunggah file: " + uploadErr.message);
+      setUploadLoadingState(false);
       return;
+    } finally {
+      setUploadLoadingState(false);
     }
   }
 
+  // PASTIKAN DI SINI MENGGUNAKAN 'message', BUKAN 'content'
   const { error } = await client
     .from('messages')
     .insert([
       {
         sender_id: session.user.id,
         receiver_id: activeChatReceiverId,
-        content: messageText,
+        message: messageText, // <-- Menggunakan 'message'
         file_url: fileUrl,
         file_type: fileType
       }
@@ -457,18 +498,12 @@ async function sendPrivateMessage(event) {
     alert("Gagal mengirim pesan: " + error.message);
   } else {
     inputEl.value = "";
-    if (fileEl) fileEl.value = "";
-    selectedFile = null;
-
-    const labelBtn = document.querySelector("label[for='chat-file-input']");
-    if (labelBtn) {
-      labelBtn.style.color = "";
-      labelBtn.title = "Kirim Foto/Video";
-    }
-
+    cancelSelectedFile();
     fetchPrivateMessages(activeChatReceiverId);
   }
 }
+
+
 
 // Menerima Pesan & Panggilan Realtime
 function subscribeToPrivateChat(receiverId) {
@@ -480,7 +515,7 @@ function subscribeToPrivateChat(receiverId) {
   }
 
   chatSubscription = client
-    .channel(`private-chat-${receiverId}`)
+    .channel(`private-chat-global`)
     .on(
       'postgres_changes',
       { event: 'INSERT', schema: 'public', table: 'messages' },
@@ -488,14 +523,25 @@ function subscribeToPrivateChat(receiverId) {
         const { data: { session } } = await client.auth.getSession();
         if (!session) return;
 
-        const currentUserId = session.user.id;
+        const myUserId = session.user.id;
         const newMsg = payload.new;
 
-        if (
-          (newMsg.sender_id === receiverId && newMsg.receiver_id === currentUserId) ||
-          (newMsg.sender_id === currentUserId && newMsg.receiver_id === receiverId)
-        ) {
-          fetchPrivateMessages(receiverId);
+        // Jika pesan ditujukan untuk pengguna saat ini
+        if (newMsg.receiver_id === myUserId) {
+          // Jika chatroom sedang dibuka bersama pengirim ini, refresh pesan
+          if (activeChatReceiverId === newMsg.sender_id) {
+            fetchPrivateMessages(newMsg.sender_id);
+          } else {
+            // Tampilkan notifikasi melayang di layar
+            showGlobalToast(
+              "💬 Pesan Baru Masuk",
+              newMsg.content || "Mengirim sebuah media",
+              () => {
+                openChatFromNavbar();
+                selectUserForChat(newMsg.sender_id, "Teman");
+              }
+            );
+          }
         }
       }
     )
@@ -507,14 +553,19 @@ function subscribeToPrivateChat(receiverId) {
       const data = payload.payload;
 
       if (data.targetUserId === myUserId) {
-        const accept = confirm(`${data.callerName} memanggil kamu (${data.callMode} call). Angkat?`);
-        if (accept) {
-          startCallWithRoom(data.roomName, data.callMode);
-        }
+        showGlobalToast(
+          `📞 Panggilan ${data.callMode.toUpperCase()} Masuk`,
+          `${data.callerName} memanggil kamu. Klik untuk menjawab!`,
+          () => {
+            openChatFromNavbar();
+            startCallWithRoom(data.roomName, data.callMode);
+          }
+        );
       }
     })
     .subscribe();
 }
+
 
 // Fitur Panggilan Video & Suara (Jitsi API)
 function startCall(callMode) {
@@ -544,7 +595,12 @@ function startCallWithRoom(roomName, callMode) {
         configOverwrite: {
           startWithAudioMuted: false,
           startWithVideoMuted: callMode === 'audio',
+          disableDeepLinking: true, // Mematikan pop-up promo aplikasi Jitsi di ponsel
+          enableWelcomePage: false,  // Langsung masuk tanpa landing page
           prejoinPageEnabled: false
+        },
+        interfaceConfigOverwrite: {
+          MOBILE_APP_PROMO: false // Menyembunyikan tombol 'Join in App'
         }
       });
 
@@ -557,17 +613,6 @@ function startCallWithRoom(roomName, callMode) {
   }
 }
 
-function endJitsiCall() {
-  if (activeJitsiApi) {
-    activeJitsiApi.dispose();
-    activeJitsiApi = null;
-  }
-
-  const overlay = document.getElementById("jitsi-call-overlay");
-  const container = document.getElementById("jitsi-frame");
-  if (overlay) overlay.style.display = "none";
-  if (container) container.innerHTML = "";
-}
 
 // ==========================================================================
 // INISIALISASI SAAT HALAMAN SELESAI DIMUAT
@@ -577,4 +622,29 @@ document.addEventListener('DOMContentLoaded', () => {
   if (typeof google !== 'undefined' && google.accounts) {
     initGoogleDrive();
   }
+});
+
+function initGoogleDrive() {
+  if (typeof google !== 'undefined' && google.accounts) {
+    tokenClient = google.accounts.oauth2.initTokenClient({
+      client_id: GOOGLE_CLIENT_ID,
+      scope: SCOPES,
+      callback: (tokenResponse) => {
+        accessToken = tokenResponse.access_token;
+      },
+    });
+  }
+}
+
+// Cek secara berkala sampai library google siap
+function ensureGoogleDriveReady() {
+  if (typeof google !== 'undefined' && google.accounts) {
+    initGoogleDrive();
+  } else {
+    setTimeout(ensureGoogleDriveReady, 500); // Cek lagi setiap 0.5 detik
+  }
+}
+
+document.addEventListener('DOMContentLoaded', () => {
+  ensureGoogleDriveReady();
 });
