@@ -310,6 +310,16 @@ async function selectUserForChat(userId, userName) {
   subscribeToPrivateChat(userId);
 }
 
+async function openPrivateChat(userId, userName) {
+  const modal = document.getElementById('Chat-Room');
+  if (modal) modal.style.display = 'block';
+  
+  if (typeof selectUserForChat === 'function') {
+    await selectUserForChat(userId, userName);
+  }
+}
+
+
 // Memuat Riwayat Pesan
 async function fetchPrivateMessages(receiverId) {
   const messageContainer = document.getElementById("chat-messages");
@@ -637,17 +647,30 @@ async function startCall(callMode) {
     return;
   }
 
-  const roomName = `ChatsRoom_${activeChatUserId}_${activeChatReceiverId}_${Date.now()}`;
+  const client = window.supabaseClient || (typeof supabaseClient !== 'undefined' ? supabaseClient : null);
+  if (!client) {
+    alert("Koneksi Supabase belum siap!");
+    return;
+  }
 
-  // 1. Hapus panggilan lama jika ada, lalu kirim sinyal baru
-  await supabaseClient.from('calls').delete().eq('receiver_id', activeChatReceiverId);
+  const { data: { session } } = await client.auth.getSession();
+  if (!session) {
+    alert("Silakan login terlebih dahulu!");
+    return;
+  }
 
-  const { data, error } = await supabaseClient.from('calls').insert([
+  const currentUserId = session.user.id;
+  const roomName = `CatatanAjaib_${currentUserId.slice(0, 5)}_${activeChatReceiverId.slice(0, 5)}_${Date.now()}`;
+
+  // 1. Hapus riwayat panggilan lama ke pengguna ini jika ada, lalu masukkan permintaan panggilan baru
+  await client.from('calls').delete().eq('receiver_id', activeChatReceiverId);
+
+  const { data, error } = await client.from('calls').insert([
     {
-      sender_id: activeChatUserId,
+      sender_id: currentUserId,
       receiver_id: activeChatReceiverId,
       room_name: roomName,
-      call_mode: callMode,
+      call_type: callMode, // Menggunakan call_type agar cocok dengan handler penerima
       status: 'ringing'
     }
   ]).select().single();
@@ -660,7 +683,7 @@ async function startCall(callMode) {
   alert("Memanggil... Menunggu tanggapan penerima.");
 
   // 2. Dengarkan jika Penerima Menerima/Menolak Panggilan
-  currentCallSubscription = supabaseClient
+  currentCallSubscription = client
     .channel('call_status_tracker')
     .on(
       'postgres_changes',
@@ -668,8 +691,7 @@ async function startCall(callMode) {
       (payload) => {
         const updatedCall = payload.new;
         if (updatedCall.status === 'accepted') {
-          // Penerima Mengangkat -> Masuk ke Room Jitsi!
-          startCallWithRoom(updatedCall.room_name, updatedCall.call_mode);
+          startCallWithRoom(updatedCall.room_name, updatedCall.call_type);
         } else if (updatedCall.status === 'rejected') {
           alert("Panggilan ditolak oleh penerima.");
           endJitsiCall();
