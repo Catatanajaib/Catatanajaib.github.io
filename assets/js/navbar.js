@@ -119,15 +119,7 @@ class NavBar extends HTMLElement {
               <button type="submit" id="chat-send-btn" style="padding: 8px 16px; background: #007bff; color: white; border: none; border-radius: 20px; cursor: pointer;" disabled>Kirim</button>
             </form>
 
-            <!-- OVERLAY JITSI MEET CALL -->
-            <div id="jitsi-call-overlay" style="display: none; position: left; top: 0; left: 0; width: 100%; height: 75%; background: #000; z-index: 100; flex-direction: column;">
-              <div style="padding: 8px 12px; background: #111; color: #fff; display: flex; justify-content: space-between; align-items: center; font-size: 12px;">
-                <span id="jitsi-status-title">Panggilan Berlangsung...</span>
-                <button onclick="endJitsiCall()" style="background: #dc3545; color: white; border: none; padding: 4px 10px; border-radius: 12px; cursor: pointer; font-size: 12px;">Tutup</button>
-              </div>
-              <div id="jitsi-frame" style="flex: 1; width: 100%; height: 100%;"></div>
-            </div>
-
+        
           </div>
         </div>
         <div id="chat-toast-container" style="position: fixed; bottom: 20px; right: 20px; z-index: 99999; display: flex; flex-direction: column; gap: 10px;"></div>
