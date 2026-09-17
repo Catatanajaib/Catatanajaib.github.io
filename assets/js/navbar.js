@@ -331,26 +331,83 @@ async function fetchPrivateMessages(receiverId) {
   messageContainer.scrollTop = messageContainer.scrollHeight;
 }
 
-async function uploadToR2(file) {
-  // 1. Buat FormData untuk mengirim file
+const GOOGLE_API_KEY = 'AIzaSyChf3GjmEsvFQoktUBPFbWnFKUkC1VObpU';
+const GOOGLE_CLIENT_ID = '49596256372-4eoeert51u0p1ssv55f5vr851v9ia2dk.apps.googleusercontent.com';
+const SCOPES = 'https://www.googleapis.com/auth/drive.file';
+
+let tokenClient;
+let accessToken = null;
+
+// Initialize Google API Client
+function initGoogleDrive() {
+  tokenClient = google.accounts.oauth2.initTokenClient({
+    client_id: GOOGLE_CLIENT_ID,
+    scope: SCOPES,
+    callback: (tokenResponse) => {
+      accessToken = tokenResponse.access_token;
+    },
+  });
+}
+
+// Fungsi Upload File ke Google Drive
+async function uploadToGoogleDrive(file) {
+  return new Promise((resolve, reject) => {
+    // Jika belum ada akses token, minta izin login Google dulu
+    if (!accessToken) {
+      tokenClient.callback = async (resp) => {
+        if (resp.error) return reject(resp);
+        accessToken = resp.access_token;
+        try {
+          const url = await executeDriveUpload(file);
+          resolve(url);
+        } catch (err) {
+          reject(err);
+        }
+      };
+      tokenClient.requestAccessToken({ prompt: 'consent' });
+    } else {
+      executeDriveUpload(file).then(resolve).catch(reject);
+    }
+  });
+}
+
+async function executeDriveUpload(file) {
+  const metadata = {
+    name: file.name,
+    mimeType: file.type,
+  };
+
   const formData = new FormData();
+  formData.append('metadata', new Blob([JSON.stringify(metadata)], { type: 'application/json' }));
   formData.append('file', file);
 
-  // 2. Kirim ke endpoint Worker / Backend kamu
-  // Ganti URL di bawah dengan URL Cloudflare Worker / API kamu
-  const response = await fetch('https://worker-r2-kamu.workers.dev/upload', {
+  // 1. Upload File ke Drive
+  const res = await fetch('https://www.googleapis.com/upload/drive/v3/files?uploadType=multipart', {
     method: 'POST',
-    body: formData
+    headers: new Headers({ 'Authorization': 'Bearer ' + accessToken }),
+    body: formData,
   });
 
-  if (!response.ok) {
-    throw new Error('Gagal mengunggah media ke Cloudflare R2');
-  }
+  const fileData = await res.json();
+  if (!fileData.id) throw new Error('Gagal upload ke Drive');
 
-  const result = await response.json();
-  // Mengembalikan URL publik dari file yang berhasil diunggah (misal: https://pub-xxx.r2.dev/foto.jpg)
-  return result.fileUrl; 
+  // 2. Ubah Izin File Menjadi Public (Anyone with link)
+  await fetch(`https://www.googleapis.com/drive/v3/files/${fileData.id}/permissions?key=${GOOGLE_API_KEY}`, {
+    method: 'POST',
+    headers: new Headers({
+      'Authorization': 'Bearer ' + accessToken,
+      'Content-Type': 'application/json'
+    }),
+    body: JSON.stringify({
+      role: 'reader',
+      type: 'anyone'
+    })
+  });
+
+  // 3. Kembalikan Direct Link agar bisa tampil langsung di Chat
+  return `https://lh3.googleusercontent.com/d/${fileData.id}`;
 }
+
 
 // Mengirim Pesan (Teks & File Media)
 async function sendPrivateMessage(event) {
@@ -372,15 +429,18 @@ async function sendPrivateMessage(event) {
   let fileUrl = null;
   let fileType = null;
 
-  if (file && typeof uploadToR2 === 'function') {
+    // Proses upload file ke Google Drive jika ada file yang dipilih
+  if (file) {
     try {
-      fileUrl = await uploadToR2(file); 
+      // Panggil fungsi Google Drive untuk mengunggah file
+      fileUrl = await uploadToGoogleDrive(file); 
       fileType = file.type.startsWith('video/') ? 'video' : 'image';
     } catch (uploadErr) {
       alert("Gagal mengunggah file: " + uploadErr.message);
       return;
     }
   }
+
   const { error } = await client
     .from('messages')
     .insert([
@@ -508,3 +568,13 @@ function endJitsiCall() {
   if (overlay) overlay.style.display = "none";
   if (container) container.innerHTML = "";
 }
+
+// ==========================================================================
+// INISIALISASI SAAT HALAMAN SELESAI DIMUAT
+// ==========================================================================
+document.addEventListener('DOMContentLoaded', () => {
+  // Pastikan library Google Client sudah dimuat di HTML sebelum dipanggil
+  if (typeof google !== 'undefined' && google.accounts) {
+    initGoogleDrive();
+  }
+});
