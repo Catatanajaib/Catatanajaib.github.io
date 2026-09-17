@@ -606,49 +606,29 @@ if (!supabaseClient) return;
 
 // FUNGSI 2: POP-UP KONFIRMASI PANGGILAN MASUK
 
-async function showIncomingCallPopup(callData) {
-  const isAudio = callData.call_mode === 'audio';
-  const confirmAccept = confirm(
-    `Panggilan ${isAudio ? 'Suara' : 'Video'} masuk! Apakah ingin mengangkat?`
-  );
+function showIncomingCallPopup(callData) {
+  const callType = callData.call_type === 'video' ? 'Video' : 'Suara';
+  const isAccepted = confirm(`Panggilan ${callType} masuk! Apakah ingin mengangkat?`);
 
-  if (confirmAccept) {
-    // Update status di Supabase menjadi 'accepted'
-    await supabaseClient
+  if (isAccepted) {
+    // 1. Update status panggilan di Supabase menjadi 'accepted'
+    supabaseClient
       .from('calls')
       .update({ status: 'accepted' })
-      .eq('id', callData.id);
-
-    // Langsung buka Jitsi untuk Penerima
-    startCallWithRoom(callData.room_name, callData.call_mode);
+      .eq('id', callData.id)
+      .then(() => {
+        // 2. Buka layar panggilan Jitsi
+        startCallWithRoom(callData.room_name, callData.call_type);
+      });
   } else {
-    // Update status di Supabase menjadi 'rejected'
-    await supabaseClient
+    // Jika ditolak, ubah status menjadi 'rejected'
+    supabaseClient
       .from('calls')
       .update({ status: 'rejected' })
       .eq('id', callData.id);
   }
 }
 
-
-// Tampilkan Pop-up Panggilan Masuk untuk Penerima
-function showIncomingCallPopup(callData) {
-  const isAudio = callData.callMode === 'audio';
-  const confirmAccept = confirm(
-    `Panggilan ${isAudio ? 'Suara' : 'Video'} masuk dari pengirim! Apakah ingin mengangkat?`
-  );
-
-  if (confirmAccept) {
-    // Update status panggilan di database menjadi 'accepted'
-    firebase.database().ref(`calls/${callData.receiverId}`).update({ status: 'accepted' });
-
-    // Masuk ke room Jitsi yang sama
-    startCallWithRoom(callData.roomName, callData.callMode);
-  } else {
-    // Jika ditolak, hapus/update sinyal panggilan
-    firebase.database().ref(`calls/${callData.receiverId}`).update({ status: 'rejected' });
-  }
-}
 
 // FUNGSI 3: MENGIRIM SINYAL PANGGILAN (Sisi Pengirim)
 async function startCall(callMode) {
