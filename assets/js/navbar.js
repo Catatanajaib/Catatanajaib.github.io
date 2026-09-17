@@ -164,7 +164,6 @@ customElements.define('my-navbar', NavBar);
 
 let activeChatReceiverId = null;
 let chatSubscription = null;
-let activeJitsiApi = null;
 let selectedFile = null;
 
 // Helper Modal
@@ -580,16 +579,126 @@ function subscribeToPrivateChat(receiverId) {
 
 
 // Fitur Panggilan Video & Suara (Jitsi API)
-function startCall(callMode) {
+// Variable global untuk Jitsi API
+
+let activeJitsiApi = null;
+let currentCallSubscription = null;
+
+// FUNGSI 1: MENDENGARKAN PANGGILAN MASUK (Sisi Penerima)
+function listenForIncomingCalls(myUserId) {
+if (!supabaseClient) return;
+
+  supabaseClient
+    .channel('incoming_calls')
+    .on(
+      'postgres_changes',
+      { event: 'INSERT', schema: 'public', table: 'calls', filter: `receiver_id=eq.${myUserId}` },
+      (payload) => {
+        const callData = payload.new;
+        if (callData && callData.status === 'ringing') {
+          showIncomingCallPopup(callData);
+        }
+      }
+    )
+    .subscribe();
+}
+
+// FUNGSI 2: POP-UP KONFIRMASI PANGGILAN MASUK
+
+async function showIncomingCallPopup(callData) {
+  const isAudio = callData.call_mode === 'audio';
+  const confirmAccept = confirm(
+    `Panggilan ${isAudio ? 'Suara' : 'Video'} masuk! Apakah ingin mengangkat?`
+  );
+
+  if (confirmAccept) {
+    // Update status di Supabase menjadi 'accepted'
+    await supabaseClient
+      .from('calls')
+      .update({ status: 'accepted' })
+      .eq('id', callData.id);
+
+    // Langsung buka Jitsi untuk Penerima
+    startCallWithRoom(callData.room_name, callData.call_mode);
+  } else {
+    // Update status di Supabase menjadi 'rejected'
+    await supabaseClient
+      .from('calls')
+      .update({ status: 'rejected' })
+      .eq('id', callData.id);
+  }
+}
+
+
+// Tampilkan Pop-up Panggilan Masuk untuk Penerima
+function showIncomingCallPopup(callData) {
+  const isAudio = callData.callMode === 'audio';
+  const confirmAccept = confirm(
+    `Panggilan ${isAudio ? 'Suara' : 'Video'} masuk dari pengirim! Apakah ingin mengangkat?`
+  );
+
+  if (confirmAccept) {
+    // Update status panggilan di database menjadi 'accepted'
+    firebase.database().ref(`calls/${callData.receiverId}`).update({ status: 'accepted' });
+
+    // Masuk ke room Jitsi yang sama
+    startCallWithRoom(callData.roomName, callData.callMode);
+  } else {
+    // Jika ditolak, hapus/update sinyal panggilan
+    firebase.database().ref(`calls/${callData.receiverId}`).update({ status: 'rejected' });
+  }
+}
+
+// FUNGSI 3: MENGIRIM SINYAL PANGGILAN (Sisi Pengirim)
+async function startCall(callMode) {
   if (!activeChatReceiverId) {
     alert("Pilih pengguna terlebih dahulu!");
     return;
   }
 
-  const roomName = `Call_Room_${activeChatReceiverId}`;
-  startCallWithRoom(roomName, callMode);
+  const roomName = `ChatsRoom_${activeChatUserId}_${activeChatReceiverId}_${Date.now()}`;
+
+  // 1. Hapus panggilan lama jika ada, lalu kirim sinyal baru
+  await supabaseClient.from('calls').delete().eq('receiver_id', activeChatReceiverId);
+
+  const { data, error } = await supabaseClient.from('calls').insert([
+    {
+      sender_id: activeChatUserId,
+      receiver_id: activeChatReceiverId,
+      room_name: roomName,
+      call_mode: callMode,
+      status: 'ringing'
+    }
+  ]).select().single();
+
+  if (error) {
+    alert("Gagal melakukan panggilan: " + error.message);
+    return;
+  }
+
+  alert("Memanggil... Menunggu tanggapan penerima.");
+
+  // 2. Dengarkan jika Penerima Menerima/Menolak Panggilan
+  currentCallSubscription = supabaseClient
+    .channel('call_status_tracker')
+    .on(
+      'postgres_changes',
+      { event: 'UPDATE', schema: 'public', table: 'calls', filter: `id=eq.${data.id}` },
+      (payload) => {
+        const updatedCall = payload.new;
+        if (updatedCall.status === 'accepted') {
+          // Penerima Mengangkat -> Masuk ke Room Jitsi!
+          startCallWithRoom(updatedCall.room_name, updatedCall.call_mode);
+        } else if (updatedCall.status === 'rejected') {
+          alert("Panggilan ditolak oleh penerima.");
+          endJitsiCall();
+        }
+      }
+    )
+    .subscribe();
 }
 
+//FUNGSI 4:
 function startCallWithRoom(roomName, callMode) {
   const overlay = document.getElementById("jitsi-call-overlay");
   const container = document.getElementById("jitsi-frame");
@@ -606,23 +715,41 @@ function startCallWithRoom(roomName, callMode) {
         parentNode: container,
         configOverwrite: {
           startWithAudioMuted: false,
-          startWithVideoMuted: callMode === 'audio',
-          disableDeepLinking: true, // Mematikan pop-up promo aplikasi Jitsi di ponsel
-          enableWelcomePage: false,  // Langsung masuk tanpa landing page
+          startWithVideoMuted: (callMode === 'audio'), // Audio murni jika callMode === 'audio'
+          disableDeepLinking: true,
+          enableWelcomePage: false,
           prejoinPageEnabled: false
         },
         interfaceConfigOverwrite: {
-          MOBILE_APP_PROMO: false // Menyembunyikan tombol 'Join in App'
+          MOBILE_APP_PROMO: false,
+          TOOLBAR_BUTTONS: ['microphone', 'camera', 'hangup', 'fullscreen']
         }
       });
 
+      // Saat telepon ditutup oleh pengguna
       activeJitsiApi.addEventListener('readyToClose', () => {
         endJitsiCall();
       });
-    } else {
-      alert("Library Jitsi belum siap.");
     }
   }
+}
+
+//FUNGSI 5:
+function endJitsiCall() {
+  if (activeJitsiApi) {
+    activeJitsiApi.dispose();
+    activeJitsiApi = null;
+  }
+
+  // Hapus sinyal panggilan di database
+  if (activeChatReceiverId) {
+    firebase.database().ref(`calls/${activeChatReceiverId}`).remove();
+  }
+
+  const overlay = document.getElementById("jitsi-call-overlay");
+  const container = document.getElementById("jitsi-frame");
+  if (overlay) overlay.style.display = "none";
+  if (container) container.innerHTML = "";
 }
 
 

@@ -52,7 +52,12 @@ document.addEventListener("DOMContentLoaded", () => {
             updateUIForLoggedOutUser();
             return;
         }
+  // Set ID Pengguna Aktif Global
+  activeChatUserId = user.id;
 
+  // AKTIFKAN PEMANTAU PANGGILAN MASUK DISINI:
+  listenForIncomingCalls(user.id);
+  
         const { data: profile } = await supabaseClient
             .from('profiles')
             .select('username')
