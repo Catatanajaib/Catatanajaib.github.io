@@ -368,42 +368,29 @@ async function fetchPrivateMessages(receiverId) {
   messageContainer.scrollTop = messageContainer.scrollHeight;
 }
 
+//Database sementara sambil nunggu tabungan buat sewa server 
+
 const GOOGLE_API_KEY = 'AIzaSyChf3GjmEsvFQoktUBPFbWnFKUkC1VObpU';
 const GOOGLE_CLIENT_ID = '49596256372-4eoeert51u0p1ssv55f5vr851v9ia2dk.apps.googleusercontent.com';
 const SCOPES = 'https://www.googleapis.com/auth/drive.file';
 
-let tokenClient;
-let accessToken = null;
-
-// Initialize Google API Client
-function initGoogleDrive() {
-  tokenClient = google.accounts.oauth2.initTokenClient({
-    client_id: GOOGLE_CLIENT_ID,
-    scope: SCOPES,
-    callback: (tokenResponse) => {
-      accessToken = tokenResponse.access_token;
-    },
-  });
-}
-
-// Fungsi Upload File ke Google Drive
+// Fungsi Utama Upload File ke Google Drive + Ubah Izin Publik
 async function uploadToGoogleDrive(file) {
   return new Promise(async (resolve, reject) => {
     
-    // Fungsi pembantu untuk menunggu SDK Google siap
+    // 1. Menunggu SDK Google siap
     const waitForGoogleSDK = () => {
       return new Promise((res) => {
         if (typeof google !== 'undefined' && google.accounts && google.accounts.oauth2) {
           return res(true);
         }
-        
         let checkCount = 0;
         const interval = setInterval(() => {
           checkCount++;
           if (typeof google !== 'undefined' && google.accounts && google.accounts.oauth2) {
             clearInterval(interval);
             res(true);
-          } else if (checkCount > 20) { // Maksimal tunggu 10 detik
+          } else if (checkCount > 20) {
             clearInterval(interval);
             res(false);
           }
@@ -411,16 +398,15 @@ async function uploadToGoogleDrive(file) {
       });
     };
 
-    // Tunggu Google SDK siap
     const isReady = await waitForGoogleSDK();
     if (!isReady) {
-      return reject(new Error("Gagal memuat skrip Google. Periksa koneksi internet atau pastikan tag script Google terpasang di HTML."));
+      return reject(new Error("Gagal memuat skrip Google. Pastikan tag script Google terpasang di HTML."));
     }
 
     try {
       const client = google.accounts.oauth2.initTokenClient({
-        client_id: 'YOUR_GOOGLE_CLIENT_ID.apps.googleusercontent.com', // Pastikan Client ID kamu diisi di sini
-        scope: 'https://www.googleapis.com/auth/drive.file',
+        client_id: GOOGLE_CLIENT_ID, // Menggunakan variabel global
+        scope: SCOPES,
         callback: async (tokenResponse) => {
           if (tokenResponse.error) {
             return reject(new Error("Gagal otorisasi Google Drive: " + tokenResponse.error));
@@ -428,22 +414,36 @@ async function uploadToGoogleDrive(file) {
 
           try {
             const accessToken = tokenResponse.access_token;
+            
+            // 2. Upload File ke Google Drive
             const metadata = { name: file.name, mimeType: file.type };
-
             const formData = new FormData();
             formData.append('metadata', new Blob([JSON.stringify(metadata)], { type: 'application/json' }));
             formData.append('file', file);
 
-            const uploadRes = await fetch('https://www.googleapis.com/upload/drive/v3/files?uploadType=multipart&fields=id,webViewLink', {
+            const uploadRes = await fetch('https://www.googleapis.com/upload/drive/v3/files?uploadType=multipart', {
               method: 'POST',
               headers: new Headers({ 'Authorization': 'Bearer ' + accessToken }),
               body: formData
             });
 
             const fileData = await uploadRes.json();
-            if (fileData.error) return reject(new Error(fileData.error.message));
+            if (!fileData.id) return reject(new Error(fileData.error ? fileData.error.message : "Gagal upload ke Drive"));
 
-            resolve(fileData.webViewLink);
+            // 3. Ubah Izin File Menjadi Public (Anyone with link)
+            await fetch(`https://www.googleapis.com/drive/v3/files/${fileData.id}/permissions?key=${GOOGLE_API_KEY}`, {
+              method: 'POST',
+              headers: new Headers({
+                'Authorization': 'Bearer ' + accessToken,
+                'Content-Type': 'application/json'
+              }),
+              body: JSON.stringify({ role: 'reader', type: 'anyone' })
+            });
+
+            // 4. Kembalikan Direct Link agar foto/video bisa tampil langsung di Chat
+            const directMediaUrl = `https://lh3.googleusercontent.com/d/${fileData.id}`;
+            resolve(directMediaUrl);
+
           } catch (err) {
             reject(err);
           }
@@ -455,44 +455,6 @@ async function uploadToGoogleDrive(file) {
       reject(err);
     }
   });
-}
-
-
-async function executeDriveUpload(file) {
-  const metadata = {
-    name: file.name,
-    mimeType: file.type,
-  };
-
-  const formData = new FormData();
-  formData.append('metadata', new Blob([JSON.stringify(metadata)], { type: 'application/json' }));
-  formData.append('file', file);
-
-  // 1. Upload File ke Drive
-  const res = await fetch('https://www.googleapis.com/upload/drive/v3/files?uploadType=multipart', {
-    method: 'POST',
-    headers: new Headers({ 'Authorization': 'Bearer ' + accessToken }),
-    body: formData,
-  });
-
-  const fileData = await res.json();
-  if (!fileData.id) throw new Error('Gagal upload ke Drive');
-
-  // 2. Ubah Izin File Menjadi Public (Anyone with link)
-  await fetch(`https://www.googleapis.com/drive/v3/files/${fileData.id}/permissions?key=${GOOGLE_API_KEY}`, {
-    method: 'POST',
-    headers: new Headers({
-      'Authorization': 'Bearer ' + accessToken,
-      'Content-Type': 'application/json'
-    }),
-    body: JSON.stringify({
-      role: 'reader',
-      type: 'anyone'
-    })
-  });
-
-  // 3. Kembalikan Direct Link agar bisa tampil langsung di Chat
-  return `https://lh3.googleusercontent.com/d/${fileData.id}`;
 }
 
 
