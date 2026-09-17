@@ -596,24 +596,29 @@ let activeJitsiApi = null;
 let currentCallSubscription = null;
 
 // FUNGSI 1: MENDENGARKAN PANGGILAN MASUK (Sisi Penerima)
-function listenForIncomingCalls(myUserId) {
-if (!supabaseClient) return;
-
-  supabaseClient
+function listenForIncomingCalls(userId) {
+  const client = window.supabaseClient || (typeof supabaseClient !== 'undefined' ? supabaseClient : null);
+  if (!client || !userId) return;
+  
+  client
     .channel('incoming_calls')
     .on(
       'postgres_changes',
-      { event: 'INSERT', schema: 'public', table: 'calls', filter: `receiver_id=eq.${myUserId}` },
+      {
+        event: 'INSERT',
+        schema: 'public',
+        table: 'calls',
+        filter: `receiver_id=eq.${userId}`
+      },
       (payload) => {
-        const callData = payload.new;
-        if (callData && callData.status === 'ringing') {
-          showIncomingCallPopup(callData);
+        const newCall = payload.new;
+        if (newCall.status === 'ringing') {
+          showIncomingCallPopup(newCall);
         }
       }
     )
     .subscribe();
 }
-
 // FUNGSI 2: POP-UP KONFIRMASI PANGGILAN MASUK
 
 function showIncomingCallPopup(callData) {
@@ -662,10 +667,8 @@ async function startCall(callMode) {
   const currentUserId = session.user.id;
   const roomName = `CatatanAjaib_${currentUserId.slice(0, 5)}_${activeChatReceiverId.slice(0, 5)}_${Date.now()}`;
 
-  // 1. Bersihkan panggilan lama
   await client.from('calls').delete().eq('receiver_id', activeChatReceiverId);
 
-  // 2. Buat entri panggilan baru
   const { data, error } = await client.from('calls').insert([
     {
       sender_id: currentUserId,
@@ -685,20 +688,16 @@ async function startCall(callMode) {
 
   let callHandled = false;
 
-  // Fungsi untuk membuka overlay Jitsi bagi pemanggil
   const handleCallAccepted = (room, type) => {
     if (callHandled) return;
     callHandled = true;
     
-    // Hentikan penanganan listener & polling
     if (currentCallSubscription) client.removeChannel(currentCallSubscription);
-    clearInterval(pollInterval);
+    if (typeof pollInterval !== 'undefined') clearInterval(pollInterval);
 
-    // Buka overlay Jitsi di sisi pemanggil
     startCallWithRoom(room, type);
   };
 
-  // 3. Listen perubahan status via Realtime
   currentCallSubscription = client
     .channel(`call_status_${data.id}`)
     .on(
@@ -715,7 +714,7 @@ async function startCall(callMode) {
           handleCallAccepted(updatedCall.room_name, updatedCall.call_type);
         } else if (updatedCall.status === 'rejected') {
           callHandled = true;
-          clearInterval(pollInterval);
+          if (typeof pollInterval !== 'undefined') clearInterval(pollInterval);
           client.removeChannel(currentCallSubscription);
           alert("Panggilan ditolak oleh penerima.");
         }
@@ -723,14 +722,13 @@ async function startCall(callMode) {
     )
     .subscribe();
 
-  // 4. Polling Cadangan (Memastikan overlay pemanggil tetap terbuka jika Realtime missed)
   const pollInterval = setInterval(async () => {
     if (callHandled) return;
 
     const { data: checkCall } = await client
       .from('calls')
       .select('status, room_name, call_type')
-      .eq('id', data.id')
+      .eq('id', data.id)
       .single();
 
     if (checkCall) {
@@ -743,9 +741,8 @@ async function startCall(callMode) {
         alert("Panggilan ditolak oleh penerima.");
       }
     }
-  }, 2000); // Cek setiap 2 detik
+  }, 2000);
 }
-
 
 //FUNGSI 4:
 function startCallWithRoom(roomName, callMode) {
