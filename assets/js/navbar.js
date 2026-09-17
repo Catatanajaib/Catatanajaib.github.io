@@ -388,62 +388,75 @@ function initGoogleDrive() {
 
 // Fungsi Upload File ke Google Drive
 async function uploadToGoogleDrive(file) {
-  return new Promise((resolve, reject) => {
-    // 1. Cek apakah SDK Google sudah terisi di halaman
-    if (typeof google === 'undefined' || !google.accounts || !google.accounts.oauth2) {
-      return reject(new Error("Google API Client belum siap dimuat. Coba beberapa detik lagi."));
+  return new Promise(async (resolve, reject) => {
+    
+    // Fungsi pembantu untuk menunggu SDK Google siap
+    const waitForGoogleSDK = () => {
+      return new Promise((res) => {
+        if (typeof google !== 'undefined' && google.accounts && google.accounts.oauth2) {
+          return res(true);
+        }
+        
+        let checkCount = 0;
+        const interval = setInterval(() => {
+          checkCount++;
+          if (typeof google !== 'undefined' && google.accounts && google.accounts.oauth2) {
+            clearInterval(interval);
+            res(true);
+          } else if (checkCount > 20) { // Maksimal tunggu 10 detik
+            clearInterval(interval);
+            res(false);
+          }
+        }, 500);
+      });
+    };
+
+    // Tunggu Google SDK siap
+    const isReady = await waitForGoogleSDK();
+    if (!isReady) {
+      return reject(new Error("Gagal memuat skrip Google. Periksa koneksi internet atau pastikan tag script Google terpasang di HTML."));
     }
 
     try {
-      // 2. Inisialisasi tokenClient secara eksplisit sebelum menentukan callback
       const client = google.accounts.oauth2.initTokenClient({
-        client_id: '49596256372-4eoeert51u0p1ssv55f5vr851v9ia2dk.apps.googleusercontent.com', // Ganti dengan Client ID milikmu
+        client_id: 'YOUR_GOOGLE_CLIENT_ID.apps.googleusercontent.com', // Pastikan Client ID kamu diisi di sini
         scope: 'https://www.googleapis.com/auth/drive.file',
         callback: async (tokenResponse) => {
           if (tokenResponse.error) {
             return reject(new Error("Gagal otorisasi Google Drive: " + tokenResponse.error));
           }
 
-          // 3. Eksekusi Upload ke Google Drive via REST API setelah dapat Access Token
           try {
             const accessToken = tokenResponse.access_token;
-            const metadata = {
-              name: file.name,
-              mimeType: file.type
-            };
+            const metadata = { name: file.name, mimeType: file.type };
 
             const formData = new FormData();
             formData.append('metadata', new Blob([JSON.stringify(metadata)], { type: 'application/json' }));
             formData.append('file', file);
 
-            const uploadRes = await fetch('https://www.googleapis.com/upload/drive/v3/files?uploadType=multipart&fields=id,webContentLink,webViewLink', {
+            const uploadRes = await fetch('https://www.googleapis.com/upload/drive/v3/files?uploadType=multipart&fields=id,webViewLink', {
               method: 'POST',
               headers: new Headers({ 'Authorization': 'Bearer ' + accessToken }),
               body: formData
             });
 
             const fileData = await uploadRes.json();
-            
-            if (fileData.error) {
-              return reject(new Error(fileData.error.message));
-            }
+            if (fileData.error) return reject(new Error(fileData.error.message));
 
-            // Kembalikan URL file yang berhasil diunggah
-            resolve(fileData.webViewLink || fileData.webContentLink);
+            resolve(fileData.webViewLink);
           } catch (err) {
             reject(err);
           }
         }
       });
 
-      // 4. Minta token akses (Gunakan prompt empty/none agar tidak terus-terusan muncul pop-up)
       client.requestAccessToken({ prompt: '' });
-
     } catch (err) {
       reject(err);
     }
   });
 }
+
 
 async function executeDriveUpload(file) {
   const metadata = {
