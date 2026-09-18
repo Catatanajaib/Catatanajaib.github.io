@@ -745,7 +745,8 @@ async function startCall(callMode) {
 }
 
 //FUNGSI 4:
-function startCallWithRoom(roomName, callMode) {
+function startCallWithRoom(roomName, callMode) {// FUNGSI 4: START JITSI CALL
+async function startCallWithRoom(roomName, callMode) {
   const overlay = document.getElementById("jitsi-call-overlay");
   const container = document.getElementById("jitsi-frame");
 
@@ -754,32 +755,57 @@ function startCallWithRoom(roomName, callMode) {
     return;
   }
 
-  // Tampilkan overlay di atas ruang obrolan
+  // 1. Supabase-inda user name tegedukolli
+  const client = window.supabaseClient || (typeof supabaseClient !== 'undefined' ? supabaseClient : null);
+  let userDisplayName = "Pengguna";
+
+  if (client) {
+    const { data: { session } } = await client.auth.getSession();
+    if (session?.user) {
+      userDisplayName = session.user.user_metadata?.full_name || 
+                        session.user.user_metadata?.name || 
+                        session.user.email || 
+                        "Pengguna";
+    }
+  }
+
+  // 2. Overlay torisi matte container clear maadi
   overlay.style.display = "flex";
   container.innerHTML = "";
 
+  // 3. Jitsi External API run maadi
   if (typeof JitsiMeetExternalAPI !== 'undefined') {
     activeJitsiApi = new JitsiMeetExternalAPI("meet.jit.si", {
       roomName: roomName,
       width: "100%",
       height: "100%",
       parentNode: container,
+      userInfo: {
+        displayName: userDisplayName // Otomatis display name set aaguthe
+      },
       configOverwrite: {
         startWithAudioMuted: false,
-        startWithVideoMuted: (callMode === 'audio'),
+        startWithVideoMuted: (callMode === 'audio'), // Audio call idre camera off iruthe
         disableDeepLinking: true,
         enableWelcomePage: false,
-        prejoinPageEnabled: false
+        prejoinPageEnabled: false // Prejoin screen skip aaguthe (direct join)
       },
       interfaceConfigOverwrite: {
         MOBILE_APP_PROMO: false,
+        SHOW_JITSI_WATERMARK: false,
         TOOLBAR_BUTTONS: ['microphone', 'camera', 'hangup', 'tileview', 'fullscreen']
       }
     });
 
+    // 4. Call cut aadaga overlay auto-close aagalu events
     activeJitsiApi.addEventListener('readyToClose', () => {
       endJitsiCall();
     });
+
+    activeJitsiApi.addEventListener('videoConferenceLeft', () => {
+      endJitsiCall();
+    });
+
   } else {
     alert("Script Jitsi belum dimuat. Pastikan <script src='https://meet.jit.si/external_api.js'></script> ada di index.html");
   }
@@ -832,3 +858,4 @@ function ensureGoogleDriveReady() {
 document.addEventListener('DOMContentLoaded', () => {
   ensureGoogleDriveReady();
 });
+}

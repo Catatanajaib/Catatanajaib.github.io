@@ -152,13 +152,11 @@ function initInfiniteScrollFeed() {
    B. LOGIKA SUPABASE FEED (#posts-container)
    ========================================================================== */
 async function loadPosts() {
-  // Mengecek elemen posts-container (Perhatikan typo id di HTML harus posts-container)
   const postsContainer = document.getElementById("posts-container");
   if (!postsContainer) return;
 
   postsContainer.innerHTML = "<p style='text-align:center;'>Memuat postingan...</p>";
 
-  // Mengamankan pemanggilan Supabase jika client menggunakan 'supabase' atau 'supabaseClient'
   const client = window.supabaseClient || window.supabase;
 
   if (!client) {
@@ -168,6 +166,11 @@ async function loadPosts() {
   }
 
   try {
+    // 1. Ambil data pengguna yang sedang login
+    const { data: { session } } = await client.auth.getSession();
+    const currentUserId = session?.user?.id;
+
+    // 2. Ambil postingan dari database
     const { data: posts, error } = await client
       .from('posts')
       .select('*')
@@ -184,6 +187,7 @@ async function loadPosts() {
       return;
     }
 
+    // 3. Render daftar postingan
     postsContainer.innerHTML = posts.map(post => {
       const author = escapeHtml(post.author_name || post.username || 'Anonim');
       const content = escapeHtml(post.content);
@@ -195,27 +199,55 @@ async function loadPosts() {
         minute: '2-digit'
       });
 
+      // Cek apakah pengguna saat ini adalah pemilik postingan
+      const isOwner = currentUserId && post.user_id === currentUserId;
+
       return `
       <article class="post-card" data-post-id="${post.id}">
-        <header class="post-header">
-          <img src="https://picsum.photos/600/300?random=5" alt="Foto Profil" class="avatar">
-          <div class="user-info">
-            <h4>${author}</h4>
-            <span>${date}</span>
-          </div>
-          <button class="action-btn btn-chat-right" onclick="openPrivateChat('${post.user_id}', '${author}')">
-            💬 Kirim Pesan
-          </button>
-        </header>
+        <header class="post-header" style="position: relative; display: flex; justify-content: space-between; align-items: center;">
+  <div style="display: flex; align-items: center; gap: 10px;">
+    <img src="https://picsum.photos/600/300?random=5" alt="Foto Profil" class="avatar">
+    <div class="user-info">
+      <h4>${author}</h4>
+      <span>${date}</span>
+    </div>
+  </div>
+
+  <!-- MENU TITIK TIGA DI POJOK KANAN ATAS -->
+  <details class="post-menu-dropdown" style="position: relative;">
+    <summary style="list-style: none; cursor: pointer; font-size: 18px; padding: 4px 8px; user-select: none;">
+      ⋮
+    </summary>
+    
+    <div style="position: absolute; right: 0; top: 100%; background: white; border: 1px solid #ddd; border-radius: 6px; box-shadow: 0 4px 12px rgba(0,0,0,0.15); display: flex; flex-direction: column; gap: 4px; padding: 6px; min-width: 130px; z-index: 10;">
+      
+      <button class="action-btn btn-chat-right" onclick="openPrivateChat('${post.user_id}', '${author}')" style="width: 100%; text-align: left; background: none; border: none; padding: 6px 10px; cursor: pointer; font-size: 13px;">
+        💬 Kirim Pesan
+      </button>
+
+      ${isOwner ? `
+        <button onclick="deletePost('${post.id}')" style="width: 100%; text-align: left; background: none; border: none; color: #dc3545; padding: 6px 10px; cursor: pointer; font-size: 13px;">
+          🗑️ Hapus
+        </button>
+      ` : ''}
+
+    </div>
+  </details>
+</header>
+
+
         <div class="post-content">${content}</div>
+
         <div class="post-media">
           <img src="https://picsum.photos/600/300?random=7" alt="Foto Postingan">
         </div>
+
         <footer class="post-actions">
           <button class="action-btn" onclick="toggleLike(this)">Suka</button>
           <button class="action-btn" onclick="toggleComments('${post.id}')">Komentar</button>
           <button class="action-btn" onclick="sharePost()">Bagikan</button>
         </footer>
+
         <div id="comment-section-${post.id}" style="display: none; margin-top: 12px; padding-top: 10px; border-top: 1px solid #eee;">
           <div id="comments-list-${post.id}" style="margin-bottom: 10px; text-align: left;">
             <p style="font-size: 12px; color: #888;">Memuat komentar...</p>
@@ -233,6 +265,8 @@ async function loadPosts() {
     postsContainer.innerHTML = "<p style='color:red; text-align:center;'>Terjadi kesalahan koneksi.</p>";
   }
 }
+
+
 
 // ------------------------------------------------------------------------
 // NAVBAR AUTO-HIDE SAAT SCROLL
@@ -290,4 +324,34 @@ function showGlobalToast(title, message, onClickCallback) {
   setTimeout(() => {
     if (toast.parentNode) toast.remove();
   }, 5000);
+}
+
+// FUNGSI UNTUK MENGHAPUS POSTINGAN
+async function deletePost(postId) {
+  const confirmDelete = confirm("Apakah Anda yakin ingin menghapus postingan ini?");
+  if (!confirmDelete) return;
+
+  const client = window.supabaseClient || (typeof supabaseClient !== 'undefined' ? supabaseClient : null);
+  if (!client) {
+    alert("Koneksi Supabase tidak ditemukan.");
+    return;
+  }
+
+  // Hapus postingan dari tabel 'posts' berdasarkan ID
+  const { error } = await client
+    .from('posts')
+    .delete()
+    .eq('id', postId);
+
+  if (error) {
+    alert("Gagal menghapus postingan: " + error.message);
+  } else {
+    alert("Postingan berhasil dihapus!");
+    // Refresh daftar postingan
+    if (typeof loadPosts === 'function') {
+      loadPosts();
+    } else {
+      location.reload();
+    }
+  }
 }
