@@ -1,6 +1,7 @@
+document.addEventListener('DOMContentLoaded', initNotification);
 console.log("File main.js berhasil dimuat!");
 
-// Helper function untuk mencegah XSS injection (yang tadi bikin error karena belum ada)
+// Helper function untuk mencegah XSS injection
 function escapeHtml(str) {
   if (!str) return '';
   return String(str)
@@ -12,14 +13,26 @@ function escapeHtml(str) {
 }
 
 // ==========================================
-// FUNGSI MEMUAT & MENAMPILKAN POSTINGAN
+// INISIALISASI UTAMA (DOM CONTENT LOADED)
 // ==========================================
-document.addEventListener('DOMContentLoaded', () => {
+document.addEventListener('DOMContentLoaded', async () => {
   // 1. Inisialisasi Pemuatan Data Supabase
   loadPosts();
 
   // 2. Inisialisasi Feed Dummy / Infinite Scroll
   initInfiniteScrollFeed();
+
+  // 3. Inisialisasi Web Push Notification & Service Worker
+  initNotification();
+
+  // 4. Inisialisasi Listener Panggilan Masuk (Jika fungsi tersedia)
+  const client = window.supabaseClient || (typeof supabaseClient !== 'undefined' ? supabaseClient : null);
+  if (client) {
+    const { data: { session } } = await client.auth.getSession();
+    if (session?.user?.id && typeof listenForIncomingCalls === 'function') {
+      listenForIncomingCalls(session.user.id);
+    }
+  }
 });
 
 /* ==========================================================================
@@ -205,36 +218,35 @@ async function loadPosts() {
       return `
       <article class="post-card" data-post-id="${post.id}">
         <header class="post-header" style="position: relative; display: flex; justify-content: space-between; align-items: center;">
-  <div style="display: flex; align-items: center; gap: 10px;">
-    <img src="https://picsum.photos/600/300?random=5" alt="Foto Profil" class="avatar">
-    <div class="user-info">
-      <h4>${author}</h4>
-      <span>${date}</span>
-    </div>
-  </div>
+          <div style="display: flex; align-items: center; gap: 10px;">
+            <img src="https://picsum.photos/600/300?random=5" alt="Foto Profil" class="avatar">
+            <div class="user-info">
+              <h4>${author}</h4>
+              <span>${date}</span>
+            </div>
+          </div>
 
-  <!-- MENU TITIK TIGA DI POJOK KANAN ATAS -->
-  <details class="post-menu-dropdown" style="position: relative;">
-    <summary style="list-style: none; cursor: pointer; font-size: 18px; padding: 4px 8px; user-select: none;">
-      ⋮
-    </summary>
-    
-    <div style="position: absolute; right: 0; top: 100%; background: white; border: 1px solid #ddd; border-radius: 6px; box-shadow: 0 4px 12px rgba(0,0,0,0.15); display: flex; flex-direction: column; gap: 4px; padding: 6px; min-width: 130px; z-index: 10;">
-      
-      <button class="action-btn btn-chat-right" onclick="openPrivateChat('${post.user_id}', '${author}')" style="width: 100%; text-align: left; background: none; border: none; padding: 6px 10px; cursor: pointer; font-size: 13px;">
-        💬 Kirim Pesan
-      </button>
+          <!-- MENU TITIK TIGA DI POJOK KANAN ATAS -->
+          <details class="post-menu-dropdown" style="position: relative;">
+            <summary style="list-style: none; cursor: pointer; font-size: 18px; padding: 4px 8px; user-select: none;">
+              ⋮
+            </summary>
+            
+            <div style="position: absolute; right: 0; top: 100%; background: white; border: 1px solid #ddd; border-radius: 6px; box-shadow: 0 4px 12px rgba(0,0,0,0.15); display: flex; flex-direction: column; gap: 4px; padding: 6px; min-width: 130px; z-index: 10;">
+              
+              <button class="action-btn btn-chat-right" onclick="openPrivateChat('${post.user_id}', '${author}')" style="width: 100%; text-align: left; background: none; border: none; padding: 6px 10px; cursor: pointer; font-size: 13px;">
+                💬 Kirim Pesan
+              </button>
 
-      ${isOwner ? `
-        <button onclick="deletePost('${post.id}')" style="width: 100%; text-align: left; background: none; border: none; color: #dc3545; padding: 6px 10px; cursor: pointer; font-size: 13px;">
-          🗑️ Hapus
-        </button>
-      ` : ''}
+              ${isOwner ? `
+                <button onclick="deletePost('${post.id}')" style="width: 100%; text-align: left; background: none; border: none; color: #dc3545; padding: 6px 10px; cursor: pointer; font-size: 13px;">
+                  🗑️ Hapus
+                </button>
+              ` : ''}
 
-    </div>
-  </details>
-</header>
-
+            </div>
+          </details>
+        </header>
 
         <div class="post-content">${content}</div>
 
@@ -266,8 +278,6 @@ async function loadPosts() {
   }
 }
 
-
-
 // ------------------------------------------------------------------------
 // NAVBAR AUTO-HIDE SAAT SCROLL
 // ------------------------------------------------------------------------
@@ -286,10 +296,9 @@ if (navbar) {
   });
 }
 
-//=========
-// Fungsi Menampilkan Notifikasi Toast
-//=========
-
+// ------------------------------------------------------------------------
+// FUNGSI MENAMPILKAN NOTIFIKASI TOAST
+// ------------------------------------------------------------------------
 function showGlobalToast(title, message, onClickCallback) {
   const container = document.getElementById("chat-toast-container");
   if (!container) return;
@@ -326,7 +335,9 @@ function showGlobalToast(title, message, onClickCallback) {
   }, 5000);
 }
 
+// ------------------------------------------------------------------------
 // FUNGSI UNTUK MENGHAPUS POSTINGAN
+// ------------------------------------------------------------------------
 async function deletePost(postId) {
   const confirmDelete = confirm("Apakah Anda yakin ingin menghapus postingan ini?");
   if (!confirmDelete) return;
@@ -347,7 +358,6 @@ async function deletePost(postId) {
     alert("Gagal menghapus postingan: " + error.message);
   } else {
     alert("Postingan berhasil dihapus!");
-    // Refresh daftar postingan
     if (typeof loadPosts === 'function') {
       loadPosts();
     } else {
@@ -356,13 +366,11 @@ async function deletePost(postId) {
   }
 }
 
-// Menangani notifikasi yang masuk dari server/background
-// main.js - Berjalan di halaman web (Frontend)
-
-// GANTI STRING INI DENGAN PUBLIC KEY VAPID KAMU
+// ------------------------------------------------------------------------
+// LOGIKA WEB PUSH NOTIFICATION
+// ------------------------------------------------------------------------
 const PUBLIC_VAPID_KEY = 'BNUMzABdr28NW_FhFsQeJGeima8yago6J3Q77DpWB6Gnk2rEmq4lixD0cQjyJ1Ke78bTwm1VZyWb7MRzaEa1hWY';
 
-// Fungsi pembantu untuk mengonversi Public Key VAPID ke bentuk Uint8Array
 function urlBase64ToUint8Array(base64String) {
   const padding = '='.repeat((4 - base64String.length % 4) % 4);
   const base64 = (base64String + padding).replace(/\-/g, '+').replace(/_/g, '/');
@@ -374,12 +382,11 @@ function urlBase64ToUint8Array(base64String) {
   return outputArray;
 }
 
-// Registrasi Service Worker & Minta Izin Notifikasi
 async function initNotification() {
   if (!('serviceWorker' in navigator) || !('PushManager' in window)) return;
 
   try {
-    // 1. Register Service Worker ke file sw.js
+    // 1. Register Service Worker
     const reg = await navigator.serviceWorker.register('/sw.js');
 
     // 2. Minta Izin Notifikasi
@@ -389,7 +396,7 @@ async function initNotification() {
       return;
     }
 
-    // 3. Ambil/Buat Subscription dari PushManager menggunakan VAPID Key
+    // 3. Ambil/Buat Subscription dari PushManager
     let sub = await reg.pushManager.getSubscription();
     if (!sub) {
       sub = await reg.pushManager.subscribe({
@@ -415,6 +422,3 @@ async function initNotification() {
     console.error("Gagal menginisialisasi Web Push:", err);
   }
 }
-
-// Jalankan fungsi saat halaman selesai dimuat
-document.addEventListener('DOMContentLoaded', initNotification);

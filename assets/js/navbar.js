@@ -1,4 +1,14 @@
 // ==========================================================================
+// VARIABEL GLOBAL
+// ==========================================================================
+let activeChatReceiverId = null;
+let chatSubscription = null;
+let selectedFile = null;
+let activeJitsiApi = null;
+let currentCallSubscription = null;
+let tokenClient = null;
+let accessToken = null;
+// ==========================================================================
 // FUNGSI PEMBANTU (Mencegah Celah Keamanan XSS)
 // ==========================================================================
 function escapeHtml(text) {
@@ -13,7 +23,7 @@ function escapeHtml(text) {
     '`': '&#96;',
     '/': '&#47;'
   };
-
+  
   return String(text).replace(/[&<>"'`/]/g, (match) => htmlEscapes[match]);
 }
 /* ==========================================================================
@@ -68,8 +78,7 @@ class NavBar extends HTMLElement {
           </form>
         </div>
       </div>
-
-      <!-- MODAL CHAT ROOM GLOBAL -->
+<!-- MODAL CHAT ROOM GLOBAL -->
       <div id="Chat-Room" class="modal" style="display: none;">
         <div class="modal-content chat-modal-content" style="width: 90%; display: flex; height: 700px; padding: 0; overflow: hidden; border-radius: 8px;">
           
@@ -104,7 +113,8 @@ class NavBar extends HTMLElement {
                 Silakan pilih teman dari daftar di sebelah kiri untuk melihat percakapan.
               </p>
             </div>
-<!-- Indikator File Terpilih & Animasi Upload -->
+
+            <!-- Indikator File Terpilih & Animasi Upload -->
             <div id="file-preview-container" style="display: none; padding: 6px 12px; background: #eef5ff; border-top: 1px solid #cce5ff; font-size: 12px; align-items: center; justify-content: space-between;">
               <span id="file-preview-name" style="color: #004085; font-weight: 500; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; max-width: 80%;"></span>
               <button type="button" onclick="cancelSelectedFile()" style="background: none; border: none; color: #dc3545; font-weight: bold; cursor: pointer;">&times;</button>
@@ -118,21 +128,18 @@ class NavBar extends HTMLElement {
               <input type="text" id="chat-input" placeholder="Tulis pesan..." style="flex: 1; padding: 8px 12px; border: 1px solid #ccc; border-radius: 20px; outline: none;" disabled>
               <button type="submit" id="chat-send-btn" style="padding: 8px 16px; background: #007bff; color: white; border: none; border-radius: 20px; cursor: pointer;" disabled>Kirim</button>
             </form>
-
-            <!-- OVERLAY JITSI MEET CALL -->
+<!-- OVERLAY JITSI MEET CALL -->
             <div id="jitsi-call-overlay" style="display: none; position: absolute; top: 0; left: 0; width: 100%; height: 100%; background: #111; z-index: 999; flex-direction: column; border-radius: 8px; overflow: hidden;">
-            <div style="padding: 10px 14px; background: #222; color: #fff; display: flex; justify-content: space-between; align-items: center; font-size: 13px; border-bottom: 1px solid #333;">
-            <span id="jitsi-status-title" style="font-weight: 500;">Panggilan Berlangsung...</span>
-            <button type="button" onclick="endJitsiCall()" style="background: #dc3545; color: white; border: none; padding: 6px 14px; border-radius: 16px; cursor: pointer; font-size: 12px; font-weight: bold;">Tutup Panggilan</button>
+              <div style="padding: 10px 14px; background: #222; color: #fff; display: flex; justify-content: space-between; align-items: center; font-size: 13px; border-bottom: 1px solid #333;">
+                <span id="jitsi-status-title" style="font-weight: 500;">Panggilan Berlangsung...</span>
+                <button type="button" onclick="endJitsiCall()" style="background: #dc3545; color: white; border: none; padding: 6px 14px; border-radius: 16px; cursor: pointer; font-size: 12px; font-weight: bold;">Tutup Panggilan</button>
+              </div>
+              <div id="jitsi-frame" style="flex: 1; width: 100%; height: calc(100% - 45px);"></div>
             </div>
-            <div id="jitsi-frame" style="flex: 1; width: 100%; height: calc(100% - 45px);"></div>
-            </div>
-
 
           </div>
         </div>
         <div id="chat-toast-container" style="position: fixed; bottom: 20px; right: 20px; z-index: 99999; display: flex; flex-direction: column; gap: 10px;"></div>
-
       </div>
     `;
 
@@ -156,18 +163,9 @@ class NavBar extends HTMLElement {
     });
   }
 }
-
-customElements.define('my-navbar', NavBar);
-
-/* ==========================================================================
-   LOGIKA CHATROOM GLOBAL & JITSI CALL (KONTROLER)
-   ========================================================================== */
-
-let activeChatReceiverId = null;
-let chatSubscription = null;
-let selectedFile = null;
-
-// Helper Modal
+// ==========================================================================
+// HELPER MODAL & CHAT CONTROL
+// ==========================================================================
 function closeModalDirect(modalId) {
   const modal = document.getElementById(modalId);
   if (modal) modal.style.display = 'none';
@@ -231,7 +229,6 @@ function setUploadLoadingState(isLoading, text = "Mengunggah file...") {
     if (sendBtn) sendBtn.disabled = false;
   }
 }
-
 
 // Memuat Daftar Pengguna dari Supabase
 async function loadChatUsers() {
@@ -317,10 +314,7 @@ async function openPrivateChat(userId, userName) {
   if (typeof selectUserForChat === 'function') {
     await selectUserForChat(userId, userName);
   }
-}
-
-
-// Memuat Riwayat Pesan
+}// Memuat Riwayat Pesan
 async function fetchPrivateMessages(receiverId) {
   const messageContainer = document.getElementById("chat-messages");
   if (!messageContainer) return;
@@ -349,7 +343,7 @@ async function fetchPrivateMessages(receiverId) {
 
   messageContainer.innerHTML = messages.map(msg => {
     const isMe = msg.sender_id === currentUserId;
-    let contentHtml = escapeHtml(msg.content || msg.message || '');
+    let contentHtml = escapeHtml(msg.message || msg.content || '');
 
     if (msg.file_url) {
       if (msg.file_type === 'video') {
@@ -377,18 +371,15 @@ async function fetchPrivateMessages(receiverId) {
 
   messageContainer.scrollTop = messageContainer.scrollHeight;
 }
-
-//Database sementara sambil nunggu tabungan buat sewa server 
-
+// ==========================================================================
+// INTEGRASI GOOGLE DRIVE
+// ==========================================================================
 const GOOGLE_API_KEY = 'AIzaSyChf3GjmEsvFQoktUBPFbWnFKUkC1VObpU';
 const GOOGLE_CLIENT_ID = '49596256372-4eoeert51u0p1ssv55f5vr851v9ia2dk.apps.googleusercontent.com';
 const SCOPES = 'https://www.googleapis.com/auth/drive.file';
 
-// Fungsi Utama Upload File ke Google Drive + Ubah Izin Publik
 async function uploadToGoogleDrive(file) {
   return new Promise(async (resolve, reject) => {
-    
-    // 1. Menunggu SDK Google siap
     const waitForGoogleSDK = () => {
       return new Promise((res) => {
         if (typeof google !== 'undefined' && google.accounts && google.accounts.oauth2) {
@@ -415,7 +406,7 @@ async function uploadToGoogleDrive(file) {
 
     try {
       const client = google.accounts.oauth2.initTokenClient({
-        client_id: GOOGLE_CLIENT_ID, // Menggunakan variabel global
+        client_id: GOOGLE_CLIENT_ID,
         scope: SCOPES,
         callback: async (tokenResponse) => {
           if (tokenResponse.error) {
@@ -423,9 +414,8 @@ async function uploadToGoogleDrive(file) {
           }
 
           try {
-            const accessToken = tokenResponse.access_token;
+            const token = tokenResponse.access_token;
             
-            // 2. Upload File ke Google Drive
             const metadata = { name: file.name, mimeType: file.type };
             const formData = new FormData();
             formData.append('metadata', new Blob([JSON.stringify(metadata)], { type: 'application/json' }));
@@ -433,24 +423,22 @@ async function uploadToGoogleDrive(file) {
 
             const uploadRes = await fetch('https://www.googleapis.com/upload/drive/v3/files?uploadType=multipart', {
               method: 'POST',
-              headers: new Headers({ 'Authorization': 'Bearer ' + accessToken }),
+              headers: new Headers({ 'Authorization': 'Bearer ' + token }),
               body: formData
             });
 
             const fileData = await uploadRes.json();
             if (!fileData.id) return reject(new Error(fileData.error ? fileData.error.message : "Gagal upload ke Drive"));
 
-            // 3. Ubah Izin File Menjadi Public (Anyone with link)
             await fetch(`https://www.googleapis.com/drive/v3/files/${fileData.id}/permissions?key=${GOOGLE_API_KEY}`, {
               method: 'POST',
               headers: new Headers({
-                'Authorization': 'Bearer ' + accessToken,
+                'Authorization': 'Bearer ' + token,
                 'Content-Type': 'application/json'
               }),
               body: JSON.stringify({ role: 'reader', type: 'anyone' })
             });
 
-            // 4. Kembalikan Direct Link agar foto/video bisa tampil langsung di Chat
             const directMediaUrl = `https://lh3.googleusercontent.com/d/${fileData.id}`;
             resolve(directMediaUrl);
 
@@ -467,10 +455,8 @@ async function uploadToGoogleDrive(file) {
   });
 }
 
-
 // Mengirim Pesan (Teks & File Media)
-
- async function sendPrivateMessage(event) {
+async function sendPrivateMessage(event) {
   event.preventDefault();
 
   const inputEl = document.getElementById("chat-input");
@@ -503,14 +489,13 @@ async function uploadToGoogleDrive(file) {
     }
   }
 
-  // PASTIKAN DI SINI MENGGUNAKAN 'message', BUKAN 'content'
   const { error } = await client
     .from('messages')
     .insert([
       {
         sender_id: session.user.id,
         receiver_id: activeChatReceiverId,
-        message: messageText, // <-- Menggunakan 'message'
+        message: messageText,
         file_url: fileUrl,
         file_type: fileType
       }
@@ -524,8 +509,6 @@ async function uploadToGoogleDrive(file) {
     fetchPrivateMessages(activeChatReceiverId);
   }
 }
-
-
 
 // Menerima Pesan & Panggilan Realtime
 function subscribeToPrivateChat(receiverId) {
@@ -548,16 +531,13 @@ function subscribeToPrivateChat(receiverId) {
         const myUserId = session.user.id;
         const newMsg = payload.new;
 
-        // Jika pesan ditujukan untuk pengguna saat ini
         if (newMsg.receiver_id === myUserId) {
-          // Jika chatroom sedang dibuka bersama pengirim ini, refresh pesan
           if (activeChatReceiverId === newMsg.sender_id) {
             fetchPrivateMessages(newMsg.sender_id);
           } else {
-            // Tampilkan notifikasi melayang di layar
             showGlobalToast(
               "💬 Pesan Baru Masuk",
-              newMsg.content || "Mengirim sebuah media",
+              newMsg.message || newMsg.content || "Mengirim sebuah media",
               () => {
                 openChatFromNavbar();
                 selectUserForChat(newMsg.sender_id, "Teman");
@@ -587,15 +567,9 @@ function subscribeToPrivateChat(receiverId) {
     })
     .subscribe();
 }
-
-
-// Fitur Panggilan Video & Suara (Jitsi API)
-// Variable global untuk Jitsi API
-
-let activeJitsiApi = null;
-let currentCallSubscription = null;
-
-// FUNGSI 1: MENDENGARKAN PANGGILAN MASUK (Sisi Penerima)
+// ==========================================================================
+// FITUR PANGGILAN VIDEO & SUARA (JITSI API)
+// ==========================================================================
 function listenForIncomingCalls(userId) {
   const client = window.supabaseClient || (typeof supabaseClient !== 'undefined' ? supabaseClient : null);
   if (!client || !userId) return;
@@ -619,35 +593,31 @@ function listenForIncomingCalls(userId) {
     )
     .subscribe();
 }
-// FUNGSI 2: POP-UP KONFIRMASI PANGGILAN MASUK
 
 function showIncomingCallPopup(callData) {
+  const client = window.supabaseClient || (typeof supabaseClient !== 'undefined' ? supabaseClient : null);
   const callType = callData.call_type === 'video' ? 'Video' : 'Suara';
   const isAccepted = confirm(`Panggilan ${callType} masuk! Apakah ingin mengangkat?`);
 
+  if (!client) return;
+
   if (isAccepted) {
-    // 1. Update status panggilan di Supabase menjadi 'accepted'
-    supabaseClient
+    client
       .from('calls')
       .update({ status: 'accepted' })
       .eq('id', callData.id)
       .then(() => {
-        // 2. Buka layar panggilan Jitsi
         startCallWithRoom(callData.room_name, callData.call_type);
       });
   } else {
-    // Jika ditolak, ubah status menjadi 'rejected'
-    supabaseClient
+    client
       .from('calls')
       .update({ status: 'rejected' })
       .eq('id', callData.id);
   }
 }
 
-
-// FUNGSI 3: MENGIRIM SINYAL PANGGILAN (Sisi Pengirim)
 async function startCall(callMode) {
-  if (!activeChatReceiverId) {async function startCall(callMode) {
   if (!activeChatReceiverId) {
     alert("Pilih pengguna terlebih dahulu!");
     return;
@@ -686,9 +656,9 @@ async function startCall(callMode) {
     return;
   }
 
-  // --- PEMANGGILAN TRIGGER PUSH NOTIFICATION ---
-  // Mengirim notifikasi push ke HP/Browser penerima
-  triggerPushNotification(activeChatReceiverId, callerName, callMode);
+  if (typeof triggerPushNotification === 'function') {
+    triggerPushNotification(activeChatReceiverId, callerName, callMode);
+  }
 
   alert("Memanggil... Menunggu tanggapan penerima.");
 
@@ -750,8 +720,6 @@ async function startCall(callMode) {
   }, 2000);
 }
 
-
-// FUNGSI 4: START JITSI CALL (Langsung masuk tanpa prejoin)
 async function startCallWithRoom(roomName, callMode) {
   const overlay = document.getElementById("jitsi-call-overlay");
   const container = document.getElementById("jitsi-frame");
@@ -761,7 +729,6 @@ async function startCallWithRoom(roomName, callMode) {
     return;
   }
 
-  // 1. Ambil Nama Pengguna dari Supabase
   let userDisplayName = "Pengguna";
   try {
     const client = window.supabaseClient || (typeof supabaseClient !== 'undefined' ? supabaseClient : null);
@@ -776,13 +743,10 @@ async function startCallWithRoom(roomName, callMode) {
     console.error("Gagal mengambil session pengguna:", err);
   }
 
-  // 2. Tampilkan Overlay dan Bersihkan Frame Sebelumnya
   overlay.style.display = "flex";
   container.innerHTML = "";
 
-  // 3. Jalankan Jitsi API
   if (typeof JitsiMeetExternalAPI !== 'undefined') {
-    // Bersihkan instance lama jika masih tersisa
     if (typeof activeJitsiApi !== 'undefined' && activeJitsiApi) {
       activeJitsiApi.dispose();
       activeJitsiApi = null;
@@ -800,8 +764,8 @@ async function startCallWithRoom(roomName, callMode) {
       configOverwrite: {
         startWithAudioMuted: false,
         startWithVideoMuted: (callMode === 'audio'),
-        prejoinPageEnabled: false,      // Langsung masuk room tanpa layar konfirmasi
-        prejoinConfig: { enabled: false }, // Cadangan untuk versi Jitsi terbaru
+        prejoinPageEnabled: false,
+        prejoinConfig: { enabled: false },
         disableDeepLinking: true,
         enableWelcomePage: false
       },
@@ -814,7 +778,6 @@ async function startCallWithRoom(roomName, callMode) {
 
     activeJitsiApi = new JitsiMeetExternalAPI(domain, options);
 
-    // 4. Tutup Overlay Otomatis Saat Panggilan Selesai
     activeJitsiApi.addEventListener('readyToClose', () => {
       endJitsiCall();
     });
@@ -839,12 +802,10 @@ function endJitsiCall() {
   if (overlay) overlay.style.display = "none";
   if (container) container.innerHTML = "";
 }
-
 // ==========================================================================
 // INISIALISASI SAAT HALAMAN SELESAI DIMUAT
 // ==========================================================================
 document.addEventListener('DOMContentLoaded', () => {
-  // Pastikan library Google Client sudah dimuat di HTML sebelum dipanggil
   if (typeof google !== 'undefined' && google.accounts) {
     initGoogleDrive();
     ensureGoogleDriveReady();
@@ -863,11 +824,13 @@ function initGoogleDrive() {
   }
 }
 
-// Cek secara berkala sampai library google siap
 function ensureGoogleDriveReady() {
   if (typeof google !== 'undefined' && google.accounts) {
     initGoogleDrive();
   } else {
-    setTimeout(ensureGoogleDriveReady, 500); // Cek lagi setiap 0.5 detik
+    setTimeout(ensureGoogleDriveReady, 500);
   }
 }
+
+// REGISTER WEB COMPONENT
+customElements.define('my-navbar', NavBar);
