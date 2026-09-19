@@ -7,8 +7,8 @@
 /* 1. Atur HTML & Body agar tidak memunculkan scrollbar ganda */
 html, body {
   overflow-x: hidden; /* Mencegah overflow liar */
-  margin: 0;
-  padding: 0;
+  margin: 0%;
+  padding: 0%;
   width: 100%;
 }
 
@@ -277,7 +277,7 @@ h4.logo {
   margin: 10% auto;
   padding: 25px;
   width: 80%;
-  max-width: 500px;
+  max-width: 100%;
   border-radius: 8px;
   position: relative;
   box-shadow: 0 4px 10px rgba(0,0,0,0.3);
@@ -370,7 +370,7 @@ h4.logo {
 
 /* Container Pembungkus Daftar Postingan */
 .container {
-  max-width: 680px;
+  max-width: 100%;
   margin: 40px auto;
   padding: 0 16px;
 }
@@ -575,7 +575,7 @@ h4.logo {
 /* Gaya dasar wadah utama untuk HP (1 kolom memanjang) */
 .main-container {
     width: 90%;
-    max-width: 500px;       /* Ukuran pas untuk HP */
+    max-width: 70%;       /* Ukuran pas untuk HP */
     margin: 0 auto 20px;
     transition: all 0.3s ease;
 }
@@ -590,7 +590,7 @@ h4.logo {
 }
 
 /* Penyesuaian khusus Laptop/Desktop (Layar > 768px atau 1024px) */
-@media (min-width: 992px) {
+@media (min-width: 720px) {
     .main-container {
         max-width: 1200px;                  /* Diperlebar agar memanfaatkan layar laptop */
         display: grid;                       /* Mengaktifkan mode Grid */
