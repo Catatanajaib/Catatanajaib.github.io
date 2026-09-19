@@ -647,6 +647,7 @@ function showIncomingCallPopup(callData) {
 
 // FUNGSI 3: MENGIRIM SINYAL PANGGILAN (Sisi Pengirim)
 async function startCall(callMode) {
+  if (!activeChatReceiverId) {async function startCall(callMode) {
   if (!activeChatReceiverId) {
     alert("Pilih pengguna terlebih dahulu!");
     return;
@@ -665,6 +666,7 @@ async function startCall(callMode) {
   }
 
   const currentUserId = session.user.id;
+  const callerName = session.user.user_metadata?.full_name || session.user.email || "Seseorang";
   const roomName = `CatatanAjaib_${currentUserId.slice(0, 5)}_${activeChatReceiverId.slice(0, 5)}_${Date.now()}`;
 
   await client.from('calls').delete().eq('receiver_id', activeChatReceiverId);
@@ -683,6 +685,10 @@ async function startCall(callMode) {
     alert("Gagal melakukan panggilan: " + error.message);
     return;
   }
+
+  // --- PEMANGGILAN TRIGGER PUSH NOTIFICATION ---
+  // Mengirim notifikasi push ke HP/Browser penerima
+  triggerPushNotification(activeChatReceiverId, callerName, callMode);
 
   alert("Memanggil... Menunggu tanggapan penerima.");
 
@@ -743,6 +749,7 @@ async function startCall(callMode) {
     }
   }, 2000);
 }
+
 
 // FUNGSI 4: START JITSI CALL (Langsung masuk tanpa prejoin)
 async function startCallWithRoom(roomName, callMode) {

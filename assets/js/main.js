@@ -357,55 +357,62 @@ async function deletePost(postId) {
 }
 
 // Menangani notifikasi yang masuk dari server/background
-self.addEventListener('push', function(event) {
-  let data = { title: 'Panggilan / Pesan Baru', body: 'Ada aktivitas baru di aplikasi!' };
-  
-  if (event.data) {
-    try {
-      data = event.data.json();
-    } catch (e) {
-      data.body = event.data.text();
-    }
+// main.js - Berjalan di halaman web (Frontend)
+
+// GANTI STRING INI DENGAN PUBLIC KEY VAPID KAMU
+const PUBLIC_VAPID_KEY = 'BNUMzABdr28NW_FhFsQeJGeima8yago6J3Q77DpWB6Gnk2rEmq4lixD0cQjyJ1Ke78bTwm1VZyWb7MRzaEa1hWY';
+
+// Fungsi pembantu untuk mengonversi Public Key VAPID ke bentuk Uint8Array
+function urlBase64ToUint8Array(base64String) {
+  const padding = '='.repeat((4 - base64String.length % 4) % 4);
+  const base64 = (base64String + padding).replace(/\-/g, '+').replace(/_/g, '/');
+  const rawData = window.atob(base64);
+  const outputArray = new Uint8Array(rawData.length);
+  for (let i = 0; i < rawData.length; ++i) {
+    outputArray[i] = rawData.charCodeAt(i);
   }
-
-  const options = {
-    body: data.body,
-    icon: '/icon.png', // Ganti dengan path ikon aplikasimu
-    badge: '/icon.png',
-    vibrate: [200, 100, 200]
-  };
-
-  event.waitUntil(
-    self.registration.showNotification(data.title, options)
-  );
-});
-
-// Ketika notifikasi diklik, buka kembali aplikasinya
-self.addEventListener('notificationclick', function(event) {
-  event.notification.close();
-  event.waitUntil(
-    clients.openWindow('/')
-  );
-});
+  return outputArray;
+}
 
 // Registrasi Service Worker & Minta Izin Notifikasi
 async function initNotification() {
-  if ('serviceWorker' in navigator && 'PushManager' in window) {
-    try {
-      // 1. Daftarkan Service Worker
-      const registration = await navigator.serviceWorker.register('/sw.js');
-      console.log('Service Worker berhasil terdaftar:', registration);
+  if (!('serviceWorker' in navigator) || !('PushManager' in window)) return;
 
-      // 2. Minta izin ke pengguna
-      const permission = await Notification.requestPermission();
-      if (permission === 'granted') {
-        console.log('Izin notifikasi diberikan.');
-      } else {
-        console.warn('Izin notifikasi ditolak.');
-      }
-    } catch (error) {
-      console.error('Gagal mendaftarkan Service Worker:', error);
+  try {
+    // 1. Register Service Worker ke file sw.js
+    const reg = await navigator.serviceWorker.register('/sw.js');
+
+    // 2. Minta Izin Notifikasi
+    const permission = await Notification.requestPermission();
+    if (permission !== 'granted') {
+      console.warn("Izin notifikasi tidak diberikan");
+      return;
     }
+
+    // 3. Ambil/Buat Subscription dari PushManager menggunakan VAPID Key
+    let sub = await reg.pushManager.getSubscription();
+    if (!sub) {
+      sub = await reg.pushManager.subscribe({
+        userVisibleOnly: true,
+        applicationServerKey: urlBase64ToUint8Array(PUBLIC_VAPID_KEY)
+      });
+    }
+
+    // 4. Simpan Subscription ke tabel 'push_subscriptions' di Supabase
+    const client = window.supabaseClient || window.supabase;
+    if (client) {
+      const { data: { session } } = await client.auth.getSession();
+      if (session?.user) {
+        await client
+          .from('push_subscriptions')
+          .upsert({
+            user_id: session.user.id,
+            subscription: sub.toJSON()
+          }, { onConflict: 'user_id' });
+      }
+    }
+  } catch (err) {
+    console.error("Gagal menginisialisasi Web Push:", err);
   }
 }
 
