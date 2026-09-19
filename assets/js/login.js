@@ -1,6 +1,6 @@
-//login, daftar, posting, komentar 
+// login, daftar, posting, komentar 
 // ==========================================
-// 1. INISIALISASI SUPABASE
+// 1. INISIALISASI SUPABASE & VARIABEL GLOBAL
 // ==========================================
 const SUPABASE_URL = 'https://qcopjasrzjubbgjnxidv.supabase.co';
 const SUPABASE_ANON_KEY = 'sb_publishable_YFS1w6HfZbyg-F6QoxISFw_b62yHMO6';
@@ -9,9 +9,9 @@ const SUPABASE_ANON_KEY = 'sb_publishable_YFS1w6HfZbyg-F6QoxISFw_b62yHMO6';
 window.supabaseClient = window.supabase ? window.supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY) : null;
 const supabaseClient = window.supabaseClient;
 
-
-// Variable global untuk menyimpan username aktif
+// PERBAIKAN: Deklarasikan semua variabel global agar tidak memicu ReferenceError
 let currentUsername = "Pengunjung Anonim";
+let activeChatUserId = null; 
 
 document.addEventListener("DOMContentLoaded", () => {
     if (!supabaseClient) {
@@ -46,30 +46,56 @@ document.addEventListener("DOMContentLoaded", () => {
     // 2. FUNGSI CEK STATUS SESI & PROFILE
     // ==========================================
     async function checkUserSession() {
-        const { data: { user }, error: authError } = await supabaseClient.auth.getUser();
+        try {
+            const { data: { session }, error: sessionError } = await supabaseClient.auth.getSession();
 
-        if (authError || !user) {
+            if (sessionError || !session || !session.user) {
+                updateUIForLoggedOutUser();
+                return;
+            }
+
+            const user = session.user;
+
+            // Set ID Pengguna Aktif Global
+            activeChatUserId = user.id;
+
+            // Panggil pemantau panggilan jika fungsinya didefinisikan di file lain
+            if (typeof listenForIncomingCalls === "function") {
+                try {
+                    listenForIncomingCalls(user.id);
+                } catch (e) {
+                    console.warn("Gagal menjalankan listenForIncomingCalls:", e);
+                }
+            }
+
+            // Tentukan username fallback terlebih dahulu
+            let username = user.user_metadata?.username 
+                || user.user_metadata?.full_name 
+                || user.email?.split('@')[0] 
+                || "Pengguna";
+
+            // Coba ambil dari tabel profiles
+            try {
+                const { data: profile } = await supabaseClient
+                    .from('profiles')
+                    .select('username')
+                    .eq('id', user.id)
+                    .maybeSingle();
+
+                if (profile && profile.username) {
+                    username = profile.username;
+                }
+            } catch (pErr) {
+                console.warn("Gagal mengambil profil:", pErr);
+            }
+
+            currentUsername = username;
+            updateUIForLoggedInUser(user, currentUsername);
+
+        } catch (err) {
+            console.error("Detail eror pemeriksaan sesi:", err);
             updateUIForLoggedOutUser();
-            return;
         }
-  // Set ID Pengguna Aktif Global
-  activeChatUserId = user.id;
-
-  // AKTIFKAN PEMANTAU PANGGILAN MASUK DISINI:
-  listenForIncomingCalls(user.id);
-  
-        const { data: profile } = await supabaseClient
-            .from('profiles')
-            .select('username')
-            .eq('id', user.id)
-            .maybeSingle();
-
-        currentUsername = profile?.username 
-            || user.user_metadata?.username 
-            || user.email?.split('@')[0] 
-            || "Pengguna";
-
-        updateUIForLoggedInUser(user, currentUsername);
     }
 
     function updateUIForLoggedInUser(user, username) {
@@ -90,7 +116,9 @@ document.addEventListener("DOMContentLoaded", () => {
 
         if (createPostBox) createPostBox.style.display = "none";
         if (loginRequiredBox) loginRequiredBox.style.display = "block";
+        
         currentUsername = "Pengunjung Anonim";
+        activeChatUserId = null;
     }
 
     function showNotification(message, isError = false) {
@@ -127,7 +155,7 @@ document.addEventListener("DOMContentLoaded", () => {
                 showNotification("Gagal Masuk: " + error.message, true);
             } else {
                 showNotification("Login berhasil! Memuat profil...", false);
-                setTimeout(checkUserSession, 1000);
+                await checkUserSession();
             }
         });
     }
@@ -237,7 +265,7 @@ document.addEventListener("DOMContentLoaded", () => {
         });
     }
 
-    // Jalankan pemeriksaan sesi awal
+    // Jalankan pemeriksaan sesi awal saat halaman dimuat
     checkUserSession();
 });
 
@@ -268,7 +296,6 @@ async function toggleComments(postId) {
   }
 }
 
-// Mengambil komentar & menyusun hirarki (Parent - Child)
 async function fetchCommentsForPost(postId) {
   const listEl = document.getElementById(`comments-list-${postId}`);
   if (!listEl) return;
@@ -278,7 +305,6 @@ async function fetchCommentsForPost(postId) {
     return;
   }
 
-  // Ambil seluruh komentar untuk post_id ini
   const { data: comments, error } = await supabaseClient
     .from('comments')
     .select('*')
@@ -296,7 +322,6 @@ async function fetchCommentsForPost(postId) {
     return;
   }
 
-  // Pisahkan komentar utama dan balasan berdasarkan parent_id
   const parentComments = comments.filter(c => !c.parent_id);
   const replies = comments.filter(c => c.parent_id);
 
@@ -306,13 +331,11 @@ async function fetchCommentsForPost(postId) {
   }).join('');
 }
 
-// Render tampilan Komentar Utama beserta Balasannya
 function renderCommentTree(parent, replies, postId) {
   const author = escapeHtml(parent.author_name || parent.username || 'Anonim');
   const content = escapeHtml(parent.content);
   const time = new Date(parent.created_at).toLocaleString('id-ID', { hour: '2-digit', minute: '2-digit', day: 'numeric', month: 'short' });
 
-  // HTML daftar balasan komentar (di-indent ke kanan)
   const repliesHTML = replies.map(reply => {
     const rAuthor = escapeHtml(reply.author_name || reply.username || 'Anonim');
     const rContent = escapeHtml(reply.content);
@@ -337,12 +360,10 @@ function renderCommentTree(parent, replies, postId) {
       </div>
       <p style="margin:4px 0 6px 0; color:#444; line-height:1.4;">${content}</p>
 
-      <!-- Tombol Balas -->
       <button onclick="toggleReplyForm('${parent.id}')" style="background:none; border:none; color:#007bff; font-size:11px; cursor:pointer; padding:0; font-weight:bold;">
         ↩ Balas
       </button>
 
-      <!-- Form Input Balasan (Default Sembunyi) -->
       <div id="reply-form-${parent.id}" style="display:none; margin-top:8px;">
         <form onsubmit="handleCommentSubmit(event, '${postId}', '${parent.id}')" style="display:flex; gap:6px;">
           <input type="text" placeholder="Tulis balasan..." required style="flex:1; padding:6px; font-size:11px; border:1px solid #ccc; border-radius:4px;">
@@ -350,7 +371,6 @@ function renderCommentTree(parent, replies, postId) {
         </form>
       </div>
 
-      <!-- Wadah Balasan Komentar -->
       <div class="replies-container">
         ${repliesHTML}
       </div>
@@ -358,7 +378,6 @@ function renderCommentTree(parent, replies, postId) {
   `;
 }
 
-// Buka/Tutup Form Balasan Komentar
 function toggleReplyForm(commentId) {
   const formBox = document.getElementById(`reply-form-${commentId}`);
   if (formBox) {
@@ -367,7 +386,6 @@ function toggleReplyForm(commentId) {
   }
 }
 
-// Handler submit komentar utama maupun balasan (dilihat dari parameter parentId)
 async function handleCommentSubmit(event, postId, parentId = null) {
   event.preventDefault();
   const form = event.target;
@@ -379,7 +397,6 @@ async function handleCommentSubmit(event, postId, parentId = null) {
 
   if (submitBtn) submitBtn.disabled = true;
 
-  // 1. Cek Sesi Auth
   const { data: { session } } = await supabaseClient.auth.getSession();
 
   if (!session) {
@@ -388,7 +405,6 @@ async function handleCommentSubmit(event, postId, parentId = null) {
     return;
   }
 
-  // 2. Susun Payload
   const payload = {
     post_id: String(postId),
     user_id: session.user.id,
@@ -397,10 +413,9 @@ async function handleCommentSubmit(event, postId, parentId = null) {
   };
 
   if (parentId) {
-    payload.parent_id = parentId; // Simpan parent_id jika berupa balasan
+    payload.parent_id = parentId;
   }
 
-  // 3. Simpan ke Supabase
   const { error } = await supabaseClient
     .from('comments')
     .insert([payload]);
