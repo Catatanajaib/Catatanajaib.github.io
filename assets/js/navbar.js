@@ -71,7 +71,7 @@ class NavBar extends HTMLElement {
 
       <!-- MODAL CHAT ROOM GLOBAL -->
       <div id="Chat-Room" class="modal" style="display: none;">
-        <div class="modal-content chat-modal-content" style="width: 500px; display: flex; height: 700px; padding: 0; overflow: hidden; border-radius: 8px;">
+        <div class="modal-content chat-modal-content" style="width: 100%; display: flex; height: 700px; padding: 0; overflow: hidden; border-radius: 8px;">
           
           <!-- Sidebar Kiri: Daftar Pengguna -->
           <div class="chat-sidebar" style="width: 25%; border-right: 1px solid #ddd; background: #f8f9fa; display: flex; flex-direction: column;">
