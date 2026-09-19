@@ -355,3 +355,59 @@ async function deletePost(postId) {
     }
   }
 }
+
+// Menangani notifikasi yang masuk dari server/background
+self.addEventListener('push', function(event) {
+  let data = { title: 'Panggilan / Pesan Baru', body: 'Ada aktivitas baru di aplikasi!' };
+  
+  if (event.data) {
+    try {
+      data = event.data.json();
+    } catch (e) {
+      data.body = event.data.text();
+    }
+  }
+
+  const options = {
+    body: data.body,
+    icon: '/icon.png', // Ganti dengan path ikon aplikasimu
+    badge: '/icon.png',
+    vibrate: [200, 100, 200]
+  };
+
+  event.waitUntil(
+    self.registration.showNotification(data.title, options)
+  );
+});
+
+// Ketika notifikasi diklik, buka kembali aplikasinya
+self.addEventListener('notificationclick', function(event) {
+  event.notification.close();
+  event.waitUntil(
+    clients.openWindow('/')
+  );
+});
+
+// Registrasi Service Worker & Minta Izin Notifikasi
+async function initNotification() {
+  if ('serviceWorker' in navigator && 'PushManager' in window) {
+    try {
+      // 1. Daftarkan Service Worker
+      const registration = await navigator.serviceWorker.register('/sw.js');
+      console.log('Service Worker berhasil terdaftar:', registration);
+
+      // 2. Minta izin ke pengguna
+      const permission = await Notification.requestPermission();
+      if (permission === 'granted') {
+        console.log('Izin notifikasi diberikan.');
+      } else {
+        console.warn('Izin notifikasi ditolak.');
+      }
+    } catch (error) {
+      console.error('Gagal mendaftarkan Service Worker:', error);
+    }
+  }
+}
+
+// Jalankan fungsi saat halaman selesai dimuat
+document.addEventListener('DOMContentLoaded', initNotification);
