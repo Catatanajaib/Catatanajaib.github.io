@@ -71,7 +71,7 @@ class NavBar extends HTMLElement {
 
       <!-- MODAL CHAT ROOM GLOBAL -->
       <div id="Chat-Room" class="modal" style="display: none;">
-        <div class="modal-content chat-modal-content" style="width: 100%; display: flex; height: 700px; padding: 0; overflow: hidden; border-radius: 8px;">
+        <div class="modal-content chat-modal-content" style="width: 90%; display: flex; height: 700px; padding: 0; overflow: hidden; border-radius: 8px;">
           
           <!-- Sidebar Kiri: Daftar Pengguna -->
           <div class="chat-sidebar" style="width: 25%; border-right: 1px solid #ddd; background: #f8f9fa; display: flex; flex-direction: column;">
@@ -744,8 +744,7 @@ async function startCall(callMode) {
   }, 2000);
 }
 
-//FUNGSI 4:
-function startCallWithRoom(roomName, callMode) {// FUNGSI 4: START JITSI CALL
+// FUNGSI 4: START JITSI CALL (Langsung masuk tanpa prejoin)
 async function startCallWithRoom(roomName, callMode) {
   const overlay = document.getElementById("jitsi-call-overlay");
   const container = document.getElementById("jitsi-frame");
@@ -755,49 +754,60 @@ async function startCallWithRoom(roomName, callMode) {
     return;
   }
 
-  // 1. Supabase-inda user name tegedukolli
-  const client = window.supabaseClient || (typeof supabaseClient !== 'undefined' ? supabaseClient : null);
+  // 1. Ambil Nama Pengguna dari Supabase
   let userDisplayName = "Pengguna";
-
-  if (client) {
-    const { data: { session } } = await client.auth.getSession();
-    if (session?.user) {
-      userDisplayName = session.user.user_metadata?.full_name || 
-                        session.user.user_metadata?.name || 
-                        session.user.email || 
-                        "Pengguna";
+  try {
+    const client = window.supabaseClient || (typeof supabaseClient !== 'undefined' ? supabaseClient : null);
+    if (client && client.auth) {
+      const { data } = await client.auth.getSession();
+      if (data?.session?.user) {
+        const u = data.session.user;
+        userDisplayName = u.user_metadata?.full_name || u.user_metadata?.name || u.email || "Pengguna";
+      }
     }
+  } catch (err) {
+    console.error("Gagal mengambil session pengguna:", err);
   }
 
-  // 2. Overlay torisi matte container clear maadi
+  // 2. Tampilkan Overlay dan Bersihkan Frame Sebelumnya
   overlay.style.display = "flex";
   container.innerHTML = "";
 
-  // 3. Jitsi External API run maadi
+  // 3. Jalankan Jitsi API
   if (typeof JitsiMeetExternalAPI !== 'undefined') {
-    activeJitsiApi = new JitsiMeetExternalAPI("meet.jit.si", {
+    // Bersihkan instance lama jika masih tersisa
+    if (typeof activeJitsiApi !== 'undefined' && activeJitsiApi) {
+      activeJitsiApi.dispose();
+      activeJitsiApi = null;
+    }
+
+    const domain = "meet.jit.si";
+    const options = {
       roomName: roomName,
       width: "100%",
       height: "100%",
       parentNode: container,
       userInfo: {
-        displayName: userDisplayName // Otomatis display name set aaguthe
+        displayName: userDisplayName
       },
       configOverwrite: {
         startWithAudioMuted: false,
-        startWithVideoMuted: (callMode === 'audio'), // Audio call idre camera off iruthe
+        startWithVideoMuted: (callMode === 'audio'),
+        prejoinPageEnabled: false,      // Langsung masuk room tanpa layar konfirmasi
+        prejoinConfig: { enabled: false }, // Cadangan untuk versi Jitsi terbaru
         disableDeepLinking: true,
-        enableWelcomePage: false,
-        prejoinPageEnabled: false // Prejoin screen skip aaguthe (direct join)
+        enableWelcomePage: false
       },
       interfaceConfigOverwrite: {
         MOBILE_APP_PROMO: false,
         SHOW_JITSI_WATERMARK: false,
         TOOLBAR_BUTTONS: ['microphone', 'camera', 'hangup', 'tileview', 'fullscreen']
       }
-    });
+    };
 
-    // 4. Call cut aadaga overlay auto-close aagalu events
+    activeJitsiApi = new JitsiMeetExternalAPI(domain, options);
+
+    // 4. Tutup Overlay Otomatis Saat Panggilan Selesai
     activeJitsiApi.addEventListener('readyToClose', () => {
       endJitsiCall();
     });
@@ -812,7 +822,7 @@ async function startCallWithRoom(roomName, callMode) {
 }
 
 function endJitsiCall() {
-  if (activeJitsiApi) {
+  if (typeof activeJitsiApi !== 'undefined' && activeJitsiApi) {
     activeJitsiApi.dispose();
     activeJitsiApi = null;
   }
@@ -823,7 +833,6 @@ function endJitsiCall() {
   if (container) container.innerHTML = "";
 }
 
-
 // ==========================================================================
 // INISIALISASI SAAT HALAMAN SELESAI DIMUAT
 // ==========================================================================
@@ -831,6 +840,7 @@ document.addEventListener('DOMContentLoaded', () => {
   // Pastikan library Google Client sudah dimuat di HTML sebelum dipanggil
   if (typeof google !== 'undefined' && google.accounts) {
     initGoogleDrive();
+    ensureGoogleDriveReady();
   }
 });
 
@@ -853,9 +863,4 @@ function ensureGoogleDriveReady() {
   } else {
     setTimeout(ensureGoogleDriveReady, 500); // Cek lagi setiap 0.5 detik
   }
-}
-
-document.addEventListener('DOMContentLoaded', () => {
-  ensureGoogleDriveReady();
-});
 }
