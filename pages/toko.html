@@ -99,6 +99,21 @@
         .btn-buy:hover {
             background-color: #1eb954;
         }
+        .btn-beli {
+            background-color: #008cba;
+            color: white;
+            padding: 12px 24px;
+            font-size: 16px;
+            border: none;
+            border-radius: 4px;
+            cursor: pointer;
+            font-weight: bold;
+        }
+        .btn-beli:hover {
+            background-color: #005f73;
+        }
+        
+        
     </style>
 </head>
 <body>
@@ -117,9 +132,14 @@
                     <h3 class="product-title">Kemeja Polos Casual</h3>
                     <div class="product-price">Rp 120.000</div>
                     <p class="product-description">Bahan katun adem, cocok untuk aktivitas harian maupun formal.</p>
+                    <div style="
+            display: flex; justify-content: center;
+            items-align: center; gap: 10px;">
                     <button class="action-btn btn-chat-right" onclick="openPrivateChat('80cb070a-2e2e-4698-b24f-4666b4514b58', 'miftah98')" style="width: 100%; text-align: left; background: none; border: none; padding: 6px 10px; cursor: pointer; font-size: 13px;">
                         💬 Kirim Pesan
                     </button>
+                    <button id="pay-button" class="btn-buy open-modal-btn" data-target="tombol-beli">Bayar Sekarang</button>
+                    </div>
                 </div>
             </div>
 
@@ -130,9 +150,13 @@
                     <h3 class="product-title">Sepatu Sneaker Lokal</h3>
                     <div class="product-price">Rp 250.000</div>
                     <p class="product-description">Sol empuk, desain elegan, dan tahan lama untuk pemakaian harian.</p>
-                    <button class="action-btn btn-chat-right" onclick="openPrivateChat('80cb070a-2e2e-4698-b24f-4666b4514b58', 'miftah98')" style="width: 100%; text-align: left; background: none; border: none; padding: 6px 10px; cursor: pointer; font-size: 13px;">
-                        💬 Kirim Pesan
-                    </button>
+                    <div style="
+            display: flex; justify-content: center;
+            items-align: center; gap: 10px;">
+                        <button class="action-btn btn-chat-right" onclick="openPrivateChat('80cb070a-2e2e-4698-b24f-4666b4514b58', 'miftah98')" style="width: 100%; text-align: left; background: none; border: none; padding: 6px 10px; cursor: pointer; font-size: 13px;">💬 Kirim Pesan
+                        </button>
+                        <button id="pay-button" class="btn-buy open-modal-btn" data-target="tombol-beli">Bayar Sekarang</button>
+                        </div>
                 </div>
             </div>
 
@@ -143,12 +167,241 @@
                     <h3 class="product-title">Tas Ransel Laptop</h3>
                     <div class="product-price">Rp 180.000</div>
                     <p class="product-description">Dilengkapi kompartemen laptop 15 inci dan bahan tahan air.</p>
-                    <button class="action-btn btn-chat-right" onclick="openPrivateChat('80cb070a-2e2e-4698-b24f-4666b4514b58', 'miftah98')" style="width: 100%; text-align: left; background: none; border: none; padding: 6px 10px; cursor: pointer; font-size: 13px;">
-                        💬 Kirim Pesan
-                    </button>
+                    <div style="
+            display: flex; justify-content: center;
+            items-align: center; gap: 10px;">
+    <button class="action-btn btn-chat-right" onclick="openPrivateChat('80cb070a-2e2e-4698-b24f-4666b4514b58', 'miftah98')" style="width: 100%; text-align: left; background: none; border: none; padding: 6px 10px; cursor: pointer; font-size: 13px;">
+        💬 Kirim Pesan
+    </button>
+    <button id="pay-button" class="btn-buy open-modal-btn" data-target="tombol-beli">Bayar Sekarang</button>
+</div>
                 </div>
             </div>
+<!-- MODAL tombol beli -->
+      <div id="tombol-beli" class="modal" style="display: none;">
+        <div class="modal-content">
+          <span class="close-btn" onclick="closeModalDirect('tombol-beli')">&times;</span>
+                  <style>
+                  * {
+            box-sizing: border-box;
+            margin: 0;
+            padding: 0;
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+        }
 
+        body {
+            background-color: #f4f7f6;
+            color: #333;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            min-height: 100vh;
+            padding: 20px;
+        }
+
+        .checkout-card {
+            background: #ffffff;
+            border-radius: 16px;
+            box-shadow: 0 10px 25px rgba(0, 0, 0, 0.08);
+            max-width: 480px;
+            width: 100%;
+            padding: 32px 24px;
+            text-align: center;
+        }
+
+        /* Header Success Icon */
+        .status-icon {
+            width: 64px;
+            height: 64px;
+            background-color: #e6f4ea;
+            color: #137333;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            margin: 0 auto 16px;
+            font-size: 32px;
+        }
+
+        .title {
+            font-size: 22px;
+            font-weight: 700;
+            color: #202124;
+            margin-bottom: 8px;
+        }
+
+        .subtitle {
+            font-size: 14px;
+            color: #5f6368;
+            margin-bottom: 24px;
+        }
+
+        /* Timer / Expiry Badge */
+        .timer-badge {
+            background-color: #fef7e0;
+            color: #b06000;
+            display: inline-block;
+            padding: 6px 16px;
+            border-radius: 20px;
+            font-size: 13px;
+            font-weight: 600;
+            margin-bottom: 24px;
+        }
+
+        /* Order Details Box */
+        .order-box {
+            background-color: #f8f9fa;
+            border: 1px solid #e8eaed;
+            border-radius: 12px;
+            padding: 16px;
+            margin-bottom: 24px;
+            text-align: left;
+        }
+
+        .order-row {
+            display: flex;
+            justify-content: space-between;
+            margin-bottom: 12px;
+            font-size: 14px;
+        }
+
+        .order-row:last-child {
+            margin-bottom: 0;
+            padding-top: 12px;
+            border-top: 1px dashed #dadce0;
+            font-weight: bold;
+            font-size: 16px;
+        }
+
+        .label {
+            color: #5f6368;
+        }
+
+        .value {
+            color: #202124;
+            font-weight: 500;
+        }
+
+        /* QR Code & Payment Method Section */
+        .payment-method {
+            margin-bottom: 24px;
+        }
+
+        .qr-placeholder {
+            width: 180px;
+            height: 180px;
+            background: #ffffff;
+            border: 2px dashed #008cba;
+            border-radius: 12px;
+            margin: 12px auto;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: #008cba;
+            font-size: 13px;
+            font-weight: 600;
+        }
+
+        /* Action Buttons */
+        .btn-group {
+            display: flex;
+            flex-direction: column;
+            gap: 12px;
+        }
+
+        .btn {
+            width: 100%;
+            padding: 12px;
+            border: none;
+            border-radius: 8px;
+            font-size: 15px;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.2s ease;
+        }
+
+        .btn-primary {
+            background-color: #008cba;
+            color: white;
+        }
+
+        .btn-primary:hover {
+            background-color: #007399;
+        }
+
+        .btn-secondary {
+            background-color: transparent;
+            color: #5f6368;
+            border: 1px solid #dadce0;
+        }
+
+        .btn-secondary:hover {
+            background-color: #f1f3f4;
+        }
+
+        .footer-note {
+            margin-top: 20px;
+            font-size: 12px;
+            color: #80868b;
+        }
+    </style>
+              <div class="checkout-card">
+        <!-- Status Icon -->
+        <div class="status-icon">✓</div>
+        
+        <h1 class="title">Pesanan Berhasil Dibuat!</h1>
+        <p class="subtitle">Silakan selesaikan pembayaran sebelum batas waktu berakhir.</p>
+
+        <!-- Expiry Timer -->
+        <div class="timer-badge">
+            ⏱ Selesaikan pembayaran dalam <b>23:59:40</b>
+        </div>
+
+        <!-- Order Summary -->
+        <div class="order-box">
+            <div class="order-row">
+                <span class="label">ID Transaksi</span>
+                <span class="value">#TRX-2026092101</span>
+            </div>
+            <div class="order-row">
+                <span class="label">Produk</span>
+                <span class="value">Langganan Paket Premium</span>
+            </div>
+            <div class="order-row">
+                <span class="label">Metode Pembayaran</span>
+                <span class="value">QRIS / Bank Transfer</span>
+            </div>
+            <div class="order-row">
+                <span class="label">Total Pembayaran</span>
+                <span class="value" style="color: #008cba;">Rp 100.000</span>
+            </div>
+        </div>
+
+        <!-- QRIS Payment Area -->
+        <div class="payment-method">
+            <p style="font-size: 14px; font-weight: 600; color: #333;">Pindai QRIS untuk Bayar:</p>
+            
+            <!-- Tempat memasukkan Gambar QR Code dari Payment Gateway -->
+            <div class="qr-placeholder">
+                [ QRIS CODE HERE ]
+            </div>
+            
+            <p style="font-size: 12px; color: #5f6368;">Mendukung BCA, Mandiri, GoPay, OVO, ShopeePay & Dana</p>
+        </div>
+
+        <!-- Call to Action Buttons -->
+        <div class="btn-group">
+            <button class="btn btn-primary" onclick="alert('Mengecek status pembayaran...')">Cek Status Pembayaran</button>
+            <button class="btn btn-secondary" onclick="window.location.href='/pages/toko.html'">Kembali ke Beranda</button>
+        </div>
+
+        <!-- Footer Note -->
+        <p class="footer-note">
+            Butuh bantuan? Hubungi Layanan Pelanggan kami di support@domain.com
+        </p>
+    </div>
+        </div>
+      </div>
         </div>
     </div>
 

@@ -42,7 +42,7 @@ class NavBar extends HTMLElement {
           <li class="has-dropdown">MENU
             <ul class="vertical-dropdown">
               <li><a href="#" class="open-modal-btn" data-target="AboutModal">Kontak</a></li>
-              <li><a href="${basePath}pages/toko.html">TOKO</a></li>
+              <li><a href="#<!--${basePath}pages/toko.html-->">TOKO</a></li>
             </ul>
           </li>
           <li><a href="#" onclick="openChatFromNavbar(); return false;">💬 ChatsRoom</a></li>
