@@ -6,11 +6,11 @@
     <title>Katalog Produk</title>
     <link rel="stylesheet" href="../styles.css">
 
-    <!-- Memanggil JS dari folder assets/js -->
+    <!-- Script External -->
     <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
-<script src="https://meet.jit.si/external_api.js"></script>
-<script src="https://accounts.google.com/gsi/client" async defer></script>
-<script src="https://apis.google.com/js/api.js"></script>
+    <script src="https://meet.jit.si/external_api.js"></script>
+    <script src="https://accounts.google.com/gsi/client" async defer></script>
+    <script src="https://apis.google.com/js/api.js"></script>
     <script src="../assets/js/login.js" defer></script>
     <script src="../assets/js/pendaftaran.js" defer></script>
     <script src="../assets/js/navbar.js" defer></script>
@@ -18,14 +18,15 @@
     <script src="../assets/js/main.js" defer></script>
     <script src="../assets/js/post-card-element.js" defer></script>
     <script src="../assets/js/ubah-data-profil.js" defer></script>
-    <style>
-        /* Container Produk */
+    <script src="../assets/js/data-produk.js" defer> </script>
 
-        
+    <style>
+        /* Global & Layout Katalog */
         .page-title {
-            text-align: center;
+            padding-top:15px;
+            text-align: left;
             margin-bottom: 30px;
-            color: #222;
+            color: white;
         }
 
         .product-grid {
@@ -84,132 +85,126 @@
             line-height: 1.4;
         }
 
+        .card-actions {
+            display: flex; 
+            justify-content: center;
+            align-items: center; 
+            gap: 10px;
+        }
+
         .btn-buy {
             display: block;
             text-align: center;
-            background-color: #25d366; /* Warna khas WhatsApp */
+            background-color: #25d366;
             color: white;
             text-decoration: none;
             padding: 10px;
             border-radius: 6px;
             font-weight: bold;
+            border: none;
+            cursor: pointer;
             transition: background 0.2s;
         }
 
         .btn-buy:hover {
             background-color: #1eb954;
         }
-        .btn-beli {
-            background-color: #008cba;
-            color: white;
-            padding: 12px 24px;
-            font-size: 16px;
-            border: none;
-            border-radius: 4px;
-            cursor: pointer;
-            font-weight: bold;
-        }
-        .btn-beli:hover {
-            background-color: #005f73;
-        }
-        
-        
-    </style>
-</head>
-<body>
-    <!-- Navigasi -->
-<my-navbar></my-navbar>
-    <!-- Katalog Produk -->
-    <div class="container">
-        <h1 class="page-title">Katalog Produk</h1>
 
-        <div class="product-grid">
-            
-            <!-- Produk 1 -->
-            <div class="product-card">
-                <img src="https://via.placeholder.com/300x200" alt="Produk 1" class="product-image">
-                <div class="product-info">
-                    <h3 class="product-title">Kemeja Polos Casual</h3>
-                    <div class="product-price">Rp 120.000</div>
-                    <p class="product-description">Bahan katun adem, cocok untuk aktivitas harian maupun formal.</p>
-                    <div style="
-            display: flex; justify-content: center;
-            items-align: center; gap: 10px;">
-                    <button class="action-btn btn-chat-right" onclick="openPrivateChat('80cb070a-2e2e-4698-b24f-4666b4514b58', 'miftah98')" style="width: 100%; text-align: left; background: none; border: none; padding: 6px 10px; cursor: pointer; font-size: 13px;">
-                        💬 Kirim Pesan
-                    </button>
-                    <button id="pay-button" class="btn-buy open-modal-btn" data-target="tombol-beli">Bayar Sekarang</button>
-                    </div>
-                </div>
-            </div>
-
-            <!-- Produk 2 -->
-            <div class="product-card">
-                <img src="https://via.placeholder.com/300x200" alt="Produk 2" class="product-image">
-                <div class="product-info">
-                    <h3 class="product-title">Sepatu Sneaker Lokal</h3>
-                    <div class="product-price">Rp 250.000</div>
-                    <p class="product-description">Sol empuk, desain elegan, dan tahan lama untuk pemakaian harian.</p>
-                    <div style="
-            display: flex; justify-content: center;
-            items-align: center; gap: 10px;">
-                        <button class="action-btn btn-chat-right" onclick="openPrivateChat('80cb070a-2e2e-4698-b24f-4666b4514b58', 'miftah98')" style="width: 100%; text-align: left; background: none; border: none; padding: 6px 10px; cursor: pointer; font-size: 13px;">💬 Kirim Pesan
-                        </button>
-                        <button id="pay-button" class="btn-buy open-modal-btn" data-target="tombol-beli">Bayar Sekarang</button>
-                        </div>
-                </div>
-            </div>
-
-            <!-- Produk 3 -->
-            <div class="product-card">
-                <img src="https://via.placeholder.com/300x200" alt="Produk 3" class="product-image">
-                <div class="product-info">
-                    <h3 class="product-title">Tas Ransel Laptop</h3>
-                    <div class="product-price">Rp 180.000</div>
-                    <p class="product-description">Dilengkapi kompartemen laptop 15 inci dan bahan tahan air.</p>
-                    <div style="
-            display: flex; justify-content: center;
-            items-align: center; gap: 10px;">
-    <button class="action-btn btn-chat-right" onclick="openPrivateChat('80cb070a-2e2e-4698-b24f-4666b4514b58', 'miftah98')" style="width: 100%; text-align: left; background: none; border: none; padding: 6px 10px; cursor: pointer; font-size: 13px;">
-        💬 Kirim Pesan
-    </button>
-    <button id="pay-button" class="btn-buy open-modal-btn" data-target="tombol-beli">Bayar Sekarang</button>
-</div>
-                </div>
-            </div>
-<!-- MODAL tombol beli -->
-      <div id="tombol-beli" class="modal" style="display: none;">
-        <div class="modal-content">
-          <span class="close-btn" onclick="closeModalDirect('tombol-beli')">&times;</span>
-                  <style>
-                  * {
-            box-sizing: border-box;
-            margin: 0;
-            padding: 0;
-            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
-        }
-
-        body {
-            background-color: #f4f7f6;
-            color: #333;
+        /* Modal Detail Produk */
+        .product-gallery {
+            flex: 1 1 400px;
+            background-color: #e9ecef;
             display: flex;
             justify-content: center;
             align-items: center;
-            min-height: 100vh;
             padding: 20px;
         }
 
+        .product-gallery img {
+            max-width: 100%;
+            height: auto;
+            border-radius: 8px;
+            object-fit: cover;
+        }
+
+        .product-details {
+            flex: 1 1 400px;
+            padding: 20px 30px;
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+        }
+
+        .product-category {
+            font-size: 0.85rem;
+            color: #888;
+            text-transform: uppercase;
+            letter-spacing: 1px;
+            margin-bottom: 8px;
+        }
+
+        .option-group {
+            margin-bottom: 15px;
+        }
+
+        .option-title {
+            font-size: 0.9rem;
+            font-weight: 600;
+            margin-bottom: 8px;
+        }
+
+        .options {
+            display: flex;
+            gap: 10px;
+        }
+
+        .btn-option {
+            padding: 8px 16px;
+            border: 1px solid #ccc;
+            background: #fff;
+            border-radius: 6px;
+            cursor: pointer;
+            transition: 0.2s;
+            font-size: 0.85rem;
+        }
+
+        .btn-option:hover, .btn-option.active {
+            border-color: #25d366;
+            background-color: #e8fadf;
+            color: #128c7e;
+            font-weight: bold;
+        }
+
+        .features {
+            margin-top: 25px;
+            border-top: 1px solid #eee;
+            padding-top: 15px;
+        }
+
+        .feature-item {
+            display: flex;
+            align-items: center;
+            font-size: 0.85rem;
+            color: #666;
+            margin-bottom: 8px;
+        }
+
+        .feature-item span {
+            margin-right: 8px;
+            color: #25d366;
+        }
+
+        /* Modal Checkout / Pembayaran */
         .checkout-card {
             background: #ffffff;
             border-radius: 16px;
-            box-shadow: 0 10px 25px rgba(0, 0, 0, 0.08);
             max-width: 480px;
             width: 100%;
-            padding: 32px 24px;
+            padding: 24px;
+            margin: 0 auto;
             text-align: center;
         }
 
-        /* Header Success Icon */
         .status-icon {
             width: 64px;
             height: 64px;
@@ -236,7 +231,6 @@
             margin-bottom: 24px;
         }
 
-        /* Timer / Expiry Badge */
         .timer-badge {
             background-color: #fef7e0;
             color: #b06000;
@@ -248,7 +242,6 @@
             margin-bottom: 24px;
         }
 
-        /* Order Details Box */
         .order-box {
             background-color: #f8f9fa;
             border: 1px solid #e8eaed;
@@ -273,20 +266,6 @@
             font-size: 16px;
         }
 
-        .label {
-            color: #5f6368;
-        }
-
-        .value {
-            color: #202124;
-            font-weight: 500;
-        }
-
-        /* QR Code & Payment Method Section */
-        .payment-method {
-            margin-bottom: 24px;
-        }
-
         .qr-placeholder {
             width: 180px;
             height: 180px;
@@ -302,7 +281,6 @@
             font-weight: 600;
         }
 
-        /* Action Buttons */
         .btn-group {
             display: flex;
             flex-direction: column;
@@ -344,64 +322,114 @@
             font-size: 12px;
             color: #80868b;
         }
+
+        @media (max-width: 600px) {
+            .product-details {
+                padding: 15px;
+            }
+            .product-title {
+                font-size: 1.4rem;
+            }
+        }
     </style>
-              <div class="checkout-card">
-        <!-- Status Icon -->
-        <div class="status-icon">✓</div>
+</head>
+<body>
+
+    <!-- Navigasi -->
+    <my-navbar></my-navbar>
+
+    <!-- Katalog Produk -->
+    <div class="container">
+        <h2 class="page-title">Katalog Produk</h1>
+        <div class="product-grid" id="product-list">
+    <!-- Produk akan diisi secara otomatis oleh JavaScript -->
+        </div>
         
-        <h1 class="title">Pesanan Berhasil Dibuat!</h1>
-        <p class="subtitle">Silakan selesaikan pembayaran sebelum batas waktu berakhir.</p>
-
-        <!-- Expiry Timer -->
-        <div class="timer-badge">
-            ⏱ Selesaikan pembayaran dalam <b>23:59:40</b>
-        </div>
-
-        <!-- Order Summary -->
-        <div class="order-box">
-            <div class="order-row">
-                <span class="label">ID Transaksi</span>
-                <span class="value">#TRX-2026092101</span>
-            </div>
-            <div class="order-row">
-                <span class="label">Produk</span>
-                <span class="value">Langganan Paket Premium</span>
-            </div>
-            <div class="order-row">
-                <span class="label">Metode Pembayaran</span>
-                <span class="value">QRIS / Bank Transfer</span>
-            </div>
-            <div class="order-row">
-                <span class="label">Total Pembayaran</span>
-                <span class="value" style="color: #008cba;">Rp 100.000</span>
-            </div>
-        </div>
-
-        <!-- QRIS Payment Area -->
-        <div class="payment-method">
-            <p style="font-size: 14px; font-weight: 600; color: #333;">Pindai QRIS untuk Bayar:</p>
-            
-            <!-- Tempat memasukkan Gambar QR Code dari Payment Gateway -->
-            <div class="qr-placeholder">
-                [ QRIS CODE HERE ]
-            </div>
-            
-            <p style="font-size: 12px; color: #5f6368;">Mendukung BCA, Mandiri, GoPay, OVO, ShopeePay & Dana</p>
-        </div>
-
-        <!-- Call to Action Buttons -->
-        <div class="btn-group">
-            <button class="btn btn-primary" onclick="alert('Mengecek status pembayaran...')">Cek Status Pembayaran</button>
-            <button class="btn btn-secondary" onclick="window.location.href='/pages/toko.html'">Kembali ke Beranda</button>
-        </div>
-
-        <!-- Footer Note -->
-        <p class="footer-note">
-            Butuh bantuan? Hubungi Layanan Pelanggan kami di support@domain.com
-        </p>
     </div>
+    
+    <!-- MODAL 1: Detail Produk (Serbaguna) -->
+<div id="modal-detail-produk" class="modal" style="display: none;">
+    <div class="modal-content">
+        <span class="close-btn" onclick="closeModalDirect('modal-detail-produk')">&times;</span>
+        <div class="container" style="display: flex; flex-wrap: wrap;">
+            
+            <!-- Gambar Produk -->
+            <div class="product-gallery">
+                <img id="modal-img" src="" alt="Foto Produk">
+            </div>
+
+            <!-- Detail Teks Produk -->
+            <div class="product-details">
+                <div id="modal-category" class="product-category"></div>
+                <h3 id="modal-title" class="product-title"></h3>
+                <div id="modal-price" class="product-price"></div>
+                <p id="modal-description" class="product-description"></p>
+
+                <!-- Container Opsi Ukuran -->
+                <div class="option-group">
+                    <div class="option-title">Pilih Ukuran:</div>
+                    <div id="modal-sizes" class="options"></div>
+                </div>
+
+                <!-- Container Keunggulan -->
+                <div class="features" id="modal-features"></div>
+            </div>
+
         </div>
-      </div>
+    </div>
+</div>
+
+
+    <!-- MODAL 2: Pembayaran -->
+    <div id="tombol-beli" class="modal" style="display: none;">
+        <div class="modal-content" style="width: 95%; height: 90%;">
+            <span class="close-btn" onclick="closeModalDirect('tombol-beli')">&times;</span>
+            <div class="checkout-card">
+                <div class="status-icon">✓</div>
+                <h1 class="title">Pesanan Berhasil Dibuat!</h1>
+                <p class="subtitle">Silakan selesaikan pembayaran sebelum batas waktu berakhir.</p>
+
+                <div class="timer-badge">
+                    ⏱ Selesaikan pembayaran dalam <b>23:59:40</b>
+                </div>
+
+                <div class="order-box">
+                    <div class="order-row">
+                        <span class="label">ID Transaksi</span>
+                        <span class="value">#TRX-2026092101</span>
+                    </div>
+                    <div class="order-row">
+                        <span class="label">Produk</span>
+                        <span class="value">Kemeja Polos Casual</span>
+                    </div>
+                    <div class="order-row">
+                        <span class="label">Metode Pembayaran</span>
+                        <span class="value">QRIS / Bank Transfer</span>
+                    </div>
+                    <div class="order-row">
+                        <span class="label">Total Pembayaran</span>
+                        <span class="value" style="color: #008cba;">Rp 120.000</span>
+                    </div>
+                </div>
+
+                <div class="payment-method">
+                    <p style="font-size: 14px; font-weight: 600; color: #333;">Pindai QRIS untuk Bayar:</p>
+<div class="qr-placeholder" style="width: 70%; height: 50%; border: none; padding: 10px;">
+<img id="qr-code-img" src="" alt="QRIS Payment Code" style="width: 100%; height: 100%; object-fit: contain;">
+</div>
+                </div>
+                    <p style="font-size: 12px; color: #5f6368;">Mendukung BCA, Mandiri, GoPay, OVO, ShopeePay & Dana</p>
+                </div>
+
+                <div class="btn-group">
+                    <button class="btn btn-primary" onclick="alert('Mengecek status pembayaran...')">Cek Status Pembayaran</button>
+                    <button class="btn btn-secondary" onclick="closeModalDirect('tombol-beli')">Kembali ke Katalog</button>
+                </div>
+
+                <p class="footer-note">
+                    Butuh bantuan? Hubungi Layanan Pelanggan kami di support@domain.com
+                </p>
+            </div>
         </div>
     </div>
 
