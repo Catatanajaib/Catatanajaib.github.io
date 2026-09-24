@@ -37,12 +37,22 @@ class NavBar extends HTMLElement {
     this.innerHTML = `
       <!-- NAVIGASI UTAMA -->
       <nav class="navbar">
-        <h4 class="logo">Catatan Ajaib</h4>
+        <style>
+    @keyframes migrasi {
+        0% { left: -20%; }
+        100% { left: 100%; }
+    }
+</style>
+
+<!-- Tag HTML kamu dengan style inline yang sudah diperbaiki -->
+<h4 class="logo" style="position: absolute; top: 50%; transform: translateY(-50%); animation: migrasi 5s infinite linear; white-space: nowrap;">
+    Catatan Ajaib
+</h4>
         <ul class="nav-links">
           <li class="has-dropdown">MENU
             <ul class="vertical-dropdown">
               <li><a href="#" class="open-modal-btn" data-target="AboutModal">Kontak</a></li>
-              <li><a href="#<!--${basePath}pages/toko.html-->">TOKO</a></li>
+              <li><a href="${basePath}pages/toko.html">TOKO</a></li>
             </ul>
           </li>
           <li><a href="#" onclick="openChatFromNavbar(); return false;">💬 ChatsRoom</a></li>
