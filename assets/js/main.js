@@ -52,18 +52,19 @@ function initInfiniteScrollFeed() {
       like: 12,
       comment: 5
     },
-    { 
-      id: "dummy-2", 
-      name: "Network Pro",
-      judul: "Mengenal Cara Kerja Cloudflare & DNS Management", 
-      ringkasan: "Bagaimana cara menghubungkan domain kustom dan melindungi server.", 
-      kategori: "Networking", 
-      gambar: "https://picsum.photos/600/300?random=2", 
-      url: "#", 
-      date: "22 Agu 2026",
-      like: 8,
-      comment: 2
-    },
+    {
+  id: "dummy-2", 
+  name: "frekuensi",
+  judul: "Bermacam-Macam Frekuensi: Dari Sinyal HP Sampai Cahaya yang Kita Lihat", 
+  ringkasan: "Memahami spektrum gelombang elektromagnetik dan akustik secara sederhana. Pelajari bagaimana gelombang radio, Wi-Fi, cahaya, hingga suara bekerja di sekitar kita sehari-hari.", 
+  kategori: "Networking", 
+  gambar: "https://picsum.photos/600/300?random=2", 
+  url: "../pages/frekuensi.html", 
+  date: "22 Agu 2026",
+  like: 8,
+  comment: 2
+},
+
     { 
       id: "dummy-3", 
       name: "Blogger Hub",

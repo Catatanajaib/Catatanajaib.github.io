@@ -1,0 +1,344 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Inspirasi Desain Rumah Minimalis Sederhana</title>
+    
+    <link rel="stylesheet" href="../styles.css">
+    
+    <!-- Memanggil Script Pendukung -->
+    <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+    <script src="../assets/js/login.js" defer></script>
+<script src="../assets/js/pendaftaran.js" defer></script>
+<script src="../assets/js/navbar.js" defer></script>
+<script src="../assets/js/modalhandler.js" defer></script>
+<script src="../assets/js/main.js" defer></script>
+<script src="../assets/js/post-card-element.js" defer></script>
+<script src="../assets/js/ubah-data-profil.js" defer></script>
+    <style>
+        /* CSS RESET & GAYA DASAR */
+        
+
+        /* WADAH UTAMA ARTIKEL */
+        .article-card {
+        	text-align:left;
+            max-width: 800px;
+            margin: 0 auto 24px auto;
+            padding: 32px;
+            background-color: #ffffff;
+            border-radius: 12px;
+            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.05);
+        }
+
+        .article-title {
+            font-size: 28px;
+            color: #111827;
+            margin-bottom: 8px;
+        }
+
+        .article-meta {
+            font-size: 13px;
+            color: #6b7280;
+            margin-bottom: 24px;
+        }
+
+        p {
+            margin-bottom: 16px;
+        }
+
+        /* KISIKAN GALERI (GRID) */
+        .gallery-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
+            gap: 20px;
+            margin: 16px 0;
+        }
+
+        .gallery-card {
+            background-color: #ffffff;
+            border-radius: 10px;
+            overflow: hidden;
+            border: 1px solid #e5e7eb;
+        }
+
+        /* KOTAK GAMBAR DENGAN RASIO 4:3 */
+        .image-container {
+            width: 100%;
+            aspect-ratio: 4 / 3;
+            overflow: hidden;
+            position: relative;
+            cursor: zoom-in; /* Menandakan gambar bisa di-zoom */
+            background-color: #f3f4f6;
+        }
+
+        /* EFEK HOVER ZOOM DENGAN JAVASCRIPT */
+        .image-container img {
+        width: 100%;
+        height: 100%;
+        object-fit: cover;
+        pointer-events: none;
+        transition: transform 0.2s ease-out;
+        transform-origin: center center;
+        
+        /* Optimasi rendering agar gambar tidak pecah saat diperbesar */
+        image-rendering: -webkit-optimize-contrast;
+        image-rendering: crisp-edges;
+        }
+
+        /* Saat di-hover, gambar membesar */
+        .image-container:hover img {
+            transform: scale(2.5); /* Skala zoom disesuaikan agar pas dan nyaman (2.5x) */
+        }
+
+        .gallery-caption {
+            padding: 12px;
+            text-align: center;
+            font-weight: 600;
+            font-size: 14px;
+            color: #374151;
+        }
+
+        /* WIDGET IKLAN */
+        .ad-container {
+            text-align: center;
+            margin: 24px 0;
+            overflow-x: auto;
+        }
+        
+            :root {
+      --bg-color: #0f172a;
+      --card-bg: #1e293b;
+      --text-main: #f8fafc;
+      --text-muted: #94a3b8;
+      --border-color: #334155;
+      --accent-color: #38bdf8;
+    }
+
+    body {
+      background-color: var(--bg-color);
+      color: var(--text-main);
+      font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+      margin: 0;
+      padding: 20px;
+      display: flex;
+      justify-content: center;
+    }
+
+    .container {
+      width: 100%;
+      max-width: 1000px;
+    }
+
+    h1 {
+      text-align: center;
+      color: var(--accent-color);
+      margin-bottom: 8px;
+    }
+
+    p.subtitle {
+      text-align: center;
+      color: var(--text-muted);
+      margin-bottom: 30px;
+      font-size: 0.95rem;
+    }
+
+    h2 {
+      color: #f43f5e;
+      border-left: 4px solid #f43f5e;
+      padding-left: 10px;
+      margin-top: 40px;
+      margin-bottom: 15px;
+      font-size: 1.3rem;
+    }
+
+    .table-container {
+      overflow-x: auto;
+      background: var(--card-bg);
+      border-radius: 12px;
+      border: 1px solid var(--border-color);
+      box-shadow: 0 10px 25px rgba(0, 0, 0, 0.3);
+    }
+
+    table {
+      width: 100%;
+      border-collapse: collapse;
+      text-align: left;
+    }
+
+    th {
+      background-color: #0f172a;
+      color: var(--accent-color);
+      padding: 14px 18px;
+      font-weight: 600;
+      border-bottom: 2px solid var(--border-color);
+      white-space: nowrap;
+    }
+
+    td {
+      padding: 14px 18px;
+      border-bottom: 1px solid var(--border-color);
+      font-size: 0.9rem;
+      vertical-align: middle;
+    }
+
+    tr:last-child td {
+      border-bottom: none;
+    }
+
+    tr:hover {
+      background-color: rgba(255, 255, 255, 0.03);
+    }
+
+    /* Badge Label Warna Kategori */
+    .badge {
+      display: inline-block;
+      padding: 4px 10px;
+      border-radius: 6px;
+      font-weight: bold;
+      font-size: 0.8rem;
+    }
+
+    .badge-radio { background: #3b82f6; color: white; }
+    .badge-micro { background: #06b6d4; color: white; }
+    .badge-infra { background: #ef4444; color: white; }
+    .badge-visible { 
+      background: linear-gradient(90deg, red, orange, yellow, green, blue, indigo, violet); 
+      color: white; 
+      text-shadow: 0 1px 2px rgba(0,0,0,0.8);
+    }
+    .badge-uv { background: #a855f7; color: white; }
+    .badge-xray { background: #ec4899; color: white; }
+    .badge-gamma { background: #e11d48; color: white; }
+    .badge-audio { background: #10b981; color: white; }
+
+    .freq-code {
+      font-family: 'Courier New', Courier, monospace;
+      color: #38bdf8;
+      font-weight: bold;
+    }
+
+    /* Responsif untuk layar kecil */
+    @media (max-width: 600px) {
+      th, td {
+        padding: 10px 12px;
+        font-size: 0.82rem;
+      }
+    }
+        
+    </style>
+</head>
+<body>
+
+    <!-- Web Component Navbar -->
+    <my-navbar></my-navbar>
+
+
+
+  <article class="article-card">
+<div class="container">
+  <p class="subtitle" style="text-align: left;">Spektrum Elektromagnetik ini adalah "peta" atau rentang seluruh jenis gelombang yang ada di alam semesta, diurutkan berdasarkan frekuensi (kecepatan getarannya) dan panjang gelombangnya.
+Semua yang ada di dalam spektrum ini sebenarnya satu jenis "keluarga" yang sama (paket energi yang bergerak secepat cahaya), hanya saja frekuensinya beda-beda dari yang sangat lambat sampai yang super cepat!
+"Tabel/Peta" Spektrum Elektromagnetik
+Berikut urutannya dari frekuensi paling rendah (getaran lambat) sampai frekuensi paling tinggi (getaran super cepat):</p>
+  <h1>Peta Spektrum Gelombang</h1>
+  <p class="subtitle">Klasifikasi Gelombang Elektromagnetik (Tanpa Udara) & Akustik (Suara/Udara)</p>
+
+  <!-- TABEL SPEKTRUM ELEKTROMAGNETIK -->
+  <h2>1. Spektrum Elektromagnetik (Radiasi / Tanpa Udara)</h2>
+  <div class="table-container">
+    <table>
+      <thead>
+        <tr>
+          <th>No</th>
+          <th>Jenis Gelombang</th>
+          <th>Rentang Frekuensi</th>
+          <th>Sifat / Keberadaan di Alam & Teknologi</th>
+        </tr>
+      </thead>
+      <tbody>
+        <tr>
+          <td>1</td>
+          <td><span class="badge badge-radio">Gelombang Radio</span></td>
+          <td class="freq-code">3 Hz – 300 MHz</td>
+          <td>Siaran Radio AM/FM, TV Analog, Walkie-Talkie (HT), Radar kapal.</td>
+        </tr>
+        <tr>
+          <td>2</td>
+          <td><span class="badge badge-micro">Gelombang Mikro</span></td>
+          <td class="freq-code">300 MHz – 300 GHz</td>
+          <td>Wi-Fi, Bluetooth, Jaringan HP (4G/5G), GPS, Oven Microwave.</td>
+        </tr>
+        <tr>
+          <td>3</td>
+          <td><span class="badge badge-infra">Inframerah (Infrared)</span></td>
+          <td class="freq-code">300 GHz – 400 THz</td>
+          <td>Remote TV, Kamera Night Vision, Sensor Panas Tubuh, Api.</td>
+        </tr>
+        <tr>
+          <td>4</td>
+          <td><span class="badge badge-visible">Cahaya Tampak</span></td>
+          <td class="freq-code">400 THz – 790 THz</td>
+          <td><strong>Satu-satunya yang terlihat mata manusia!</strong> Pelangi (MeJiKuHiBiNiU).</td>
+        </tr>
+        <tr>
+          <td>5</td>
+          <td><span class="badge badge-uv">Ultraviolet (UV)</span></td>
+          <td class="freq-code">790 THz – 30 PHz</td>
+          <td>Sinar Matahari, Sterilisasi Bakteri, Alat Pendeteksi Uang Palsu.</td>
+        </tr>
+        <tr>
+          <td>6</td>
+          <td><span class="badge badge-xray">Sinar-X (X-Ray)</span></td>
+          <td class="freq-code">30 PHz – 30 EHz</td>
+          <td>Foto Rontgen Medis, Pemindai Bagasi Bandara.</td>
+        </tr>
+        <tr>
+          <td>7</td>
+          <td><span class="badge badge-gamma">Sinar Gamma</span></td>
+          <td class="freq-code">&gt; 30 EHz</td>
+          <td>Radiasi Nuklir, Ledakan Bintang (Supernova), Terapi Kanker.</td>
+        </tr>
+      </tbody>
+    </table>
+  </div>
+
+  <!-- TABEL SPEKTRUM AKUSTIK / SUARA -->
+  <h2>2. Spektrum Akustik (Getaran Fisik Udara / Suara)</h2>
+  <div class="table-container">
+    <table>
+      <thead>
+        <tr>
+          <th>Kategori Suara</th>
+          <th>Rentang Frekuensi</th>
+          <th>Dapat Didengar Oleh</th>
+          <th>Contoh Fenomena / Suara</th>
+        </tr>
+      </thead>
+      <tbody>
+        <tr>
+          <td><strong>Infrasonik</strong></td>
+          <td class="freq-code">&lt; 20 Hz</td>
+          <td>Gajah, Paus, Anjing</td>
+          <td>Getaran Gempa Bumi, Gelombang Laut, Aktivitas Gunung Berapi.</td>
+        </tr>
+        <tr>
+          <td><span class="badge badge-audio">Audiosonik</span></td>
+          <td class="freq-code">20 Hz – 20.000 Hz</td>
+          <td><strong>Manusia</strong></td>
+          <td>Suara percakapan, musik, klakson, suara berdenging (<em>Tinnitus</em>).</td>
+        </tr>
+        <tr>
+          <td><strong>Ultrasonik</strong></td>
+          <td class="freq-code">&gt; 20.000 Hz</td>
+          <td>Kelelawar, Lumba-lumba</td>
+          <td>Navigasi Radar Kelelawar, Alat USG Medis Kandungan.</td>
+        </tr>
+      </tbody>
+    </table>
+  </div>
+</div>
+  </article>
+  
+</body>
+</html>
