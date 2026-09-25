@@ -59,7 +59,7 @@ function initInfiniteScrollFeed() {
   ringkasan: "Memahami spektrum gelombang elektromagnetik dan akustik secara sederhana. Pelajari bagaimana gelombang radio, Wi-Fi, cahaya, hingga suara bekerja di sekitar kita sehari-hari.", 
   kategori: "Networking", 
   gambar: "https://picsum.photos/600/300?random=2", 
-  url: "../pages/frekuensi.html", 
+  url: "../pages/artikel-frekuensi.html", 
   date: "22 Agu 2026",
   like: 8,
   comment: 2
