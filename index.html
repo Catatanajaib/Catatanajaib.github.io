@@ -356,7 +356,161 @@ document.addEventListener("DOMContentLoaded", () => {
       <span>catatanajaib.github.io</span>
 </footer>
 
-  
+   <style>
+        .card {
+            background: #ffffff;
+            border-radius: 16px;
+            box-shadow: 0 10px 25px rgba(0,0,0,0.1);
+            width: 90%;
+            height: a:autofill;
+            padding: 24px;
+            
+        }
+        .profile-img {
+            width: 10%;
+            height: 10%;
+            background-color: #00a5cf;
+            color: #fff;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 32px;
+            font-weight: bold;
+            margin: 0 auto 16px;
+        }
+        h1 {
+            font-size: 22px;
+            color: #1a202c;
+            margin-bottom: 6px;
+        }
+        p.subtitle {
+            font-size: 14px;
+            color: #718096;
+            margin-bottom: 20px;
+        }
+        .qris-box {
+            background: #f7fafc;
+            border: 2px dashed #cbd5e0;
+            border-radius: 12px;
+            padding: 16px;
+            margin-bottom: 20px;
+        }
+        .qris-box img {
+            width: 90%;
+            height: 70%;
+            border-radius: 8px;
+        }
+        .info-group {
+            background: #edf2f7;
+            padding: 12px 16px;
+            border-radius: 8px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 12px;
+            font-size: 14px;
+        }
+        .info-group span.label {
+            color: #4a5568;
+            font-weight: 500;
+        }
+        .info-group span.value {
+            color: #2d3748;
+            font-weight: bold;
+        }
+        .btn-copy {
+            background-color: #0084ff;
+            color: white;
+            border: none;
+            padding: 6px 12px;
+            border-radius: 6px;
+            cursor: pointer;
+            font-size: 12px;
+            transition: background 0.2s;
+        }
+        .btn-copy:hover {
+            background-color: #0066cc;
+        }
+        .footer-text {
+            font-size: 12px;
+            color: #a0aec0;
+            margin-top: 16px;
+        }
+    </style>
+</head>
+<body>
+
+<div class="card">
+    <div class="profile-img">M</div>
+    <h1>MIFTAH98, OTOMOTIF</h1>
+    <p class="subtitle">Dukung konten & karya kami via QRIS / E-Wallet / Bank</p>
+
+    <!-- Tempat Menampilkan Gambar QRIS -->
+    <div class="qris-box">
+        <p style="font-size: 12px; font-weight: bold; color: #4a5568; margin-bottom: 8px;">Scan QRIS GoPay Merchant</p>
+        <!-- Ganti 'IMG_20260927_203441.jpeg' dengan nama file gambar QRIS Anda jika di-host di folder yang sama -->
+        <img src="assets/images/sawer.jpeg" alt="QRIS MIFTAH98 OTOMOTIF">
+    </div>
+
+    <!-- Informasi Nomor Sawer / Rekening -->
+    <div class="info-group">
+        <div>
+            <span class="label">Nomor / ID:</span><br>
+            <span class="value" id="nomor-sawer">901509027272</span>
+        </div>
+        <button class="btn-copy" onclick="copyNumber()">Salin</button>
+    </div>
+
+    <div class="info-group">
+        <div>
+            <span class="label">NMID QRIS:</span><br>
+            <span class="value">ID1025452391614</span>
+        </div>
+    </div>
+
+    <p class="footer-text">Terima kasih atas bantuan & dukungan Anda! 🙏</p>
+</div>
+<div class="card">
+    <div class="profile-img">M</div>
+    <h1>MIFTAH98, OTOMOTIF</h1>
+    <p class="subtitle">Dukung konten & karya kami via QRIS / E-Wallet / Bank</p>
+    
+    <!-- Tempat Menampilkan Gambar QRIS -->
+    <div class="qris-box">
+        <p style="font-size: 12px; font-weight: bold; color: #4a5568; margin-bottom: 8px;">Scan QRIS GoPay Merchant</p>
+        <!-- Ganti 'IMG_20260927_203441.jpeg' dengan nama file gambar QRIS Anda jika di-host di folder yang sama -->
+        <img src="assets/images/sawer.jpeg" alt="QRIS MIFTAH98 OTOMOTIF">
+    </div>
+    
+    <!-- Informasi Nomor Sawer / Rekening -->
+    <div class="info-group">
+        <div>
+            <span class="label">Nomor / ID:</span><br>
+            <span class="value" id="nomor-sawer">901509027272</span>
+        </div>
+        <button class="btn-copy" onclick="copyNumber()">Salin</button>
+    </div>
+    
+    <div class="info-group">
+        <div>
+            <span class="label">NMID QRIS:</span><br>
+            <span class="value">ID1025452391614</span>
+        </div>
+    </div>
+    
+    <p class="footer-text">Terima kasih atas bantuan & dukungan Anda! 🙏</p>
+</div>
+<script>
+    function copyNumber() {
+        const textToCopy = document.getElementById('nomor-sawer').innerText;
+        navigator.clipboard.writeText(textToCopy).then(() => {
+            alert('Nomor 901509027272 berhasil disalin!');
+        }).catch(err => {
+            console.error('Gagal menyalin text: ', err);
+        });
+    }
+</script>
 
 </section>
 
