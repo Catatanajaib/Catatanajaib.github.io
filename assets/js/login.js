@@ -211,63 +211,9 @@ document.addEventListener("DOMContentLoaded", () => {
             }
         });
     }
-
-    // ==========================================
-    // 6. PROSES MEMBUAT POSTINGAN BARU
-    // ==========================================
-    if (postForm) {
-        postForm.addEventListener("submit", async (event) => {
-            event.preventDefault();
-
-            const { data: { session } } = await supabaseClient.auth.getSession();
-
-            if (!session) {
-                alert("Sesi Anda telah berakhir. Silakan login kembali.");
-                updateUIForLoggedOutUser();
-                return;
-            }
-
-            const contentInput = document.getElementById("content");
-            const contentText = contentInput ? contentInput.value.trim() : "";
-
-            if (!contentText) {
-                alert("Isi postingan tidak boleh kosong!");
-                return;
-            }
-
-            try {
-                const { error } = await supabaseClient
-                    .from('posts')
-                    .insert([
-                        {
-                            user_id: session.user.id,
-                            username: currentUsername,
-                            content: contentText,
-                            is_logged_in: true
-                        }
-                    ]);
-
-                if (error) throw error;
-
-                alert("Postingan berhasil diterbitkan!");
-                postForm.reset();
-
-                if (usernameInput) usernameInput.value = currentUsername;
-
-                if (typeof loadPosts === "function") {
-                    loadPosts();
-                }
-
-            } catch (err) {
-                console.error("Gagal mengirim postingan:", err.message);
-                alert("Terjadi kesalahan saat mengirim postingan: " + err.message);
-            }
-        });
-    }
-
-    // Jalankan pemeriksaan sesi awal saat halaman dimuat
-    checkUserSession();
 });
+
+
 
 // ==========================================
 // 7. SISTEM KOMENTAR & UTILS GLOBAL (NESTED)

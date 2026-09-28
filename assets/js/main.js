@@ -161,15 +161,187 @@ function initInfiniteScrollFeed() {
     observer.observe(sentinel);
   }
 }
+/* ==========================================================================
+   A. GLOBAL VARIABLES & HELPER FUNCTIONS
+   ========================================================================== */
+
+// 1. Variabel Global Siklus Render (TIDAK BOLEH DIDEKLARASIKAN DUA KALI)
+let currentRenderCycle = 1;
+let userLocation = null;
+
+// Helper untuk menghindari XSS Injection
+function escapeHtml(text) {
+  if (!text) return '';
+  return String(text)
+    .replace(/&/g, "&amp;")
+    .replace(/</g, "&lt;")
+    .replace(/>/g, "&gt;")
+    .replace(/"/g, "&quot;")
+    .replace(/'/g, "&#039;");
+}
+
+// 2. Fungsi Mengambil Lokasi (GPS Utama -> IP Jaringan sebagai Pengganti)
+async function getCurrentLocation() {
+  return new Promise((resolve) => {
+    if (navigator.geolocation) {
+      navigator.geolocation.getCurrentPosition(
+        (position) => {
+          console.log("📍 Lokasi berhasil diambil via GPS");
+          resolve({
+            lat: position.coords.latitude,
+            lng: position.coords.longitude,
+            source: 'GPS'
+          });
+        },
+        async (error) => {
+          console.warn("⚠️ GPS tidak aktif/ditolak. Mengambil lokasi dari IP Jaringan...", error.message);
+          const ipLocation = await getLocationFromIP();
+          resolve(ipLocation);
+        },
+        { enableHighAccuracy: true, timeout: 5000, maximumAge: 0 }
+      );
+    } else {
+      getLocationFromIP().then(resolve);
+    }
+  });
+}
+
+// 3. Fungsi Pengambil Lokasi Berdasarkan IP Jaringan
+// Fungsi Pengambil Lokasi Berdasarkan IP Jaringan (Menggunakan HTTPS API)
+async function getLocationFromIP() {
+  try {
+    // Menggunakan ipapi.co (Mendukung HTTPS & CORS)
+    const response = await fetch('https://ipapi.co/json/');
+    if (!response.ok) throw new Error("Respon API IP tidak OK");
+    
+    const data = await response.json();
+
+    if (data.latitude && data.longitude) {
+      console.log("🌐 Lokasi berhasil diambil via IP Jaringan:", data.city);
+      return {
+        lat: data.latitude,
+        lng: data.longitude,
+        source: 'IP'
+      };
+    } else {
+      throw new Error("Data koordinat IP tidak ditemukan");
+    }
+  } catch (err) {
+    console.warn("⚠️ Gagal mengambil via ipapi.co, mencoba opsi cadangan (ipwho.is)...");
+    
+    // Cadangan API IP HTTPS kedua
+    try {
+      const res2 = await fetch('https://ipwho.is/');
+      const data2 = await res2.json();
+      if (data2.success) {
+        return {
+          lat: data2.latitude,
+          lng: data2.longitude,
+          source: 'IP'
+        };
+      }
+    } catch (e) {
+      console.error("❌ Semua API IP gagal:", e.message);
+    }
+
+    // Lokasi Default (Jakarta) jika semua jaringan API gagal
+    return {
+      lat: -6.2088,
+      lng: 106.8456,
+      source: 'DEFAULT'
+    };
+  }
+}
 
 /* ==========================================================================
-   B. LOGIKA SUPABASE FEED (#posts-container)
+   B. PROSES MEMBUAT POSTINGAN BARU
+   ========================================================================== */
+document.addEventListener("DOMContentLoaded", () => {
+  const postForm = document.getElementById("post-form") || document.querySelector("form");
+  const usernameInput = document.getElementById("username");
+
+  if (postForm) {
+    postForm.addEventListener("submit", async (event) => {
+      event.preventDefault();
+
+      const client = window.supabaseClient || window.supabase;
+      if (!client) {
+        alert("Koneksi database belum siap.");
+        return;
+      }
+
+      const { data: { session } } = await client.auth.getSession();
+
+      if (!session) {
+        alert("Sesi Anda telah berakhir. Silakan login kembali.");
+        if (typeof updateUIForLoggedOutUser === "function") {
+          updateUIForLoggedOutUser();
+        }
+        return;
+      }
+
+      const contentInput = document.getElementById("content");
+      const contentText = contentInput ? contentInput.value.trim() : "";
+
+      if (!contentText) {
+        alert("Isi postingan tidak boleh kosong!");
+        return;
+      }
+
+      try {
+        // Ambil lokasi terkini pengguna (GPS/IP)
+        const loc = await getCurrentLocation();
+        const pointString = `POINT(${loc.lng} ${loc.lat})`;
+
+        const currentUsername = session.user.user_metadata?.username || session.user.email;
+
+        const { error } = await client
+          .from('posts')
+          .insert([
+            {
+              user_id: session.user.id,
+              username: currentUsername,
+              content: contentText,
+              is_logged_in: true,
+              location: pointString // Menyimpan titik lokasi ke Supabase (PostGIS)
+            }
+          ]);
+
+        if (error) throw error;
+
+        alert("Postingan berhasil diterbitkan!");
+        postForm.reset();
+
+        if (usernameInput && typeof currentUsername !== "undefined") {
+          usernameInput.value = currentUsername;
+        }
+
+        if (typeof loadPosts === "function") {
+          loadPosts();
+        }
+
+      } catch (err) {
+        console.error("Gagal mengirim postingan:", err.message);
+        alert("Terjadi kesalahan saat mengirim postingan: " + err.message);
+      }
+    });
+  }
+
+  // Jalankan pemeriksaan sesi awal dan muat postingan saat halaman selesai dibuka
+  if (typeof checkUserSession === "function") {
+    checkUserSession();
+  }
+  loadPosts();
+});
+
+/* ==========================================================================
+   C. LOGIKA SUPABASE FEED DENGAN ALGORITMA 9 CYCLE RADIAL
    ========================================================================== */
 async function loadPosts() {
   const postsContainer = document.getElementById("posts-container");
   if (!postsContainer) return;
 
-  postsContainer.innerHTML = "<p style='text-align:center;'>Memuat postingan...</p>";
+  postsContainer.innerHTML = "<p style='text-align:center;'>Mendeteksi lokasi & memuat postingan...</p>";
 
   const client = window.supabaseClient || window.supabase;
 
@@ -180,15 +352,47 @@ async function loadPosts() {
   }
 
   try {
-    // 1. Ambil data pengguna yang sedang login
-    const { data: { session } } = await client.auth.getSession();
-    const currentUserId = session?.user?.id;
+    // 1. Dapatkan lokasi pengguna (GPS / IP)
+    userLocation = await getCurrentLocation();
 
-    // 2. Ambil postingan dari database
-    const { data: posts, error } = await client
-      .from('posts')
-      .select('*')
-      .order('created_at', { ascending: false });
+    // 2. Tentukan batasan jarak meter berdasarkan siklus render (1 sampai 9)
+    let minMeters = 0;
+    let maxMeters = 500;
+
+    switch (currentRenderCycle) {
+      case 1: // Render 1: 9 postingan terdekat dari Alamat IP / GPS
+        minMeters = 0; maxMeters = 500; break;
+      case 2: // Render 2: Area 1 (0m - 500m)
+        minMeters = 0; maxMeters = 500; break;
+      case 3: // Render 3: Area 2 (500m - 3.5km)
+        minMeters = 500; maxMeters = 3500; break;
+      case 4: // Render 4: Area 3 (3.5km - 8.5km)
+        minMeters = 3500; maxMeters = 8500; break;
+      case 5: // Render 5: IP & Area 1 (0m - 500m)
+        minMeters = 0; maxMeters = 500; break;
+      case 6: // Render 6: Area 1 & Area 2 (0m - 3.5km)
+        minMeters = 0; maxMeters = 3500; break;
+      case 7: // Render 7: Area 2 & Area 3 (500m - 8.5km)
+        minMeters = 500; maxMeters = 8500; break;
+      case 8: // Render 8: IP, Area 1, & Area 2 (0m - 3.5km)
+        minMeters = 0; maxMeters = 3500; break;
+      case 9: // Render 9: Area 1, Area 2, & Area 3 (0m - 8.5km)
+        minMeters = 0; maxMeters = 8500; break;
+    }
+
+    console.log(`[Cycle Render #${currentRenderCycle}] Mengambil postingan (${userLocation.source}) radius ${minMeters}m - ${maxMeters}m`);
+
+    // 3. Panggil RPC Supabase
+    const { data: posts, error } = await client.rpc('get_posts_by_radius', {
+      user_lat: userLocation.lat,
+      user_lng: userLocation.lng,
+      min_meters: minMeters,
+      max_meters: maxMeters,
+      limit_count: 9
+    });
+
+    // Geser siklus render ke giliran berikutnya (1 -> 9 -> 1)
+    currentRenderCycle = (currentRenderCycle % 9) + 1;
 
     if (error) {
       console.error("Gagal memuat postingan:", error.message);
@@ -197,11 +401,15 @@ async function loadPosts() {
     }
 
     if (!posts || posts.length === 0) {
-      postsContainer.innerHTML = "<p style='text-align:center;'>Belum ada postingan.</p>";
+      postsContainer.innerHTML = `<p style='text-align:center;'>Belum ada postingan .</p>`;
       return;
     }
 
-    // 3. Render daftar postingan
+    // 4. Ambil data sesi pengguna saat ini
+    const { data: { session } } = await client.auth.getSession();
+    const currentUserId = session?.user?.id;
+
+    // 5. Render HTML
     postsContainer.innerHTML = posts.map(post => {
       const author = escapeHtml(post.author_name || post.username || 'Anonim');
       const content = escapeHtml(post.content);
@@ -213,7 +421,6 @@ async function loadPosts() {
         minute: '2-digit'
       });
 
-      // Cek apakah pengguna saat ini adalah pemilik postingan
       const isOwner = currentUserId && post.user_id === currentUserId;
 
       return `
@@ -273,6 +480,7 @@ async function loadPosts() {
       </article>
       `;
     }).join('');
+
   } catch (err) {
     console.error("Terjadi error sistem saat memuat data:", err);
     postsContainer.innerHTML = "<p style='color:red; text-align:center;'>Terjadi kesalahan koneksi.</p>";
