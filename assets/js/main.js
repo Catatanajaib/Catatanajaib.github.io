@@ -253,12 +253,169 @@ async function getLocationFromIP() {
   }
 }
 
-/* ==========================================================================
-   B. PROSES MEMBUAT POSTINGAN BARU
-   ========================================================================== */
+// ==========================================================================
+// 1. INTEGRASI GOOGLE DRIVE (UPLOADER REUSABLE)
+// ==========================================================================
+const GOOGLE_API_KEY = 'AIzaSyChf3GjmEsvFQoktUBPFbWnFKUkC1VObpU';
+const GOOGLE_CLIENT_ID = '49596256372-4eoeert51u0p1ssv55f5vr851v9ia2dk.apps.googleusercontent.com';
+const SCOPES = 'https://www.googleapis.com/auth/drive.file';
+
+async function uploadToGoogleDrive(file) {
+  return new Promise(async (resolve, reject) => {
+    const waitForGoogleSDK = () => {
+      return new Promise((res) => {
+        if (typeof google !== 'undefined' && google.accounts && google.accounts.oauth2) {
+          return res(true);
+        }
+        let checkCount = 0;
+        const interval = setInterval(() => {
+          checkCount++;
+          if (typeof google !== 'undefined' && google.accounts && google.accounts.oauth2) {
+            clearInterval(interval);
+            res(true);
+          } else if (checkCount > 20) {
+            clearInterval(interval);
+            res(false);
+          }
+        }, 500);
+      });
+    };
+
+    const isReady = await waitForGoogleSDK();
+    if (!isReady) {
+      return reject(new Error("Gagal memuat skrip Google. Pastikan tag script Google terpasang di HTML."));
+    }
+
+    try {
+      const client = google.accounts.oauth2.initTokenClient({
+        client_id: GOOGLE_CLIENT_ID,
+        scope: SCOPES,
+        callback: async (tokenResponse) => {
+          if (tokenResponse.error) {
+            return reject(new Error("Gagal otorisasi Google Drive: " + tokenResponse.error));
+          }
+
+          try {
+            const token = tokenResponse.access_token;
+            
+            const metadata = { name: file.name, mimeType: file.type };
+            const formData = new FormData();
+            formData.append('metadata', new Blob([JSON.stringify(metadata)], { type: 'application/json' }));
+            formData.append('file', file);
+
+            const uploadRes = await fetch('https://www.googleapis.com/upload/drive/v3/files?uploadType=multipart', {
+              method: 'POST',
+              headers: new Headers({ 'Authorization': 'Bearer ' + token }),
+              body: formData
+            });
+
+            const fileData = await uploadRes.json();
+            if (!fileData.id) return reject(new Error(fileData.error ? fileData.error.message : "Gagal upload ke Drive"));
+
+            await fetch(`https://www.googleapis.com/drive/v3/files/${fileData.id}/permissions?key=${GOOGLE_API_KEY}`, {
+              method: 'POST',
+              headers: new Headers({
+                'Authorization': 'Bearer ' + token,
+                'Content-Type': 'application/json'
+              }),
+              body: JSON.stringify({ role: 'reader', type: 'anyone' })
+            });
+
+            const directMediaUrl = `https://lh3.googleusercontent.com/d/${fileData.id}`;
+            resolve(directMediaUrl);
+
+          } catch (err) {
+            reject(err);
+          }
+        }
+      });
+
+      client.requestAccessToken({ prompt: '' });
+    } catch (err) {
+      reject(err);
+    }
+  });
+}
+
+// ==========================================================================
+// 2. HELPER KELOLA INPUT FILE & LOKASI
+// ==========================================================================
+
+function handlePostFileSelect(event) {
+  const fileInput = event.target;
+  const previewContainer = document.getElementById("file-preview-container");
+  const fileNameLabel = document.getElementById("file-name-label");
+
+  if (fileInput.files && fileInput.files[0]) {
+    fileNameLabel.textContent = "📎 " + fileInput.files[0].name;
+    previewContainer.style.display = "flex";
+  } else {
+    clearSelectedFile();
+  }
+}
+
+function clearSelectedFile() {
+  const fileInput = document.getElementById("post-image-input");
+  const previewContainer = document.getElementById("file-preview-container");
+  if (fileInput) fileInput.value = "";
+  if (previewContainer) previewContainer.style.display = "none";
+}
+
+async function getCurrentLocation() {
+  return new Promise((resolve) => {
+    if (navigator.geolocation) {
+      navigator.geolocation.getCurrentPosition(
+        (position) => {
+          console.log("📍 Lokasi berhasil diambil via GPS");
+          resolve({
+            lat: position.coords.latitude,
+            lng: position.coords.longitude,
+            source: 'GPS'
+          });
+        },
+        async (error) => {
+          console.warn("⚠️ GPS tidak aktif. Mengambil lokasi via IP...", error.message);
+          const ipLocation = await getLocationFromIP();
+          resolve(ipLocation);
+        },
+        { enableHighAccuracy: true, timeout: 5000, maximumAge: 0 }
+      );
+    } else {
+      getLocationFromIP().then(resolve);
+    }
+  });
+}
+
+async function getLocationFromIP() {
+  try {
+    const response = await fetch('https://ipapi.co/json/');
+    if (!response.ok) throw new Error("Respon API IP tidak OK");
+    const data = await response.json();
+
+    if (data.latitude && data.longitude) {
+      return { lat: data.latitude, lng: data.longitude, source: 'IP' };
+    } else {
+      throw new Error("Data koordinat IP tidak ditemukan");
+    }
+  } catch (err) {
+    try {
+      const res2 = await fetch('https://ipwho.is/');
+      const data2 = await res2.json();
+      if (data2.success) {
+        return { lat: data2.latitude, lng: data2.longitude, source: 'IP' };
+      }
+    } catch (e) {
+      console.error("❌ Semua API IP gagal:", e.message);
+    }
+    return { lat: -6.2088, lng: 106.8456, source: 'DEFAULT' };
+  }
+}
+
+// ==========================================================================
+// 3. PROSES SUBMIT MEMBUAT POSTINGAN BARU
+// ==========================================================================
 document.addEventListener("DOMContentLoaded", () => {
-  const postForm = document.getElementById("post-form") || document.querySelector("form");
-  const usernameInput = document.getElementById("username");
+  const postForm = document.getElementById("postForm");
 
   if (postForm) {
     postForm.addEventListener("submit", async (event) => {
@@ -271,50 +428,67 @@ document.addEventListener("DOMContentLoaded", () => {
       }
 
       const { data: { session } } = await client.auth.getSession();
-
       if (!session) {
         alert("Sesi Anda telah berakhir. Silakan login kembali.");
-        if (typeof updateUIForLoggedOutUser === "function") {
-          updateUIForLoggedOutUser();
-        }
         return;
       }
 
       const contentInput = document.getElementById("content");
       const contentText = contentInput ? contentInput.value.trim() : "";
+      
+      const imageInput = document.getElementById("post-image-input");
+      const file = imageInput && imageInput.files ? imageInput.files[0] : null;
 
-      if (!contentText) {
-        alert("Isi postingan tidak boleh kosong!");
+      if (!contentText && !file) {
+        alert("Postingan tidak boleh kosong! Tulis teks atau sertakan gambar.");
         return;
       }
 
+      const loadingEl = document.getElementById("upload-loading");
+      const submitBtn = document.getElementById("post-submit-btn");
+
       try {
-        // Ambil lokasi terkini pengguna (GPS/IP)
+        let mediaUrl = null;
+
+        // 1. Unggah gambar jika ada file yang dipilih
+        if (file) {
+          if (loadingEl) loadingEl.style.display = "flex";
+          if (submitBtn) {
+            submitBtn.disabled = true;
+            submitBtn.style.opacity = "0.6";
+            submitBtn.style.cursor = "not-allowed";
+          }
+
+          console.log("Mengunggah gambar ke Google Drive...");
+          mediaUrl = await uploadToGoogleDrive(file);
+          console.log("Gambar berhasil diunggah:", mediaUrl);
+        }
+
+        // 2. Ambil lokasi pengguna
         const loc = await getCurrentLocation();
         const pointString = `POINT(${loc.lng} ${loc.lat})`;
-
         const currentUsername = session.user.user_metadata?.username || session.user.email;
 
+        // 3. Simpan postingan ke Supabase
         const { error } = await client
           .from('posts')
           .insert([
             {
               user_id: session.user.id,
               username: currentUsername,
-              content: contentText,
+              content: contentText || "",
+              image_url: mediaUrl,
               is_logged_in: true,
-              location: pointString // Menyimpan titik lokasi ke Supabase (PostGIS)
+              location: pointString
             }
           ]);
 
         if (error) throw error;
 
         alert("Postingan berhasil diterbitkan!");
+        
         postForm.reset();
-
-        if (usernameInput && typeof currentUsername !== "undefined") {
-          usernameInput.value = currentUsername;
-        }
+        clearSelectedFile();
 
         if (typeof loadPosts === "function") {
           loadPosts();
@@ -323,20 +497,26 @@ document.addEventListener("DOMContentLoaded", () => {
       } catch (err) {
         console.error("Gagal mengirim postingan:", err.message);
         alert("Terjadi kesalahan saat mengirim postingan: " + err.message);
+      } finally {
+        if (loadingEl) loadingEl.style.display = "none";
+        if (submitBtn) {
+          submitBtn.disabled = false;
+          submitBtn.style.opacity = "1";
+          submitBtn.style.cursor = "pointer";
+        }
       }
     });
   }
 
-  // Jalankan pemeriksaan sesi awal dan muat postingan saat halaman selesai dibuka
   if (typeof checkUserSession === "function") {
     checkUserSession();
   }
   loadPosts();
 });
 
-/* ==========================================================================
-   C. LOGIKA SUPABASE FEED DENGAN ALGORITMA 9 CYCLE RADIAL
-   ========================================================================== */
+// ==========================================================================
+// 4. MEMUAT & MERENDER POSTINGAN (RADIAL CYCLE FEED)
+// ==========================================================================
 async function loadPosts() {
   const postsContainer = document.getElementById("posts-container");
   if (!postsContainer) return;
@@ -344,45 +524,29 @@ async function loadPosts() {
   postsContainer.innerHTML = "<p style='text-align:center;'>Mendeteksi lokasi & memuat postingan...</p>";
 
   const client = window.supabaseClient || window.supabase;
-
   if (!client) {
-    console.error("Supabase client belum diinisialisasi.");
     postsContainer.innerHTML = "<p style='color:red; text-align:center;'>Gagal mengoneksikan database.</p>";
     return;
   }
 
   try {
-    // 1. Dapatkan lokasi pengguna (GPS / IP)
     userLocation = await getCurrentLocation();
 
-    // 2. Tentukan batasan jarak meter berdasarkan siklus render (1 sampai 9)
     let minMeters = 0;
-    let maxMeters = 500;
+    let maxMeters = 8500;
 
     switch (currentRenderCycle) {
-      case 1: // Render 1: 9 postingan terdekat dari Alamat IP / GPS
-        minMeters = 0; maxMeters = 500; break;
-      case 2: // Render 2: Area 1 (0m - 500m)
-        minMeters = 0; maxMeters = 500; break;
-      case 3: // Render 3: Area 2 (500m - 3.5km)
-        minMeters = 500; maxMeters = 3500; break;
-      case 4: // Render 4: Area 3 (3.5km - 8.5km)
-        minMeters = 3500; maxMeters = 8500; break;
-      case 5: // Render 5: IP & Area 1 (0m - 500m)
-        minMeters = 0; maxMeters = 500; break;
-      case 6: // Render 6: Area 1 & Area 2 (0m - 3.5km)
-        minMeters = 0; maxMeters = 3500; break;
-      case 7: // Render 7: Area 2 & Area 3 (500m - 8.5km)
-        minMeters = 500; maxMeters = 8500; break;
-      case 8: // Render 8: IP, Area 1, & Area 2 (0m - 3.5km)
-        minMeters = 0; maxMeters = 3500; break;
-      case 9: // Render 9: Area 1, Area 2, & Area 3 (0m - 8.5km)
-        minMeters = 0; maxMeters = 8500; break;
+      case 1: minMeters = 0; maxMeters = 300; break;
+      case 2: minMeters = 300; maxMeters = 500; break;
+      case 3: minMeters = 500; maxMeters = 3500; break;
+      case 4: minMeters = 3500; maxMeters = 8500; break;
+      case 5: minMeters = 0; maxMeters = 500; break;
+      case 6: minMeters = 0; maxMeters = 3500; break;
+      case 7: minMeters = 500; maxMeters = 8500; break;
+      case 8: minMeters = 0; maxMeters = 3500; break;
+      case 9: minMeters = 0; maxMeters = 8500; break;
     }
 
-    console.log(`[Cycle Render #${currentRenderCycle}] Mengambil postingan (${userLocation.source}) radius ${minMeters}m - ${maxMeters}m`);
-
-    // 3. Panggil RPC Supabase
     const { data: posts, error } = await client.rpc('get_posts_by_radius', {
       user_lat: userLocation.lat,
       user_lng: userLocation.lng,
@@ -391,25 +555,21 @@ async function loadPosts() {
       limit_count: 9
     });
 
-    // Geser siklus render ke giliran berikutnya (1 -> 9 -> 1)
     currentRenderCycle = (currentRenderCycle % 9) + 1;
 
     if (error) {
-      console.error("Gagal memuat postingan:", error.message);
       postsContainer.innerHTML = "<p style='color:red; text-align:center;'>Gagal memuat postingan.</p>";
       return;
     }
 
     if (!posts || posts.length === 0) {
-      postsContainer.innerHTML = `<p style='text-align:center;'>Belum ada postingan .</p>`;
+      postsContainer.innerHTML = `<p style='text-align:center;'>Belum ada postingan di area ini.</p>`;
       return;
     }
 
-    // 4. Ambil data sesi pengguna saat ini
     const { data: { session } } = await client.auth.getSession();
     const currentUserId = session?.user?.id;
 
-    // 5. Render HTML
     postsContainer.innerHTML = posts.map(post => {
       const author = escapeHtml(post.author_name || post.username || 'Anonim');
       const content = escapeHtml(post.content);
@@ -420,6 +580,17 @@ async function loadPosts() {
         hour: '2-digit',
         minute: '2-digit'
       });
+
+      // 1. KONDISI TEKS: Tampilkan elemen div teks HANYA JIKA postingan memiliki isi teks
+      const contentHtml = content ? `<div class="post-content">${content}</div>` : '';
+
+      // 2. KONDISI GAMBAR: Tampilkan elemen div gambar HANYA JIKA postingan memiliki URL gambar
+      const postImageHtml = post.image_url 
+        ? `<div class="post-media" style="margin-top: 10px;">
+             <img src="${post.image_url}" alt="Foto Postingan" style="width:100%; border-radius:8px;">
+           </div>` 
+        : '';
+      
 
       const isOwner = currentUserId && post.user_id === currentUserId;
 
@@ -434,33 +605,26 @@ async function loadPosts() {
             </div>
           </div>
 
-          <!-- MENU TITIK TIGA DI POJOK KANAN ATAS -->
           <details class="post-menu-dropdown" style="position: relative;">
-            <summary style="list-style: none; cursor: pointer; font-size: 18px; padding: 4px 8px; user-select: none;">
-              ⋮
-            </summary>
-            
+            <summary style="list-style: none; cursor: pointer; font-size: 18px; padding: 4px 8px; user-select: none;">⋮</summary>
             <div style="position: absolute; right: 0; top: 100%; background: white; border: 1px solid #ddd; border-radius: 6px; box-shadow: 0 4px 12px rgba(0,0,0,0.15); display: flex; flex-direction: column; gap: 4px; padding: 6px; min-width: 130px; z-index: 10;">
-              
               <button class="action-btn btn-chat-right" onclick="openPrivateChat('${post.user_id}', '${author}')" style="width: 100%; text-align: left; background: none; border: none; padding: 6px 10px; cursor: pointer; font-size: 13px;">
                 💬 Kirim Pesan
               </button>
-
               ${isOwner ? `
                 <button onclick="deletePost('${post.id}')" style="width: 100%; text-align: left; background: none; border: none; color: #dc3545; padding: 6px 10px; cursor: pointer; font-size: 13px;">
                   🗑️ Hapus
                 </button>
               ` : ''}
-
             </div>
           </details>
         </header>
+ <!-- DISINI LETAK ELEMEN TEKS DINAMIS -->
+        ${contentHtml}
 
-        <div class="post-content">${content}</div>
-
-        <div class="post-media">
-          <img src="https://picsum.photos/600/300?random=7" alt="Foto Postingan">
-        </div>
+        <!-- DISINI LETAK ELEMEN GAMBAR DINAMIS -->
+        ${postImageHtml}
+        
 
         <footer class="post-actions">
           <button class="action-btn" onclick="toggleLike(this)">Suka</button>

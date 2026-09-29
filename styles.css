@@ -670,3 +670,23 @@ h4.logo {
       border-radius: 5px;
       font-weight: bold;
     }
+    
+    /* Animasi Putar Spinner Loading Upload */
+.spinner {
+  width: 16px;
+  height: 16px;
+  border: 2px solid #f3f3f3;
+  border-top: 2px solid #007bff;
+  border-radius: 50%;
+  animation: spin 0.8s linear infinite;
+}
+
+@keyframes spin {
+  0% { transform: rotate(0deg); }
+  100% { transform: rotate(360deg); }
+}
+
+/* Efek Hover Ikon Klip */
+label[for="post-image-input"]:hover {
+  background-color: #f0f0f0;
+}

@@ -384,9 +384,6 @@ async function fetchPrivateMessages(receiverId) {
 // ==========================================================================
 // INTEGRASI GOOGLE DRIVE
 // ==========================================================================
-const GOOGLE_API_KEY = 'AIzaSyChf3GjmEsvFQoktUBPFbWnFKUkC1VObpU';
-const GOOGLE_CLIENT_ID = '49596256372-4eoeert51u0p1ssv55f5vr851v9ia2dk.apps.googleusercontent.com';
-const SCOPES = 'https://www.googleapis.com/auth/drive.file';
 
 async function uploadToGoogleDrive(file) {
   return new Promise(async (resolve, reject) => {
@@ -581,27 +578,31 @@ function subscribeToPrivateChat(receiverId) {
 // FITUR PANGGILAN VIDEO & SUARA (JITSI API)
 // ==========================================================================
 function listenForIncomingCalls(userId) {
-  const client = window.supabaseClient || (typeof supabaseClient !== 'undefined' ? supabaseClient : null);
-  if (!client || !userId) return;
-  
-  client
-    .channel('incoming_calls')
-    .on(
-      'postgres_changes',
-      {
-        event: 'INSERT',
-        schema: 'public',
-        table: 'calls',
-        filter: `receiver_id=eq.${userId}`
-      },
-      (payload) => {
-        const newCall = payload.new;
-        if (newCall.status === 'ringing') {
-          showIncomingCallPopup(newCall);
+  try {
+    const client = window.supabaseClient || (typeof supabaseClient !== 'undefined' ? supabaseClient : null);
+    if (!client || !userId) return;
+    
+    client
+      .channel('incoming_calls')
+      .on(
+        'postgres_changes',
+        {
+          event: 'INSERT',
+          schema: 'public',
+          table: 'calls',
+          filter: `receiver_id=eq.${userId}`
+        },
+        (payload) => {
+          const newCall = payload.new;
+          if (newCall.status === 'ringing') {
+            showIncomingCallPopup(newCall);
+          }
         }
-      }
-    )
-    .subscribe();
+      )
+      .subscribe();
+  } catch (err) {
+    console.warn("Layanan panggilan belum siap:", err);
+  }
 }
 
 function showIncomingCallPopup(callData) {
