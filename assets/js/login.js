@@ -1,31 +1,34 @@
-// login, daftar, posting, komentar 
 // ==========================================
 // 1. INISIALISASI SUPABASE & VARIABEL GLOBAL
 // ==========================================
 const SUPABASE_URL = 'https://qcopjasrzjubbgjnxidv.supabase.co';
 const SUPABASE_ANON_KEY = 'sb_publishable_YFS1w6HfZbyg-F6QoxISFw_b62yHMO6';
 
-// Simpan ke window agar global
+// Simpan instance Supabase ke window agar dapat diakses secara global
 window.supabaseClient = window.supabase ? window.supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY) : null;
 const supabaseClient = window.supabaseClient;
 
-// PERBAIKAN: Deklarasikan semua variabel global agar tidak memicu ReferenceError
+// Variabel Status Utama
 let currentUsername = "Pengunjung Anonim";
 let activeChatUserId = null; 
 
-document.addEventListener("DOMContentLoaded", () => {
+// ==========================================
+// 2. LOGIKA UTAMA (JALAN SAAT DOM READY)
+// ==========================================
+document.addEventListener("DOMContentLoaded", async () => {
+
     if (!supabaseClient) {
         console.error("Supabase SDK belum dimuat dengan benar. Pastikan script Supabase sudah terpasang di HTML.");
         return;
     }
 
-    // --- ELEMEN UI AUTH & PROFIL ---
+    // --- ELEMEN UI PROFIL & AUTHENTIKASI ---
     const boxAuth = document.getElementById("box-auth");
     const boxProfil = document.getElementById("box-profil");
     const profileName = document.getElementById("profile-name");
     const profileEmail = document.getElementById("profile-email");
 
-    // --- ELEMEN UI FORM LOGIN ---
+    // --- ELEMEN UI FORM LOGIN DIRECT ---
     const formLogin = document.getElementById("form-login-direct");
     const loginNotif = document.getElementById("login-notif");
     const btnSubmitLogin = document.getElementById("btn-submit-login");
@@ -36,15 +39,14 @@ document.addEventListener("DOMContentLoaded", () => {
     const btnSendReset = document.getElementById("btn-send-reset");
     const btnCancelForgot = document.getElementById("btn-cancel-forgot");
 
-    // --- ELEMEN UI FORM POSTINGAN BARU ---
+    // --- ELEMEN UI POSTINGAN ---
     const createPostBox = document.getElementById("create-post-box");
     const loginRequiredBox = document.getElementById("login-required-box");
     const usernameInput = document.getElementById("username");
-    const postForm = document.getElementById("postForm");
 
-    // ==========================================
-    // 2. FUNGSI CEK STATUS SESI & PROFILE
-    // ==========================================
+    // ------------------------------------------
+    // A. FUNGSI PENGECEKAN SESI SANGAT UTAMA
+    // ------------------------------------------
     async function checkUserSession() {
         try {
             const { data: { session }, error: sessionError } = await supabaseClient.auth.getSession();
@@ -55,11 +57,9 @@ document.addEventListener("DOMContentLoaded", () => {
             }
 
             const user = session.user;
-
-            // Set ID Pengguna Aktif Global
             activeChatUserId = user.id;
 
-            // Panggil pemantau panggilan jika fungsinya didefinisikan di file lain
+            // Pemantau Panggilan Masuk (opsional)
             if (typeof listenForIncomingCalls === "function") {
                 try {
                     listenForIncomingCalls(user.id);
@@ -68,13 +68,13 @@ document.addEventListener("DOMContentLoaded", () => {
                 }
             }
 
-            // Tentukan username fallback terlebih dahulu
+            // Penentuan Username Fallback
             let username = user.user_metadata?.username 
                 || user.user_metadata?.full_name 
                 || user.email?.split('@')[0] 
                 || "Pengguna";
 
-            // Coba ambil dari tabel profiles
+            // Mengambil Username dari Tabel Profiles Database
             try {
                 const { data: profile } = await supabaseClient
                     .from('profiles')
@@ -130,9 +130,21 @@ document.addEventListener("DOMContentLoaded", () => {
         loginNotif.textContent = message;
     }
 
-    // ==========================================
-    // 3. PROSES LOGIN
-    // ==========================================
+    // CEK SESI OTOMATIS SETIAP KALI HALAMAN DI-REFRESH
+    await checkUserSession();
+
+    // PANTAU PERUBAHAN AUTH secare Real-time
+    supabaseClient.auth.onAuthStateChange((event, session) => {
+        if (event === 'SIGNED_IN' || event === 'TOKEN_REFRESHED') {
+            checkUserSession();
+        } else if (event === 'SIGNED_OUT') {
+            updateUIForLoggedOutUser();
+        }
+    });
+
+    // ------------------------------------------
+    // B. PROSES LOGIN DIRECT
+    // ------------------------------------------
     if (formLogin) {
         formLogin.addEventListener("submit", async (e) => {
             e.preventDefault();
@@ -160,9 +172,9 @@ document.addEventListener("DOMContentLoaded", () => {
         });
     }
 
-    // ==========================================
-    // 4. RESET KATA SANDI
-    // ==========================================
+    // ------------------------------------------
+    // C. PROSES LUPA KATA SANDI
+    // ------------------------------------------
     if (btnShowForgot && boxForgot) {
         btnShowForgot.addEventListener("click", (e) => {
             e.preventDefault();
@@ -197,9 +209,9 @@ document.addEventListener("DOMContentLoaded", () => {
         });
     }
 
-    // ==========================================
-    // 5. PROSES LOGOUT
-    // ==========================================
+    // ------------------------------------------
+    // D. PROSES LOGOUT
+    // ------------------------------------------
     const btnLogout = document.getElementById("btn-logout");
     if (btnLogout) {
         btnLogout.addEventListener("click", async () => {
@@ -208,191 +220,202 @@ document.addEventListener("DOMContentLoaded", () => {
                 alert("Gagal keluar: " + error.message);
             } else {
                 updateUIForLoggedOutUser();
+                window.location.reload();
             }
         });
     }
+
+    // ------------------------------------------
+    // E. PROSES EDIT PROFIL
+    // ------------------------------------------
+    const formUbahProfil = document.getElementById('formUbahProfil');
+    if (formUbahProfil) {
+        formUbahProfil.addEventListener('submit', async (event) => {
+            event.preventDefault();
+
+            const inputNama = document.getElementById('namaLengkap');
+            const inputEmail = document.getElementById('email');
+            const errNama = document.getElementById('errNama');
+            const errEmail = document.getElementById('errEmail');
+
+            let isValid = true;
+
+            if (inputNama.value.trim() === '') {
+                showError(errNama, 'Nama lengkap wajib diisi!');
+                isValid = false;
+            } else {
+                hideError(errNama);
+            }
+
+            if (inputEmail.value.trim() === '') {
+                showError(errEmail, 'Alamat email wajib diisi!');
+                isValid = false;
+            } else if (!isValidEmail(inputEmail.value.trim())) {
+                showError(errEmail, 'Format email tidak valid!');
+                isValid = false;
+            } else {
+                hideError(errEmail);
+            }
+
+            if (isValid) {
+                try {
+                    // Update metadata nama pada auth Supabase
+                    const { error: updateError } = await supabaseClient.auth.updateUser({
+                        email: inputEmail.value.trim(),
+                        data: { username: inputNama.value.trim() }
+                    });
+
+                    if (updateError) throw updateError;
+
+                    alert('Data profil berhasil diperbarui!');
+                    window.location.href = 'index.html';
+                } catch (err) {
+                    alert('Gagal mengedit profil: ' + err.message);
+                }
+            }
+        });
+    }
+
+    // ------------------------------------------
+    // F. FORM DUAL MODE: PENDAFTARAN & LOGIN
+    // ------------------------------------------
+    const formPendaftaran = document.getElementById('form-pendaftaran');
+    const pesanNotif = document.getElementById('pesan-notif');
+    const btnDaftar = document.getElementById('btn-submit');
+    const judulForm = document.getElementById('judul-form');
+    
+    const groupUsername = document.getElementById('group-username');
+    const inputUsername = document.getElementById('username');
+    const inputEmail = document.getElementById('email');
+    const inputPassword = document.getElementById('password');
+    
+    const linkPengalih = document.getElementById('link-pengalih');
+    const teksPengalih = document.getElementById('teks-pengalih');
+
+    let isLoginMode = false;
+
+    if (linkPengalih) {
+        linkPengalih.addEventListener('click', (e) => {
+            e.preventDefault();
+            isLoginMode = !isLoginMode;
+
+            if (pesanNotif) pesanNotif.style.display = 'none';
+
+            if (isLoginMode) {
+                if (judulForm) judulForm.textContent = 'Login Akun';
+                if (btnDaftar) {
+                    btnDaftar.textContent = 'Masuk';
+                    btnDaftar.style.backgroundColor = '#007bff';
+                }
+                if (teksPengalih) teksPengalih.textContent = 'Belum punya akun?';
+                linkPengalih.textContent = 'Daftar di sini';
+                
+                if (groupUsername) groupUsername.style.display = 'none';
+                if (inputUsername) inputUsername.removeAttribute('required');
+            } else {
+                if (judulForm) judulForm.textContent = 'Daftar Akun Baru';
+                if (btnDaftar) {
+                    btnDaftar.textContent = 'Daftar Sekarang';
+                    btnDaftar.style.backgroundColor = '#28a745';
+                }
+                if (teksPengalih) teksPengalih.textContent = 'Sudah punya akun?';
+                linkPengalih.textContent = 'Login di sini';
+                
+                if (groupUsername) groupUsername.style.display = 'block';
+                if (inputUsername) inputUsername.setAttribute('required', 'true');
+            }
+        });
+    }
+
+    if (formPendaftaran) {
+        formPendaftaran.addEventListener('submit', async (e) => {
+            e.preventDefault();
+
+            const email = inputEmail.value.trim();
+            const password = inputPassword.value;
+            const username = inputUsername ? inputUsername.value.trim() : '';
+
+            btnDaftar.disabled = true;
+            btnDaftar.textContent = isLoginMode ? 'Memproses Masuk...' : 'Mendaftarkan...';
+
+            try {
+                if (isLoginMode) {
+                    const { error: authError } = await supabaseClient.auth.signInWithPassword({
+                        email: email,
+                        password: password
+                    });
+
+                    if (authError) throw authError;
+
+                    tampilkanPesan('Login berhasil! Mengalihkan ke halaman utama...', 'sukses');
+                    setTimeout(() => { window.location.href = '../index.html'; }, 1500);
+
+                } else {
+                    const { error: authError } = await supabaseClient.auth.signUp({
+                        email: email,
+                        password: password,
+                        options: { data: { username: username } }
+                    });
+
+                    if (authError) throw authError;
+
+                    tampilkanPesan('Pendaftaran berhasil! Mengalihkan ke halaman utama...', 'sukses');
+                    setTimeout(() => { window.location.href = '../index.html'; }, 2000);
+                }
+
+            } catch (error) {
+                const pesanRamah = ubahPesanErrorKeBahasaRamah(error);
+                tampilkanPesan(pesanRamah, 'gagal');
+                btnDaftar.disabled = false;
+                btnDaftar.textContent = isLoginMode ? 'Masuk' : 'Daftar Sekarang';
+            }
+        });
+    }
+
+    // Pembantu Form
+    function showError(element, message) {
+        if (!element) return;
+        element.textContent = message;
+        element.style.display = 'block';
+    }
+
+    function hideError(element) {
+        if (!element) return;
+        element.textContent = '';
+        element.style.display = 'none';
+    }
+
+    function isValidEmail(email) {
+        return /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email);
+    }
+
+    function ubahPesanErrorKeBahasaRamah(error) {
+        const pesan = error.message ? error.message.toLowerCase() : '';
+
+        if (pesan.includes('invalid login credentials') || pesan.includes('invalid credentials')) {
+            return 'Email atau kata sandi yang kamu masukkan salah. Silakan periksa kembali!';
+        }
+        if (pesan.includes('rate limit exceeded') || pesan.includes('email rate limit')) {
+            return 'Terlalu banyak percobaan. Mohon tunggu beberapa menit lagi sebelum mencoba kembali ya!';
+        }
+        if (error.code === '23505' || pesan.includes('unique constraint') || pesan.includes('profiles_username_key')) {
+            return 'Username ini sudah digunakan oleh pengguna lain. Silakan coba nama lain!';
+        }
+        if (pesan.includes('already registered') || pesan.includes('user already registered')) {
+            return 'Email ini sudah terdaftar. Silakan masuk (login) menggunakan email ini!';
+        }
+        if (pesan.includes('password should be at least')) {
+            return 'Kata sandi terlalu pendek. Mohon gunakan minimal 6 karakter!';
+        }
+
+        return 'Waduh, terjadi kendala: ' + error.message;
+    }
+
+    function tampilkanPesan(teks, tipe) {
+        if (!pesanNotif) return;
+        pesanNotif.textContent = teks;
+        pesanNotif.style.display = 'block';
+        pesanNotif.style.backgroundColor = (tipe === 'sukses') ? '#d4edda' : '#f8d7da';
+        pesanNotif.style.color = (tipe === 'sukses') ? '#155724' : '#721c24';
+    }
 });
-
-
-
-// ==========================================
-// 7. SISTEM KOMENTAR & UTILS GLOBAL (NESTED)
-// ==========================================
-
-function escapeHtml(text) {
-  if (!text) return '';
-  return text
-    .replace(/&/g, "&amp;")
-    .replace(/</g, "&lt;")
-    .replace(/>/g, "&gt;")
-    .replace(/"/g, "&quot;")
-    .replace(/'/g, "&#039;");
-}
-
-async function toggleComments(postId) {
-  const section = document.getElementById(`comment-section-${postId}`);
-  if (!section) return;
-
-  const isHidden = section.style.display === 'none' || section.style.display === '';
-  section.style.display = isHidden ? 'block' : 'none';
-
-  if (isHidden) {
-    await fetchCommentsForPost(postId);
-    subscribeToRealtimeComments(postId);
-  }
-}
-
-async function fetchCommentsForPost(postId) {
-  const listEl = document.getElementById(`comments-list-${postId}`);
-  if (!listEl) return;
-
-  if (!supabaseClient) {
-    listEl.innerHTML = '<p style="font-size:12px; color:red;">Koneksi Supabase belum siap.</p>';
-    return;
-  }
-
-  const { data: comments, error } = await supabaseClient
-    .from('comments')
-    .select('*')
-    .eq('post_id', String(postId))
-    .order('created_at', { ascending: true });
-
-  if (error) {
-    console.error('Error fetching comments:', error);
-    listEl.innerHTML = '<p style="font-size:12px; color:red;">Gagal memuat komentar.</p>';
-    return;
-  }
-
-  if (!comments || comments.length === 0) {
-    listEl.innerHTML = '<p style="font-size:12px; color: white;">Belum ada komentar. Tulis sesuatu!</p>';
-    return;
-  }
-
-  const parentComments = comments.filter(c => !c.parent_id);
-  const replies = comments.filter(c => c.parent_id);
-
-  listEl.innerHTML = parentComments.map(parent => {
-    const childReplies = replies.filter(r => String(r.parent_id) === String(parent.id));
-    return renderCommentTree(parent, childReplies, postId);
-  }).join('');
-}
-
-function renderCommentTree(parent, replies, postId) {
-  const author = escapeHtml(parent.author_name || parent.username || 'Anonim');
-  const content = escapeHtml(parent.content);
-  const time = new Date(parent.created_at).toLocaleString('id-ID', { hour: '2-digit', minute: '2-digit', day: 'numeric', month: 'short' });
-
-  const repliesHTML = replies.map(reply => {
-    const rAuthor = escapeHtml(reply.author_name || reply.username || 'Anonim');
-    const rContent = escapeHtml(reply.content);
-    const rTime = new Date(reply.created_at).toLocaleString('id-ID', { hour: '2-digit', minute: '2-digit', day: 'numeric', month: 'short' });
-
-    return `
-      <div style="margin-top: 6px; margin-left: 18px; padding: 6px 10px; background-color: #00bcd4; border-left: 3px solid #007bff; border-radius: 4px; font-size: 12px; text-align: left;">
-        <div style="display:flex; justify-content:space-between; align-items:center;">
-          <strong style="color:#333;">${rAuthor}</strong>
-          <span style="font-size:10px; color:#999;">${rTime}</span>
-        </div>
-        <p style="margin:4px 0 0 0; color:#444; line-height:1.4;">${rContent}</p>
-      </div>
-    `;
-  }).join('');
-
-  return `
-    <div style="margin-bottom: 8px; font-size: 13px; padding: 8px 12px; background-color: yellow; border-radius: 6px; border: 1px solid #eee; text-align: left;">
-      <div style="display:flex; justify-content:space-between; align-items:center;">
-        <strong style="color:#333;">${author}</strong>
-        <span style="font-size:10px; color:#999;">${time}</span>
-      </div>
-      <p style="margin:4px 0 6px 0; color:#444; line-height:1.4;">${content}</p>
-
-      <button onclick="toggleReplyForm('${parent.id}')" style="background:none; border:none; color:#007bff; font-size:11px; cursor:pointer; padding:0; font-weight:bold;">
-        ↩ Balas
-      </button>
-
-      <div id="reply-form-${parent.id}" style="display:none; margin-top:8px;">
-        <form onsubmit="handleCommentSubmit(event, '${postId}', '${parent.id}')" style="display:flex; gap:6px;">
-          <input type="text" placeholder="Tulis balasan..." required style="flex:1; padding:6px; font-size:11px; border:1px solid #ccc; border-radius:4px;">
-          <button type="submit" style="padding:6px 10px; font-size:11px; background:#28a745; color:white; border:none; border-radius:4px; cursor:pointer;">Kirim</button>
-        </form>
-      </div>
-
-      <div class="replies-container">
-        ${repliesHTML}
-      </div>
-    </div>
-  `;
-}
-
-function toggleReplyForm(commentId) {
-  const formBox = document.getElementById(`reply-form-${commentId}`);
-  if (formBox) {
-    const isHidden = formBox.style.display === 'none' || formBox.style.display === '';
-    formBox.style.display = isHidden ? 'block' : 'none';
-  }
-}
-
-async function handleCommentSubmit(event, postId, parentId = null) {
-  event.preventDefault();
-  const form = event.target;
-  const input = form.querySelector('input');
-  const submitBtn = form.querySelector('button');
-  const content = input ? input.value.trim() : '';
-
-  if (!content) return;
-
-  if (submitBtn) submitBtn.disabled = true;
-
-  const { data: { session } } = await supabaseClient.auth.getSession();
-
-  if (!session) {
-    alert('Kamu harus login terlebih dahulu untuk mengirim komentar!');
-    if (submitBtn) submitBtn.disabled = false;
-    return;
-  }
-
-  const payload = {
-    post_id: String(postId),
-    user_id: session.user.id,
-    author_name: currentUsername || 'Pengguna',
-    content: content
-  };
-
-  if (parentId) {
-    payload.parent_id = parentId;
-  }
-
-  const { error } = await supabaseClient
-    .from('comments')
-    .insert([payload]);
-
-  if (submitBtn) submitBtn.disabled = false;
-
-  if (error) {
-    alert('Gagal mengirim komentar: ' + error.message);
-  } else {
-    input.value = '';
-    fetchCommentsForPost(postId);
-  }
-}
-
-function subscribeToRealtimeComments(postId) {
-  if (!supabaseClient) return;
-
-  supabaseClient
-    .channel(`public:comments:${postId}`)
-    .on(
-      'postgres_changes',
-      {
-        event: 'INSERT',
-        schema: 'public',
-        table: 'comments',
-        filter: `post_id=eq.${postId}`
-      },
-      () => {
-        fetchCommentsForPost(postId);
-      }
-    )
-    .subscribe();
-}
-//2026
