@@ -68,11 +68,11 @@ function initInfiniteScrollFeed() {
     { 
       id: "dummy-3", 
       name: "Blogger Hub",
-      judul: "Tips Monetisasi Konten Blog untuk Pemula", 
-      ringkasan: "Langkah-langkah mendaftarkan blog ke jaringan iklan online.", 
+      judul: "Rangkaian lampu paralel", 
+      ringkasan: "membuat rangkaian paralel untuk lampu.", 
       kategori: "Blogging", 
       gambar: "https://picsum.photos/600/300?random=3", 
-      url: "#", 
+      url: "../pages/artikel-rangkaian-paralel.html", 
       date: "20 Agu 2026",
       like: 25,
       comment: 10
