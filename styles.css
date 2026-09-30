@@ -621,7 +621,23 @@ h4.logo {
       will-change: transform;
       text-align: center;
     }
-
+.bulat{
+  /* Membentuk Lingkaran */
+  width: 50px;
+  aspect-ratio: 1 / 1;
+  border-radius: 50%;
+    /* Menata Teks di Tengah */
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  text-align: center;
+  padding: 40px;
+  /* Padding besar agar teks tidak menempel di lengkungan tepi */
+  box-sizing: border-box;
+  
+  /* Menangani Teks Banyak */
+  overflow-y: auto;
+}
     /* 1. AIR (Water) - Licin & Memantul */
     .water-item {
       background: rgba(0, 180, 255, 0.85);
@@ -643,11 +659,12 @@ h4.logo {
 
     /* 3. API (Fire) - Burning Glowing Effect */
     .fire-item {
-      background: linear-gradient(135deg, #ff4e50, #f9d423);
-      color: #fff;
-      border-radius: 8px;
-      box-shadow: 0 0 15px rgba(255, 78, 80, 0.8);
-    }
+  background: linear-gradient(135deg, #ff4e50, #f9d423);
+  color: #fff;
+  box-shadow: 0 0 15px rgba(255, 78, 80, 0.8);
+
+}
+
 
     /* 4. TANAH (Earth) - Padat & Berat */
     .earth-item {
