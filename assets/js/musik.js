@@ -31,6 +31,7 @@ class PlayMusikIn extends HTMLElement {
         this.shadowRoot.innerHTML = `
         <style>
 .music-player-card {
+    padding-top : 11px;
     width: 100%;
     height: 15%;
     min-height: 110px; /* Menjaga tata letak tetap presisi di layar HP */
@@ -38,7 +39,7 @@ class PlayMusikIn extends HTMLElement {
     backdrop-filter: blur(12px);
     -webkit-backdrop-filter: blur(12px);
     color: #ffffff;
-    border-radius: 12px;
+    border-radius: 9px;
     padding: 10px 14px;
     box-shadow: 0 8px 32px rgba(0, 0, 0, 0.37), inset 0 1px 1px rgba(255, 255, 255, 0.1);
     font-family: system-ui, -apple-system, sans-serif;
@@ -52,12 +53,12 @@ class PlayMusikIn extends HTMLElement {
 .player-header {
     display: flex;
     align-items: center;
-    gap: 12px;
+    gap: 8px;
 }
 
 .album-art {
-    width: 42px;
-    height: 42px;
+    width: 30px;
+    height: 30px;
     flex-shrink: 0;
     background: linear-gradient(135deg, #ff007f, #7928ca);
     border-radius: 10px;
@@ -70,7 +71,7 @@ class PlayMusikIn extends HTMLElement {
 }
 
 .album-art.playing {
-    animation: pulse 1.5s infinite alternate;
+    animation: pulse 3s infinite alternate;
 }
 
 @keyframes pulse {
@@ -145,20 +146,20 @@ class PlayMusikIn extends HTMLElement {
 
 .btn-play {
     background: linear-gradient(135deg, #ff007f, #e00070);
-    width: 38px;
-    height: 38px;
+    width: 25px;
+    height: 25px;
     font-size: 1rem;
     box-shadow: 0 4px 14px rgba(255, 0, 127, 0.5);
 }
 
 .btn-play:hover {
     transform: scale(1.1);
-    box-shadow: 0 6px 18px rgba(255, 0, 127, 0.7);
+    box-shadow: 0 7px 18px rgba(255, 0, 127, 0.7);
 }
 
 .playlist-container {
     border-top: 1px solid rgba(255, 255, 255, 0.08);
-    padding-top: 6px;
+    padding-top: 7px;
 }
 
 .playlist-container h4 {
@@ -169,9 +170,9 @@ class PlayMusikIn extends HTMLElement {
 
 .playlist-list {
     list-style: none;
-    padding: 0;
-    margin: 0;
-    max-height: 80px;
+    padding: 5px;
+    margin: 5px;
+    max-height: 5%px;
     overflow-y: auto;
 }
 
