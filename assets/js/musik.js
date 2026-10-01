@@ -31,7 +31,6 @@ class PlayMusikIn extends HTMLElement {
         this.shadowRoot.innerHTML = `
         <style>
 .music-player-card {
-    padding-top : 11px;
     width: 100%;
     height: 15%;
     min-height: 110px; /* Menjaga tata letak tetap presisi di layar HP */
@@ -41,6 +40,7 @@ class PlayMusikIn extends HTMLElement {
     color: #ffffff;
     border-radius: 9px;
     padding: 10px 14px;
+    margin-bottom: 10px;
     box-shadow: 0 8px 32px rgba(0, 0, 0, 0.37), inset 0 1px 1px rgba(255, 255, 255, 0.1);
     font-family: system-ui, -apple-system, sans-serif;
     box-sizing: border-box;
@@ -57,8 +57,8 @@ class PlayMusikIn extends HTMLElement {
 }
 
 .album-art {
-    width: 30px;
-    height: 30px;
+    width: 50px;
+    height: 50px;
     flex-shrink: 0;
     background: linear-gradient(135deg, #ff007f, #7928ca);
     border-radius: 10px;
@@ -85,7 +85,8 @@ class PlayMusikIn extends HTMLElement {
 }
 
 .track-info h3 {
-    margin: 0;
+    padding-left: 10px;
+    margin: 2;
     font-size: 0.95rem;
     font-weight: 600;
     color: #fff;
@@ -94,6 +95,7 @@ class PlayMusikIn extends HTMLElement {
 }
 
 .track-info p {
+    padding-left: 10px;
     margin: 2px 0 0;
     font-size: 0.78rem;
     color: #a0a0b8;
@@ -127,11 +129,11 @@ class PlayMusikIn extends HTMLElement {
 .btn-ctrl {
     background: rgba(255, 255, 255, 0.08);
     border: none;
-    color: #fff;
+    color: #00bcd4;
     font-size: 0.9rem;
-    width: 32px;
-    height: 32px;
-    border-radius: 50%;
+    width: 110px;
+    height: 25px;
+    border-radius: 10%;
     cursor: pointer;
     display: flex;
     align-items: center;
