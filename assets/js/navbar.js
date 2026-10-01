@@ -48,6 +48,7 @@ class NavBar extends HTMLElement {
 <h4 class="logo" style="position: absolute; top: 50%; transform: translateY(-50%); animation: migrasi 5s infinite linear; white-space: nowrap;">
     Catatan Ajaib
 </h4>
+      <nav>
         <ul class="nav-links">
           <li class="has-dropdown">MENU
             <ul class="vertical-dropdown">
