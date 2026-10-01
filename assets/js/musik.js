@@ -11,13 +11,13 @@ class PlayMusikIn extends HTMLElement {
         // Pastikan path 'src' mengarah ke file audio mp3 yang valid
         this.songs = [
             {
-                title: "Judul Lagu 1",
-                artist: "Artis 1",
+                title: "#",
+                artist: "#",
                 src: "../assets/musik/1.mp3"
             },
             {
-                title: "Judul Lagu 2",
-                artist: "Artis 2",
+                title: "#",
+                artist: "#",
                 src: "../assets/musik/2.mp3"
             }
         ];

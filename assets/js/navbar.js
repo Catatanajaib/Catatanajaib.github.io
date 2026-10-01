@@ -91,13 +91,13 @@ class NavBar extends HTMLElement {
       </div>
 <!-- MODAL CHAT ROOM GLOBAL -->
       <div id="Chat-Room" class="modal" style="display: none;">
-        <div class="modal-content chat-modal-content" style="width: 90%; display: flex; height: 700px; padding: 0; overflow: hidden; border-radius: 8px;">
+        <div class="modal-content chat-modal-content" style="width: 95%; display: flex; height: 800px; padding: 0; overflow: hidden; border-radius: 8px;">
           
           <!-- Sidebar Kiri: Daftar Pengguna -->
           <div class="chat-sidebar" style="width: 25%; border-right: 1px solid #ddd; background: #f8f9fa; display: flex; flex-direction: column;">
             <div style="padding: 12px; border-bottom: 1px solid #ddd; font-weight: bold; background: #fff; display: flex; justify-content: space-between; align-items: center;">
-              <span>💬 Percakapan</span>
-              <button onclick="loadChatUsers()" style="background: none; border: none; cursor: pointer; font-size: 12px;" title="Refresh Daftar">🔄</button>
+              <span>✉️ Percakapan</span>
+              <button onclick="loadChatUsers()" style="background: none; border: none; cursor: pointer; font-size: 15px;" title="Refresh Daftar">🔁</button>
             </div>
             <div id="chat-user-list" style="flex: 1; overflow-y: auto; padding: 8px;">
               <p style="font-size: 12px; color: #888; text-align: center;">Memuat daftar pengguna...</p>
@@ -109,11 +109,11 @@ class NavBar extends HTMLElement {
             
             <!-- Header Chat -->
             <div class="chat-header" style="padding: 12px; border-bottom: 1px solid #ddd; display: flex; justify-content: space-between; align-items: center; background: #fff;">
-              <span id="chat-receiver-name" style="font-weight: bold; font-size: 14px; color: #333;">Pilih pengguna untuk mulai chat</span>
+              <span id="chat-receiver-name" style="font-weight: bold; font-size: 17px; color: #333;">Pilih pengguna untuk mulai chat</span>
               
               <div style="display: flex; align-items: center; gap: 8px;">
-                <button id="btn-audio-call" onclick="startCall('audio')" disabled style="background: none; border: none; cursor: pointer; font-size: 16px; opacity: 0.5;" title="Panggilan Suara">📞</button>
-                <button id="btn-video-call" onclick="startCall('video')" disabled style="background: none; border: none; cursor: pointer; font-size: 16px; opacity: 0.5;" title="Panggilan Video">📹</button>
+                <button id="btn-audio-call" onclick="startCall('audio')" disabled style="background: none; border: none; cursor: pointer; font-size: 32px; opacity: 0.5;" title="Panggilan Suara">☎️</button>
+                <button id="btn-video-call" onclick="startCall('video')" disabled style="background: none; border: none; cursor: pointer; font-size: 32px; opacity: 0.5;" title="Panggilan Video">📽️</button>
                 <span class="close" onclick="closeChatModal()" style="cursor: pointer; font-size: 20px; font-weight: bold; color: #666; margin-left: 8px;">&times;</span>
               </div>
             </div>
@@ -133,7 +133,7 @@ class NavBar extends HTMLElement {
 
             <!-- Form Kirim Pesan & Lampiran Media -->
             <form id="chat-form" onsubmit="sendPrivateMessage(event)" style="padding: 10px; border-top: 1px solid #ddd; display: flex; gap: 8px; background: #fff; align-items: center;">
-              <label for="chat-file-input" style="cursor: pointer; font-size: 18px;" title="Kirim Foto/Video">📎</label>
+              <label for="chat-file-input" style="cursor: pointer; font-size: 18px;" title="Kirim Foto/Video">🖼️</label>
               <input type="file" id="chat-file-input" style="display: none;" onchange="handleFileSelect(event)">
               
               <input type="text" id="chat-input" placeholder="Tulis pesan..." style="flex: 1; padding: 8px 12px; border: 1px solid #ccc; border-radius: 20px; outline: none;" disabled>
