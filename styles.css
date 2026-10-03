@@ -1,67 +1,62 @@
 /* ==========================================================================
    1. RESET & PENGATURAN DASAR (GLOBAL STYLES)
    ========================================================================== */
-   
-/*PENATAAN HORIZONTAL SCROLL (GESER SAMPING) */
-
-/* 1. Atur HTML & Body agar tidak memunculkan scrollbar ganda */
-html, body {
-  overflow-x: hidden; /* Mencegah overflow liar */
-  margin: 0%;
-  padding: 0%;
-  width: 100%;
-}
-
-/* 2. Pembungkus Utama Geser Samping */
-.horizontal-slider {
-  display: flex;
-  width: 100vw;
-  height: 100vh;
-  overflow-x: auto;
-  overflow-y: hidden;
-  scroll-snap-type: x mandatory; /* Memastikan geseran pas per section */
-  scroll-behavior: smooth;
-}
-
-/* 3. Setiap Section / Halaman Layar */
-.slide-page {
-  flex: 0 0 100vw; /* Setiap halaman memenuhi 100% lebar layar */
-  width: 100vw;
-  height: 100vh;
-  overflow-y: auto; /* Scroll vertikal tetap aktif di dalam masing-masing halaman */
-  scroll-snap-align: start;
-  box-sizing: border-box;
-  padding-top: 10px; /* Menjaga jarak dari Navbar */
-}
-
 
 /* Mengaktifkan scroll halus saat melakukan navigasi anchor link */
 html {
   scroll-behavior: smooth;
 }
 
-/* Reset margin, padding, dan penetapan font dasar untuk seluruh elemen */
+/* Reset margin, padding, dan penetapan box-sizing untuk seluruh elemen */
 * {
   margin: 0;
   padding: 0;
-  box-sizing: border-box; /* Memastikan padding & border tidak menambah lebar elemen */
+  box-sizing: border-box;
   font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+}
+
+/* Atur HTML & Body agar tidak memunculkan scrollbar ganda */
+html, body {
+  overflow-x: hidden;
+  margin: 0;
+  padding: 0;
+  width: 100%;
+  min-height: 100dvh; /* Menggunakan dvh agar pas dengan layar HP */
 }
 
 /* Tampilan utama halaman (Body) */
 body {
   background: #00bcd4;
   text-align: center;
+  color: #2b2b2b;
+}
+
+/* 2. Pembungkus Utama Geser Samping (Horizontal Slider) */
+.horizontal-slider {
+  display: flex;
   width: 100%;
-  margin: 0; /* Ubah dari margin: 0 auto */
-  padding-top: 50px;
-  color: #2b2b2b; /* Warna teks utama */
+  height: 100dvh; /* Mencegah overflow vertikal akibat address bar HP */
+  overflow-x: auto;
+  overflow-y: hidden;
+  scroll-snap-type: x mandatory;
+  scroll-behavior: smooth;
+}
+
+/* 3. Setiap Section / Halaman Layar */
+.slide-page {
+  flex: 0 0 100%;
+  width: 100%;
+  height: 100dvh;
+  overflow-y: auto; /* Scroll vertikal tetap aktif di dalam masing-masing halaman */
+  scroll-snap-align: start;
+  box-sizing: border-box;
+  padding-top: 60px; /* Jarak aman dari Navbar */
 }
 
 
-/*==================================
-2. NAVIGASI BAR (NAVBAR) & MODAL
-====================================*/
+/* ==========================================================================
+   2. NAVIGASI BAR (NAVBAR) & MODAL
+   ========================================================================== */
 
 /* Container Utama Navbar */
 .navbar {
@@ -75,7 +70,7 @@ body {
   left: 0;
   width: 100%;
   z-index: 1000;
-  background-color: #00bcd4; /* Beri warna latar agar konten di bawahnya tertutup saat di-scroll */
+  background-color: #00bcd4;
   padding: 10px 0;
   transition: transform 0.3s ease;
   flex-wrap: wrap;
@@ -87,7 +82,7 @@ body {
 
 /* Logo Navbar */
 h4.logo {
-  font-size: 1.5rem;
+  font-size: clamp(1.2rem, 2vw, 1.6rem); /* Ukuran font dinamis untuk HP & Laptop */
   font-weight: 700;
   color: darkblue;
   letter-spacing: 0.5px;
@@ -99,11 +94,13 @@ h4.logo {
 .nav-links {
   list-style: none;
   display: flex;
-  gap: 1.5rem;
+  gap: 1.2rem;
   background-color: #ffffff;
-  padding: 8px 24px;
+  padding: 8px 20px;
   border-radius: 20px;
   box-shadow: 0 2px 8px rgba(0, 0, 0, 0.15);
+  flex-wrap: wrap;
+  justify-content: center;
 }
 
 /* Styling Link Navigasi */
@@ -111,13 +108,12 @@ h4.logo {
   text-decoration: none;
   color: #555555;
   font-weight: 600;
-  font-size: 0.95rem;
+  font-size: 0.9rem;
   position: relative;
-  padding: 0.5rem 0;
+  padding: 0.4rem 0;
   transition: color 0.3s ease;
 }
 
-/* Garis bawah animasi untuk Link Navigasi */
 .nav-links a::after {
   content: '';
   position: absolute;
@@ -129,7 +125,6 @@ h4.logo {
   transition: width 0.3s ease;
 }
 
-/* Efek Hover & Status Aktif pada Menu Navigasi */
 .nav-links a:hover,
 .nav-links a.active {
   color: #2575fc;
@@ -140,150 +135,129 @@ h4.logo {
   width: 100%;
 }
 
-/* --- LOGIK SUB-MENU TERSEMBUNYI --- */
+/* Sub-Menu Tersembunyi */
 .main-nav {
-    list-style: none;
-    display: flex;
-    gap: 20px;
-    position: relative;
+  list-style: none;
+  display: flex;
+  gap: 20px;
+  position: relative;
 }
 
 .main-nav a {
-    text-decoration: none;
-    color: #333;
-    font-weight: 500;
-    padding: 8px 12px;
-    display: block;
+  text-decoration: none;
+  color: #333;
+  font-weight: 500;
+  padding: 8px 12px;
+  display: block;
 }
 
-/* Parent LI diset relative sebagai acuan posisi */
 .has-submenu {
-    position: relative;
+  position: relative;
 }
 
-/* Sub-menu awalnya disembunyikan (opacity & display/visibility) */
 .horizontal-submenu {
-    position: absolute;
-    top: 100%; /* Muncul tepat di bawah menu utama */
-    left: 0;
-    background-color: #ffffff;
-    list-style: none;
-    
-    /* Membuat susunan sub-menu menjadi HORIZONTAL */
-    display: flex; 
-    flex-direction: row; 
-    gap: 10px;
-    
-    padding: 10px;
-    border-radius: 8px;
-    box-shadow: 0 4px 15px rgba(0, 0, 0, 0.15);
-    white-space: nowrap; /* Mencegah item terlipat ke bawah */
-
-    /* Efek Sembunyi (Hidden) */
-    opacity: 0;
-    visibility: hidden;
-    transform: translateY(10px);
-    transition: all 0.3s ease;
+  position: absolute;
+  top: 100%;
+  left: 0;
+  background-color: #ffffff;
+  list-style: none;
+  display: flex; 
+  flex-direction: row; 
+  gap: 10px;
+  padding: 10px;
+  border-radius: 8px;
+  box-shadow: 0 4px 15px rgba(0, 0, 0, 0.15);
+  white-space: nowrap;
+  opacity: 0;
+  visibility: hidden;
+  transform: translateY(10px);
+  transition: all 0.3s ease;
 }
 
-/* Style item di dalam sub-menu */
 .horizontal-submenu li a {
-    background-color: #f0f2f5;
-    border-radius: 5px;
-    font-size: 14px;
+  background-color: #f0f2f5;
+  border-radius: 5px;
+  font-size: 14px;
 }
 
 .horizontal-submenu li a:hover {
-    background-color: #007bff;
-    color: white;
+  background-color: #007bff;
+  color: white;
 }
 
-/* --- MENAMPILKAN SUB-MENU SAAT HOVER --- */
 .has-submenu:hover .horizontal-submenu {
-    opacity: 1;
-    visibility: visible;
-    transform: translateY(0);
+  opacity: 1;
+  visibility: visible;
+  transform: translateY(0);
 }
 
-        /* --- SUB-MENU VERTIKAL (BERJEJER KE BAWAH) --- */
+.has-dropdown {
+  position: relative;
+}
 
-        /* 1. Induk <li> harus relative agar sub-menu menempel di bawahnya */
-        .has-dropdown {
-            position: relative;
-        }
+.vertical-dropdown {
+  position: absolute;
+  top: 100%;
+  left: 0;
+  background-color: #ffffff;
+  list-style: none;
+  min-width: 80px;
+  border-radius: 8px;
+  box-shadow: 0 4px 15px rgba(0, 0, 0, 0.15);
+  padding: 8px 0;
+  display: flex;
+  flex-direction: column; 
+  opacity: 0;
+  visibility: hidden;
+  transform: translateY(10px);
+  transition: all 0.2s ease-in-out;
+  gap: 10px;
+}
 
-        /* 2. Sub-menu tersembunyi & tersusun vertikal */
-        .vertical-dropdown {
-            position: absolute;
-            top: 100%; /* Pas di bawah menu Toko */
-            left: 0;
-            background-color: #ffffff;
-            list-style: none;
-            min-width: 80px; /* Lebar kotak menu */
-            border-radius: 8px;
-            box-shadow: 0 4px 15px rgba(0, 0, 0, 0.15);
-            padding: 8px 0;
-            
-            /* Dibuat Flexbox Vertikal (kebawah) */
-            display: flex;
-            flex-direction: column; 
+.vertical-dropdown li a {
+  padding: 10px 16px;
+  color: #444;
+  font-size: 14px;
+}
 
-            /* Sembunyikan secara bawaan */
-            opacity: 0;
-            visibility: hidden;
-            transform: translateY(10px);
-            transition: all 0.2s ease-in-out;
-            gap:10px;
-        }
+.vertical-dropdown li a:hover {
+  background-color: #f0f2f5;
+  color: #007bff;
+}
 
-        /* 3. Tampilan item di dalam sub-menu */
-        .vertical-dropdown li a {
-            padding: 10px 16px;
-            color: #444;
-            font-size: 14px;
-        }
+.has-dropdown:hover .vertical-dropdown {
+  opacity: 1;
+  visibility: visible;
+  transform: translateY(0);
+}
 
-        .vertical-dropdown li a:hover {
-            background-color: #f0f2f5;
-            color: #007bff;
-        }
-
-        /* 4. Tampilkan sub-menu saat mouse mengarah ke menu Toko */
-        .has-dropdown:hover .vertical-dropdown {
-            opacity: 1;
-            visibility: visible;
-            transform: translateY(0);
-        }
-        
-/* --- Modal Penelusuran / About --- */
-
-/* Latar Belakang Modal (Overlay) */
+/* Modal Penelusuran / About */
 .modal {
-  display: none; /* Tersembunyi secara bawaan, ditampilkan via JS */
+  display: none;
   position: fixed;
   z-index: 1000;
   left: 0;
   top: 0;
   width: 100%;
   height: 100%;
-  background-color: rgba(0, 0, 0, 0.5); /* Efek gelap transparan */
+  background-color: rgba(0, 0, 0, 0.5);
   justify-content: center;
   align-items: center;
 }
 
-/* Kotak Konten Modal */
 .modal-content {
   background-color: #fff;
-  margin: 10% auto;
-  padding: 25px;
-  width: 80%;
-  max-width: 100%;
-  border-radius: 8px;
+  margin: auto;
+  padding: 20px;
+  width: 90%;
+  max-width: 500px;
+  max-height: 85vh;
+  overflow-y: auto;
+  border-radius: 12px;
   position: relative;
   box-shadow: 0 4px 10px rgba(0,0,0,0.3);
 }
 
-/* Tombol Tutup (X) pada Modal */
 .close-btn {
   position: absolute;
   right: 15px;
@@ -303,7 +277,6 @@ h4.logo {
    3. FORM INPUT POSTINGAN
    ========================================================================== */
 
-/* Container Form Buat Postingan */
 .post-container {
   background: #ffffff;
   text-align: left;
@@ -316,11 +289,10 @@ h4.logo {
 
 .post-container h2 {
   margin-bottom: 15px;
-  font-size: 20px;
+  font-size: 18px;
   color: #333333;
 }
 
-/* Grup Elemen Form (Label & Input) */
 .form-group {
   margin-bottom: 15px;
 }
@@ -332,7 +304,6 @@ h4.logo {
   color: #555555;
 }
 
-/* Input Teks & Textarea */
 .form-group input,
 .form-group textarea {
   width: 100%;
@@ -344,10 +315,9 @@ h4.logo {
 
 .form-group textarea {
   text-align: left;
-  resize: none; /* Mencegah user merubah ukuran kotak textarea secara manual */
+  resize: none;
 }
 
-/* Tombol Kirim / Publish Postingan */
 .btn-post {
   background-color: #007bff;
   color: white;
@@ -368,36 +338,31 @@ h4.logo {
    4. CARD POSTINGAN & KOMPONEN FEED
    ========================================================================== */
 
-/* Container Pembungkus Daftar Postingan */
 .container {
   max-width: 100%;
-  margin: 40px auto;
-  padding: 0 16px;
+  margin: 20px auto;
+  padding: 0 12px;
 }
 
-/* Kotak / Kartu Postingan */
 .post-card {
   background: #ffffff;
   border-radius: 12px;
   overflow: hidden;
-  margin-bottom: 24px;
+  margin-bottom: 20px;
   box-shadow: 0 4px 12px rgba(0, 0, 0, 0.05);
   transition: transform 0.2s ease;
 }
 
-/* Efek Terangkat saat Kartu Postingan di-hover */
 .post-card:hover {
   transform: translateY(-2px);
 }
 
-/* Header Postingan (Profil Pengguna & Waktu) */
 .post-header {
   display: flex;
   align-items: center;
   padding: 14px 16px;
 }
 
-/* Foto Profil / Avatar */
 .avatar {
   width: 44px;
   height: 44px;
@@ -406,7 +371,6 @@ h4.logo {
   margin-right: 12px;
 }
 
-/* Informasi Pengguna (Nama & Tanggal) */
 .user-info h4 {
   font-size: 15px;
   font-weight: 600;
@@ -420,12 +384,11 @@ h4.logo {
 }
 
 .user-info .btn-chat-right {
-  margin-left: auto; /* Mendorong tombol ke posisi paling kanan */
+  margin-left: auto;
   font-size: 12px;
   padding: 4px 10px;
 }
 
-/* Isi Teks Postingan */
 .post-content {
   padding: 0 16px 12px;
   font-size: 14px;
@@ -434,7 +397,6 @@ h4.logo {
   text-align: left;
 }
 
-/* Gambar/Media dalam Postingan */
 .post-media img {
   width: 100%;
   height: auto;
@@ -443,7 +405,6 @@ h4.logo {
   object-fit: cover;
 }
 
-/* Area Meta Data & Badge Tambahan */
 .post-meta { 
   text-align: left;
   font-size: 0.85em; 
@@ -462,7 +423,6 @@ h4.logo {
   margin-left: 5px;
 }
 
-/* Area Statistik (Jumlah Like, Komentar, & Share) */
 .post-stats {
   display: flex;
   justify-content: space-between;
@@ -472,7 +432,6 @@ h4.logo {
   border-bottom: 1px solid #e4e6eb;
 }
 
-/* Container Tombol Interaksi (Like, Komen, Bagikan) */
 .post-actions {
   display: flex;
   justify-content: space-around;
@@ -480,7 +439,6 @@ h4.logo {
   border-bottom: 1px solid #e4e6eb;
 }
 
-/* Styling Tombol Interaksi */
 .action-btn {
   flex: 1;
   background: transparent;
@@ -498,30 +456,72 @@ h4.logo {
   gap: 6px;
 }
 
-/* Efek Hover & Klik pada Tombol Interaksi */
 .action-btn:hover {
   background-color: #f2f2f2;
 }
 
 .action-btn:active {
-  transform: scale(0.95); /* Efek tombol tertekan */
+  transform: scale(0.95);
 }
 
-/* Tampilan Tombol Like saat Aktif (Sudah Di-like) */
 .action-btn.active {
-  color: #0866ff; /* Warna biru Facebook */
+  color: #0866ff;
 }
 
 .action-btn.active .btn-icon {
-  animation: bounce 0.3s ease; /* Memicu animasi bounce pada ikon */
+  animation: bounce 0.3s ease;
 }
 
 
 /* ==========================================================================
-   5. ELEMEN TAMBAHAN, INDIKATOR, & ANIMASI
+   5. TATA LETAK RESPONSIF (HP & LAPTOP)
    ========================================================================== */
 
-/* Indikator Loading untuk Infinite Scroll */
+/* Wadah Utama: Fleksibel di HP, Proporsional di Laptop */
+.main-container {
+  width: 95%;             /* Mengisi 95% lebar layar di HP */
+  max-width: 600px;       /* Batas maksimal di HP agar tidak terlalu lebar */
+  margin: 0 auto 20px;
+  transition: all 0.3s ease;
+}
+
+.article-card {
+  width: 100%;
+  margin-bottom: 20px;
+  background: #00bcd4;
+  border-radius: 12px;
+  padding: 16px;
+  box-sizing: border-box;
+}
+
+/* Penyesuaian saat dibuka di Laptop / Desktop (Layar > 720px) */
+@media (min-width: 720px) {
+  .main-container {
+    max-width: 1200px;                  /* Batas lebar ideal di Laptop */
+    display: grid;                       /* Mode Grid 3 Kolom */
+    grid-template-columns: repeat(3, 1fr); 
+    gap: 20px;                           
+    margin: 0 auto 30px;
+  }
+
+  .article-card {
+    margin-bottom: 0;                   
+    height: 100%;                        
+    display: flex;
+    flex-direction: column;
+    justify-content: space-between;
+  }
+}
+
+
+/* ==========================================================================
+   6. ELEMEN TAMBAHAN, INDIKATOR, & ELEMEN SIMULASI
+   ========================================================================== */
+
+:root {
+  color-scheme: light; /* Mencegah browser memaksa mode gelap */
+}
+
 .status-indicator {
   text-align: center;
   padding: 20px;
@@ -529,7 +529,6 @@ h4.logo {
   color: #64748b;
 }
 
-/* Kotak Konten dengan Efek Zoom Saat Hover */
 .konten-zoom {
   border: 1px solid #ccc;
   transform: scale(0.8); 
@@ -544,15 +543,14 @@ h4.logo {
   box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
 }
 
-.konten-zoom img{
-	transition: tranform 0.3s ease;
+.konten-zoom img {
+  transition: transform 0.3s ease;
 }
 
 .konten-zoom:hover img {
   transform: scale(1.8);
 }
 
-/* Box Call-To-Action / Informasi di Akhir */
 .call-to-action {
   background-color: #f0fdf4;
   border-left: 4px solid #22c55e;
@@ -561,134 +559,78 @@ h4.logo {
   border-radius: 4px;
 }
 
-/* Keyframes Animasi Membal (Bounce) untuk Ikon Like */
 @keyframes bounce {
   0% { transform: scale(1); }
   50% { transform: scale(1.3); }
   100% { transform: scale(1); }
-   }
-
-/* ==========================================
-   TATA LETAK RESPONSIF (HP & LAPTOP)
-   ========================================== */
-
-/* Gaya dasar wadah utama untuk HP (1 kolom memanjang) */
-.main-container {
-    width: 90%;
-    max-width: 70%;       /* Ukuran pas untuk HP */
-    margin: 0 auto 20px;
-    transition: all 0.3s ease;
 }
 
-.article-card {
-    width: 100%;
-    margin-bottom: 20px;    /* Jarak antar kartu di HP */
-    background: #00bcd4;
-    border-radius: 12px;
-    padding: 16px;
-    box-sizing: border-box;
+.falling-item {
+  position: absolute;
+  padding: 12px 20px;
+  font-weight: bold;
+  user-select: none;
+  will-change: transform;
+  text-align: center;
 }
 
-/* Penyesuaian khusus Laptop/Desktop (Layar > 768px atau 1024px) */
-@media (min-width: 720px) {
-    .main-container {
-        max-width: 1200px;                  /* Diperlebar agar memanfaatkan layar laptop */
-        display: grid;                       /* Mengaktifkan mode Grid */
-        grid-template-columns: repeat(3, 1fr); /* Membagi menjadi 3 KOLOM SEJAJAR */
-        gap: 20px;                           /* Jarak rapi antar kartu (horizontal & vertikal) */
-        margin: 0 auto 30px;
-    }
-
-    .article-card {
-        margin-bottom: 0;                   /* Menghilangkan margin bawah karena sudah ada 'gap' */
-        height: 100%;                        /* Membuat semua tinggi kartu seragam */
-        display: flex;
-        flex-direction: column;
-        justify-content: space-between;
-    }
-}
-
-/* MENCEGAH BROWSER MEMAKSA MODE GELAP AUTOMATIS */
-:root {
-    color-scheme: light; /* Memastikan browser selalu merender dalam mode terang */
-}
-
-    .falling-item {
-      position: absolute;
-      padding: 12px 20px;
-      font-weight: bold;
-      user-select: none;
-      will-change: transform;
-      text-align: center;
-    }
-.bulat{
-  /* Membentuk Lingkaran */
+.bulat {
   width: 50px;
   aspect-ratio: 1 / 1;
   border-radius: 50%;
-    /* Menata Teks di Tengah */
   display: flex;
   justify-content: center;
   align-items: center;
   text-align: center;
   padding: 40px;
-  /* Padding besar agar teks tidak menempel di lengkungan tepi */
   box-sizing: border-box;
-  
-  /* Menangani Teks Banyak */
   overflow-y: auto;
 }
-    /* 1. AIR (Water) - Licin & Memantul */
-    .water-item {
-      background: rgba(0, 180, 255, 0.85);
-      color: #fff;
-      border-radius: 30px;
-      border: 2px solid #80d8ff;
-      box-shadow: 0 0 10px rgba(0, 180, 255, 0.5);
-    }
 
-    /* 2. UDARA (Air) - Transparan & Ringan */
-    .air-item {
-      background: rgba(255, 255, 255, 0.2);
-      color: #e0f7fa;
-      border-radius: 15px;
-      border: 1px dashed #ffffff;
-      backdrop-filter: blur(4px);
-      box-shadow: 0 0 8px rgba(255, 255, 255, 0.3);
-    }
+.water-item {
+  background: rgba(0, 180, 255, 0.85);
+  color: #fff;
+  border-radius: 30px;
+  border: 2px solid #80d8ff;
+  box-shadow: 0 0 10px rgba(0, 180, 255, 0.5);
+}
 
-    /* 3. API (Fire) - Burning Glowing Effect */
-    .fire-item {
+.air-item {
+  background: rgba(255, 255, 255, 0.2);
+  color: #e0f7fa;
+  border-radius: 15px;
+  border: 1px dashed #ffffff;
+  backdrop-filter: blur(4px);
+  box-shadow: 0 0 8px rgba(255, 255, 255, 0.3);
+}
+
+.fire-item {
   background: linear-gradient(135deg, #ff4e50, #f9d423);
   color: #fff;
   box-shadow: 0 0 15px rgba(255, 78, 80, 0.8);
-
 }
 
+.earth-item {
+  background: #5d4037;
+  color: #d7ccc8;
+  border-radius: 4px;
+  border: 3px solid #3e2723;
+  box-shadow: 2px 2px 5px rgba(0, 0, 0, 0.5);
+}
 
-    /* 4. TANAH (Earth) - Padat & Berat */
-    .earth-item {
-      background: #5d4037;
-      color: #d7ccc8;
-      border-radius: 4px;
-      border: 3px solid #3e2723;
-      box-shadow: 2px 2px 5px rgba(0, 0, 0, 0.5);
-    }
+#btn-permission {
+  position: fixed;
+  top: 10px;
+  left: 10px;
+  z-index: 1000;
+  padding: 10px 15px;
+  background: #28a745;
+  color: white;
+  border: none;
+  border-radius: 5px;
+  font-weight: bold;
+}
 
-    #btn-permission {
-      position: fixed;
-      top: 10px;
-      left: 10px;
-      z-index: 1000;
-      padding: 10px 15px;
-      background: #28a745;
-      color: white;
-      border: none;
-      border-radius: 5px;
-      font-weight: bold;
-    }
-    
-    /* Animasi Putar Spinner Loading Upload */
 .spinner {
   width: 16px;
   height: 16px;
@@ -703,7 +645,6 @@ h4.logo {
   100% { transform: rotate(360deg); }
 }
 
-/* Efek Hover Ikon Klip */
 label[for="post-image-input"]:hover {
   background-color: #f0f0f0;
 }
