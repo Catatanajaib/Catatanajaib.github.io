@@ -146,23 +146,31 @@ class NavBar extends HTMLElement {
               <button type="submit" id="chat-send-btn" style="padding: 8px 16px; background: #007bff; color: white; border: none; border-radius: 20px; cursor: pointer;" disabled>Kirim</button>
             </form>
 
-            <!-- OVERLAY WEBRTC CALL -->
-            <div id="webrtc-call-overlay" style="display: none; position: absolute; top: 0; left: 0; width: 100%; height: 100%; background: #111; z-index: 999; flex-direction: column; border-radius: 8px; overflow: hidden;">
-              <div style="padding: 10px 14px; background: #222; color: #fff; display: flex; justify-content: space-between; align-items: center; font-size: 13px; border-bottom: 1px solid #333;">
-                <span id="webrtc-status-title" style="font-weight: 500;">Panggilan Berlangsung...</span>
-                <button type="button" onclick="endCall(true)" style="background: #dc3545; color: white; border: none; padding: 6px 14px; border-radius: 16px; cursor: pointer; font-size: 12px; font-weight: bold;">Tutup Panggilan</button>
-              </div>
-              
-              <div style="flex: 1; position: relative; background: #000; display: flex; justify-content: center; align-items: center;">
-                <video id="remote-video" autoplay playsinline style="width: 100%; height: 100%; object-fit: cover;"></video>
-                <video id="local-video" autoplay playsinline muted style="position: absolute; bottom: 20px; right: 20px; width: 120px; height: 160px; object-fit: cover; border-radius: 8px; border: 2px solid #fff; background: #222;"></video>
-              </div>
-            </div>
+          <!-- OVERLAY WEBRTC CALL (FIXED MOBILE-FRIENDLY) -->
+<div id="webrtc-call-overlay" style="display: none; position: fixed; top: 0; left: 0; width: 100vw; height: 100vh; background: #000; z-index: 99999; flex-direction: column; justify-content: space-between; overflow: hidden;">
+  
+  <!-- Header Status Panggilan -->
+  <div style="padding: 14px; background: rgba(0, 0, 0, 0.7); color: #fff; display: flex; justify-content: space-between; align-items: center; font-size: 14px; position: absolute; top: 0; left: 0; right: 0; z-index: 10;">
+    <span id="webrtc-status-title" style="font-weight: 600; text-shadow: 0 1px 2px rgba(0,0,0,0.8);">Panggilan Berlangsung...</span>
+  </div>
 
-          </div>
-        </div>
-        <div id="chat-toast-container" style="position: fixed; bottom: 20px; right: 20px; z-index: 99999; display: flex; flex-direction: column; gap: 10px;"></div>
-      </div>
+  <!-- Area Video Utamanya -->
+  <div style="flex: 1; width: 100%; height: 100%; position: relative; background: #111; display: flex; align-items: center; justify-content: center;">
+    <!-- Video Remote (Lawan Bicara - Layar Penuh) -->
+    <video id="remote-video" autoplay playsinline style="width: 100%; height: 100%; object-fit: cover; background: #000;"></video>
+    
+    <!-- Video Local (Kamera Sendiri - Floating Modal Kecil) -->
+    <video id="local-video" autoplay playsinline muted style="position: absolute; bottom: 90px; right: 16px; width: 100px; height: 140px; object-fit: cover; border-radius: 12px; border: 2px solid rgba(255, 255, 255, 0.8); background: #222; box-shadow: 0 4px 12px rgba(0,0,0,0.5); z-index: 5;"></video>
+  </div>
+
+  <!-- Tombol Kontrol Panggilan (Bawah Layar) -->
+  <div style="padding: 16px; background: rgba(0, 0, 0, 0.7); display: flex; justify-content: center; align-items: center; position: absolute; bottom: 0; left: 0; right: 0; z-index: 10;">
+    <button type="button" onclick="endCall(true)" style="background: #dc3545; color: white; border: none; padding: 12px 28px; border-radius: 30px; cursor: pointer; font-size: 14px; font-weight: bold; box-shadow: 0 4px 10px rgba(220, 53, 69, 0.4);">
+      🚫 Tutup Panggilan
+    </button>
+  </div>
+</div>
+
     `;
 
     this.initModalEvents();
@@ -470,12 +478,13 @@ async function sendPrivateMessage(event) {
 }
 
 // ==========================================================================
-// LOGIKA UTAMA WEBRTC & SUPABASE SIGNALING
+// LOGIKA UTAMA WEBRTC & SUPABASE SIGNALING (DIPERBARUI)
 // ==========================================================================
 
 function initPeerConnection(myUserId, targetUserId) {
   peerConnection = new RTCPeerConnection(rtcConfig);
 
+  // 1. Pengiriman ICE Candidate
   peerConnection.onicecandidate = (event) => {
     if (event.candidate && chatSubscription) {
       chatSubscription.send({
@@ -491,14 +500,26 @@ function initPeerConnection(myUserId, targetUserId) {
     }
   };
 
+  // 2. Menerima Video/Audio Remote
   peerConnection.ontrack = (event) => {
     const remoteVideo = document.getElementById('remote-video');
     if (remoteVideo && event.streams[0]) {
       remoteVideo.srcObject = event.streams[0];
     }
   };
+
+  // 3. Menangani Terputusnya Koneksi Otomatis (Disconnect State)
+  peerConnection.onconnectionstatechange = () => {
+    if (peerConnection) {
+      const state = peerConnection.connectionState;
+      if (state === 'disconnected' || state === 'failed' || state === 'closed') {
+        endCall(false); // Tutup UI secara otomatis jika koneksi terputus
+      }
+    }
+  };
 }
 
+// Memulai Panggilan (Penelepon)
 async function startCall(mode) {
   if (!activeChatReceiverId) return;
 
@@ -508,7 +529,9 @@ async function startCall(mode) {
 
   currentCallTargetId = activeChatReceiverId;
 
-  document.getElementById('webrtc-call-overlay').style.display = 'flex';
+  // Tampilkan Overlay Responsif
+  const overlay = document.getElementById('webrtc-call-overlay');
+  if (overlay) overlay.style.display = 'flex';
   document.getElementById('webrtc-status-title').textContent = `Memanggil (${mode.toUpperCase()})...`;
 
   try {
@@ -538,11 +561,12 @@ async function startCall(mode) {
       }
     });
   } catch (err) {
-    alert("Izin kamera/mikrofon ditolak atau tidak ditemukan.");
+    alert("Izin kamera/mikrofon ditolak atau Perangkat tidak mendukung.");
     endCall(false);
   }
 }
 
+// Menjawab Panggilan (Penerima)
 async function answerCall(callerId, offerSdp, mode) {
   currentCallTargetId = callerId;
 
@@ -550,8 +574,9 @@ async function answerCall(callerId, offerSdp, mode) {
   const { data: { session } } = await client.auth.getSession();
   if (!session) return;
 
-  document.getElementById('webrtc-call-overlay').style.display = 'flex';
-  document.getElementById('webrtc-status-title').textContent = 'Panggilan Terhubung';
+  const overlay = document.getElementById('webrtc-call-overlay');
+  if (overlay) overlay.style.display = 'flex';
+  document.getElementById('webrtc-status-title').textContent = 'Menghubungkan...';
 
   try {
     localStream = await navigator.mediaDevices.getUserMedia({
@@ -579,28 +604,30 @@ async function answerCall(callerId, offerSdp, mode) {
         sdp: answer
       }
     });
+
+    document.getElementById('webrtc-status-title').textContent = 'Panggilan Terhubung';
   } catch (err) {
-    alert("Gagal menghubungkan panggilan.");
+    alert("Gagal mengakses media saat menerima telepon.");
     endCall(true);
   }
 }
 
+// Memproses Sinyal Masuk
 async function handleSignalData(payload) {
   const client = window.supabaseClient || (typeof supabaseClient !== 'undefined' ? supabaseClient : null);
   const { data: { session } } = await client.auth.getSession();
   if (!session) return;
 
   const myUserId = session.user.id;
-  if (payload.targetUserId !== myUserId) return; // Hanya proses sinyal yang ditujukan ke user ini
+  if (payload.targetUserId !== myUserId) return;
 
   if (payload.type === 'offer') {
-    // Tampilkan notifikasi panggilan masuk
     const isConfirm = confirm(`📞 Panggilan ${payload.mode.toUpperCase()} dari ${payload.callerName}. Jawab?`);
     if (isConfirm) {
       openChatFromNavbar();
       answerCall(payload.senderId, payload.sdp, payload.mode);
     } else {
-      // Tolak Panggilan
+      // Kirim Penolakan
       chatSubscription.send({
         type: 'broadcast',
         event: 'webrtc-signal',
@@ -619,13 +646,16 @@ async function handleSignalData(payload) {
       await peerConnection.addIceCandidate(new RTCIceCandidate(payload.candidate));
     } catch (e) {}
   } else if (payload.type === 'hangup') {
+    // Sinyal penutupan diterima dari lawan bicara
     endCall(false);
   }
 }
 
+// Fungsi Pembersihan Total & Penutupan Panggilan
 function endCall(notifyPeer = true) {
   const client = window.supabaseClient || (typeof supabaseClient !== 'undefined' ? supabaseClient : null);
 
+  // 1. Beritahu lawan bicara jika kita yang memutus panggilan lebih dulu
   if (notifyPeer && chatSubscription && currentCallTargetId && client) {
     client.auth.getSession().then(({ data: { session } }) => {
       if (session) {
@@ -642,11 +672,21 @@ function endCall(notifyPeer = true) {
     });
   }
 
+  // 2. Hentikan semua aliran Kamera & Mikrofon
   if (localStream) {
-    localStream.getTracks().forEach(track => track.stop());
+    localStream.getTracks().forEach(track => {
+      track.stop();
+    });
     localStream = null;
   }
 
+  // 3. Reset Elemen Video HTML
+  const localVideo = document.getElementById('local-video');
+  const remoteVideo = document.getElementById('remote-video');
+  if (localVideo) localVideo.srcObject = null;
+  if (remoteVideo) remoteVideo.srcObject = null;
+
+  // 4. Tutup Koneksi Peer WebRTC
   if (peerConnection) {
     peerConnection.close();
     peerConnection = null;
@@ -654,36 +694,13 @@ function endCall(notifyPeer = true) {
 
   currentCallTargetId = null;
 
+  // 5. Sembunyikan Overlay Panggilan
   const overlay = document.getElementById('webrtc-call-overlay');
-  if (overlay) overlay.style.display = 'none';
+  if (overlay) {
+    overlay.style.display = 'none';
+  }
 }
 
-function subscribeToPrivateChat() {
-  const client = window.supabaseClient || (typeof supabaseClient !== 'undefined' ? supabaseClient : null);
-  if (!client || chatSubscription) return;
-
-  chatSubscription = client
-    .channel('private-chat-global')
-    .on(
-      'postgres_changes',
-      { event: 'INSERT', schema: 'public', table: 'messages' },
-      async (payload) => {
-        const { data: { session } } = await client.auth.getSession();
-        if (!session) return;
-
-        const myUserId = session.user.id;
-        const newMsg = payload.new;
-
-        if (newMsg.receiver_id === myUserId && activeChatReceiverId === newMsg.sender_id) {
-          fetchPrivateMessages(newMsg.sender_id);
-        }
-      }
-    )
-    .on('broadcast', { event: 'webrtc-signal' }, (payload) => {
-      handleSignalData(payload.payload);
-    })
-    .subscribe();
-}
 
 // Inisialisasi awal
 document.addEventListener('DOMContentLoaded', () => {
