@@ -1,6 +1,20 @@
 // ==========================================================================
 // VARIABEL GLOBAL
 // ==========================================================================
+
+//webrtc
+let localStream = null;
+let peerConnection = null;
+let currentCallTargetId = null;
+
+// Konfigurasi ICE Server (STUN Server Google)
+const rtcConfig = {
+  iceServers: [
+    { urls: 'stun:stun.l.google.com:19302' },
+    { urls: 'stun:stun1.l.google.com:19302' }
+  ]
+};
+
 let activeChatReceiverId = null;
 let chatSubscription = null;
 let selectedFile = null;
@@ -139,19 +153,23 @@ class NavBar extends HTMLElement {
               <input type="text" id="chat-input" placeholder="Tulis pesan..." style="flex: 1; padding: 8px 12px; border: 1px solid #ccc; border-radius: 20px; outline: none;" disabled>
               <button type="submit" id="chat-send-btn" style="padding: 8px 16px; background: #007bff; color: white; border: none; border-radius: 20px; cursor: pointer;" disabled>Kirim</button>
             </form>
-<!-- OVERLAY JITSI MEET CALL -->
-            <div id="jitsi-call-overlay" style="display: none; position: absolute; top: 0; left: 0; width: 100%; height: 100%; background: #111; z-index: 999; flex-direction: column; border-radius: 8px; overflow: hidden;">
-              <div style="padding: 10px 14px; background: #222; color: #fff; display: flex; justify-content: space-between; align-items: center; font-size: 13px; border-bottom: 1px solid #333;">
-                <span id="jitsi-status-title" style="font-weight: 500;">Panggilan Berlangsung...</span>
-                <button type="button" onclick="endJitsiCall()" style="background: #dc3545; color: white; border: none; padding: 6px 14px; border-radius: 16px; cursor: pointer; font-size: 12px; font-weight: bold;">Tutup Panggilan</button>
-              </div>
-              <div id="jitsi-frame" style="flex: 1; width: 100%; height: calc(100% - 45px);"></div>
-            </div>
+<!-- OVERLAY WEBRTC CALL -->
+<div id="webrtc-call-overlay" style="display: none; position: absolute; top: 0; left: 0; width: 100%; height: 100%; background: #111; z-index: 999; flex-direction: column; border-radius: 8px; overflow: hidden;">
+  <div style="padding: 10px 14px; background: #222; color: #fff; display: flex; justify-content: space-between; align-items: center; font-size: 13px; border-bottom: 1px solid #333;">
+    <span id="webrtc-status-title" style="font-weight: 500;">Panggilan Berlangsung...</span>
+    <button type="button" onclick="endCall()" style="background: #dc3545; color: white; border: none; padding: 6px 14px; border-radius: 16px; cursor: pointer; font-size: 12px; font-weight: bold;">Tutup Panggilan</button>
+  </div>
+  
+  <!-- Area Tampilan Video -->
+  <div style="flex: 1; position: relative; background: #000; display: flex; justify-content: center; align-items: center;">
+    <!-- Video Lawan Bicara (Remote) -->
+    <video id="remote-video" autoplay playsinline style="width: 100%; height: 100%; object-fit: cover;"></video>
+    
+    <!-- Video Diri Sendiri (Local Preview) -->
+    <video id="local-video" autoplay playsinline muted style="position: absolute; bottom: 20px; right: 20px; width: 120px; height: 160px; object-fit: cover; border-radius: 8px; border: 2px solid #fff; background: #222;"></video>
+  </div>
+</div>
 
-          </div>
-        </div>
-        <div id="chat-toast-container" style="position: fixed; bottom: 20px; right: 20px; z-index: 99999; display: flex; flex-direction: column; gap: 10px;"></div>
-      </div>
     `;
 
     this.initModalEvents();
@@ -555,6 +573,7 @@ function subscribeToPrivateChat(receiverId) {
         }
       }
     )
+    // EVENT: Panggilan Masuk
     .on('broadcast', { event: 'incoming-call' }, async (payload) => {
       const { data: { session } } = await client.auth.getSession();
       if (!session) return;
@@ -568,252 +587,214 @@ function subscribeToPrivateChat(receiverId) {
           `${data.callerName} memanggil kamu. Klik untuk menjawab!`,
           () => {
             openChatFromNavbar();
-            startCallWithRoom(data.roomName, data.callMode);
+            answerIncomingCall(data.callerId, data.sdp, data.callMode);
           }
         );
       }
     })
+    // EVENT: Sinyal WebRTC (Answer, Candidate, End Call)
+    .on('broadcast', { event: 'webrtc-signal' }, async (payload) => {
+      const { data: { session } } = await client.auth.getSession();
+      if (!session) return;
+
+      const myUserId = session.user.id;
+      const data = payload.payload;
+
+      if (data.targetUserId === myUserId) {
+        handleSignalData(data);
+      }
+    })
     .subscribe();
 }
+
 // ==========================================================================
-// FITUR PANGGILAN VIDEO & SUARA (JITSI API)
+// LOGIKA PANGGILAN WEBRTC & SUPABASE SIGNALING
 // ==========================================================================
-function listenForIncomingCalls(userId) {
-  try {
-    const client = window.supabaseClient || (typeof supabaseClient !== 'undefined' ? supabaseClient : null);
-    if (!client || !userId) return;
-    
-    client
-      .channel('incoming_calls')
-      .on(
-        'postgres_changes',
-        {
-          event: 'INSERT',
-          schema: 'public',
-          table: 'calls',
-          filter: `receiver_id=eq.${userId}`
-        },
-        (payload) => {
-          const newCall = payload.new;
-          if (newCall.status === 'ringing') {
-            showIncomingCallPopup(newCall);
-          }
-        }
-      )
-      .subscribe();
-  } catch (err) {
-    console.warn("Layanan panggilan belum siap:", err);
-  }
-}
 
-function showIncomingCallPopup(callData) {
-  const client = window.supabaseClient || (typeof supabaseClient !== 'undefined' ? supabaseClient : null);
-  const callType = callData.call_type === 'video' ? 'Video' : 'Suara';
-  const isAccepted = confirm(`Panggilan ${callType} masuk! Apakah ingin mengangkat?`);
-
-  if (!client) return;
-
-  if (isAccepted) {
-    client
-      .from('calls')
-      .update({ status: 'accepted' })
-      .eq('id', callData.id)
-      .then(() => {
-        startCallWithRoom(callData.room_name, callData.call_type);
-      });
-  } else {
-    client
-      .from('calls')
-      .update({ status: 'rejected' })
-      .eq('id', callData.id);
-  }
-}
-
-async function startCall(callMode) {
-  if (!activeChatReceiverId) {
-    alert("Pilih pengguna terlebih dahulu!");
-    return;
-  }
+// 1. Memulai Panggilan (Penelepon/Caller)
+async function startCall(mode) {
+  if (!activeChatReceiverId) return;
 
   const client = window.supabaseClient || (typeof supabaseClient !== 'undefined' ? supabaseClient : null);
-  if (!client) {
-    alert("Koneksi Supabase belum siap!");
-    return;
-  }
+  if (!client) return alert("Koneksi Supabase tidak tersedia.");
 
   const { data: { session } } = await client.auth.getSession();
-  if (!session) {
-    alert("Silakan login terlebih dahulu!");
-    return;
-  }
+  if (!session) return alert("Silakan login terlebih dahulu.");
 
-  const currentUserId = session.user.id;
-  const callerName = session.user.user_metadata?.full_name || session.user.email || "Seseorang";
-  const roomName = `CatatanAjaib_${currentUserId.slice(0, 5)}_${activeChatReceiverId.slice(0, 5)}_${Date.now()}`;
+  currentCallTargetId = activeChatReceiverId;
 
-  await client.from('calls').delete().eq('receiver_id', activeChatReceiverId);
+  // Tampilkan overlay panggilan
+  document.getElementById('webrtc-call-overlay').style.display = 'flex';
+  document.getElementById('webrtc-status-title').textContent = `Memanggil (${mode.toUpperCase()})...`;
 
-  const { data, error } = await client.from('calls').insert([
-    {
-      sender_id: currentUserId,
-      receiver_id: activeChatReceiverId,
-      room_name: roomName,
-      call_type: callMode,
-      status: 'ringing'
-    }
-  ]).select().single();
-
-  if (error) {
-    alert("Gagal melakukan panggilan: " + error.message);
-    return;
-  }
-
-  if (typeof triggerPushNotification === 'function') {
-    triggerPushNotification(activeChatReceiverId, callerName, callMode);
-  }
-
-  alert("Memanggil... Menunggu tanggapan penerima.");
-
-  let callHandled = false;
-
-  const handleCallAccepted = (room, type) => {
-    if (callHandled) return;
-    callHandled = true;
-    
-    if (currentCallSubscription) client.removeChannel(currentCallSubscription);
-    if (typeof pollInterval !== 'undefined') clearInterval(pollInterval);
-
-    startCallWithRoom(room, type);
-  };
-
-  currentCallSubscription = client
-    .channel(`call_status_${data.id}`)
-    .on(
-      'postgres_changes',
-      { 
-        event: 'UPDATE', 
-        schema: 'public', 
-        table: 'calls', 
-        filter: `id=eq.${data.id}` 
-      },
-      (payload) => {
-        const updatedCall = payload.new;
-        if (updatedCall.status === 'accepted') {
-          handleCallAccepted(updatedCall.room_name, updatedCall.call_type);
-        } else if (updatedCall.status === 'rejected') {
-          callHandled = true;
-          if (typeof pollInterval !== 'undefined') clearInterval(pollInterval);
-          client.removeChannel(currentCallSubscription);
-          alert("Panggilan ditolak oleh penerima.");
-        }
-      }
-    )
-    .subscribe();
-
-  const pollInterval = setInterval(async () => {
-    if (callHandled) return;
-
-    const { data: checkCall } = await client
-      .from('calls')
-      .select('status, room_name, call_type')
-      .eq('id', data.id)
-      .single();
-
-    if (checkCall) {
-      if (checkCall.status === 'accepted') {
-        handleCallAccepted(checkCall.room_name, checkCall.call_type);
-      } else if (checkCall.status === 'rejected') {
-        callHandled = true;
-        clearInterval(pollInterval);
-        if (currentCallSubscription) client.removeChannel(currentCallSubscription);
-        alert("Panggilan ditolak oleh penerima.");
-      }
-    }
-  }, 2000);
-}
-
-async function startCallWithRoom(roomName, callMode) {
-  const overlay = document.getElementById("jitsi-call-overlay");
-  const container = document.getElementById("jitsi-frame");
-
-  if (!overlay || !container) {
-    alert("Elemen Jitsi tidak ditemukan!");
-    return;
-  }
-
-  let userDisplayName = "Pengguna";
   try {
-    const client = window.supabaseClient || (typeof supabaseClient !== 'undefined' ? supabaseClient : null);
-    if (client && client.auth) {
-      const { data } = await client.auth.getSession();
-      if (data?.session?.user) {
-        const u = data.session.user;
-        userDisplayName = u.user_metadata?.full_name || u.user_metadata?.name || u.email || "Pengguna";
-      }
+    // Ambil akses Mikrofon & Kamera
+    localStream = await navigator.mediaDevices.getUserMedia({
+      audio: true,
+      video: mode === 'video'
+    });
+
+    document.getElementById('local-video').srcObject = localStream;
+
+    // Buat Peer Connection & kirim penawaran (Offer)
+    initPeerConnection(session.user.id, currentCallTargetId);
+
+    // Tambahkan Local Track ke Connection
+    localStream.getTracks().forEach(track => peerConnection.addTrack(track, localStream));
+
+    // Buat SDP Offer
+    const offer = await peerConnection.createOffer();
+    await peerConnection.setLocalDescription(offer);
+
+    // Kirim pesan pemicu panggilan & Offer ke penerima lewat Supabase Broadcast
+    if (chatSubscription) {
+      chatSubscription.send({
+        type: 'broadcast',
+        event: 'incoming-call',
+        payload: {
+          callerId: session.user.id,
+          callerName: session.user.email || 'Pengguna',
+          targetUserId: currentCallTargetId,
+          callMode: mode,
+          sdp: offer
+        }
+      });
     }
   } catch (err) {
-    console.error("Gagal mengambil session pengguna:", err);
+    alert("Gagal mengakses media (kamera/mikrofon): " + err.message);
+    endCall();
   }
+}
 
-  overlay.style.display = "flex";
-  container.innerHTML = "";
+// 2. Inisialisasi RTC Peer Connection
+function initPeerConnection(myUserId, targetUserId) {
+  peerConnection = new RTCPeerConnection(rtcConfig);
 
-  if (typeof JitsiMeetExternalAPI !== 'undefined') {
-    if (typeof activeJitsiApi !== 'undefined' && activeJitsiApi) {
-      activeJitsiApi.dispose();
-      activeJitsiApi = null;
+  // Ketika mendapat ICE Candidate lokal, kirim ke lawan bicara melalui Supabase
+  peerConnection.onicecandidate = (event) => {
+    if (event.candidate && chatSubscription) {
+      chatSubscription.send({
+        type: 'broadcast',
+        event: 'webrtc-signal',
+        payload: {
+          senderId: myUserId,
+          targetUserId: targetUserId,
+          signalType: 'candidate',
+          candidate: event.candidate
+        }
+      });
     }
+  };
 
-    const domain = "meet.jit.si";
-    const options = {
-      roomName: roomName,
-      width: "100%",
-      height: "100%",
-      parentNode: container,
-      userInfo: {
-        displayName: userDisplayName
-      },
-      configOverwrite: {
-        startWithAudioMuted: false,
-        startWithVideoMuted: (callMode === 'audio'),
-        prejoinPageEnabled: false,
-        prejoinConfig: { enabled: false },
-        disableDeepLinking: true,
-        enableWelcomePage: false
-      },
-      interfaceConfigOverwrite: {
-        MOBILE_APP_PROMO: false,
-        SHOW_JITSI_WATERMARK: false,
-        TOOLBAR_BUTTONS: ['microphone', 'camera', 'hangup', 'tileview', 'fullscreen']
+  // Ketika menerima Stream dari lawan bicara
+  peerConnection.ontrack = (event) => {
+    const remoteVideo = document.getElementById('remote-video');
+    if (remoteVideo && event.streams[0]) {
+      remoteVideo.srcObject = event.streams[0];
+    }
+  };
+}
+
+// 3. Menjawab Panggilan Masuk (Penerima/Callee)
+async function answerIncomingCall(callerId, offerSdp, mode) {
+  currentCallTargetId = callerId;
+
+  const client = window.supabaseClient || (typeof supabaseClient !== 'undefined' ? supabaseClient : null);
+  const { data: { session } } = await client.auth.getSession();
+  if (!session) return;
+
+  document.getElementById('webrtc-call-overlay').style.display = 'flex';
+  document.getElementById('webrtc-status-title').textContent = 'Panggilan Terhubung';
+
+  try {
+    localStream = await navigator.mediaDevices.getUserMedia({
+      audio: true,
+      video: mode === 'video'
+    });
+
+    document.getElementById('local-video').srcObject = localStream;
+
+    initPeerConnection(session.user.id, callerId);
+    localStream.getTracks().forEach(track => peerConnection.addTrack(track, localStream));
+
+    // Set Remote Description dari Offer Penelepon
+    await peerConnection.setRemoteDescription(new RTCSessionDescription(offerSdp));
+
+    // Buat SDP Answer
+    const answer = await peerConnection.createAnswer();
+    await peerConnection.setLocalDescription(answer);
+
+    // Kirim Answer balik ke Penelepon
+    chatSubscription.send({
+      type: 'broadcast',
+      event: 'webrtc-signal',
+      payload: {
+        senderId: session.user.id,
+        targetUserId: callerId,
+        signalType: 'answer',
+        sdp: answer
       }
-    };
-
-    activeJitsiApi = new JitsiMeetExternalAPI(domain, options);
-
-    activeJitsiApi.addEventListener('readyToClose', () => {
-      endJitsiCall();
     });
-
-    activeJitsiApi.addEventListener('videoConferenceLeft', () => {
-      endJitsiCall();
-    });
-
-  } else {
-    alert("Script Jitsi belum dimuat. Pastikan <script src='https://meet.jit.si/external_api.js'></script> ada di index.html");
+  } catch (err) {
+    alert("Gagal menerima panggilan: " + err.message);
+    endCall();
   }
 }
 
-function endJitsiCall() {
-  if (typeof activeJitsiApi !== 'undefined' && activeJitsiApi) {
-    activeJitsiApi.dispose();
-    activeJitsiApi = null;
+// 4. Memproses Sinyal WebRTC yang Masuk (Answer & ICE Candidate)
+async function handleSignalData(data) {
+  if (!peerConnection) return;
+
+  if (data.signalType === 'answer') {
+    await peerConnection.setRemoteDescription(new RTCSessionDescription(data.sdp));
+    document.getElementById('webrtc-status-title').textContent = 'Panggilan Terhubung';
+  } else if (data.signalType === 'candidate') {
+    await peerConnection.addIceCandidate(new RTCIceCandidate(data.candidate));
+  } else if (data.signalType === 'end-call') {
+    endCall(false);
+  }
+}
+
+// 5. Mengakhiri Panggilan
+function endCall(notifyPeer = true) {
+  const client = window.supabaseClient || (typeof supabaseClient !== 'undefined' ? supabaseClient : null);
+
+  // Beritahu lawan bicara jika kita menutupi panggilan lebih dulu
+  if (notifyPeer && chatSubscription && currentCallTargetId && client) {
+    client.auth.getSession().then(({ data: { session } }) => {
+      if (session) {
+        chatSubscription.send({
+          type: 'broadcast',
+          event: 'webrtc-signal',
+          payload: {
+            senderId: session.user.id,
+            targetUserId: currentCallTargetId,
+            signalType: 'end-call'
+          }
+        });
+      }
+    });
   }
 
-  const overlay = document.getElementById("jitsi-call-overlay");
-  const container = document.getElementById("jitsi-frame");
-  if (overlay) overlay.style.display = "none";
-  if (container) container.innerHTML = "";
+  // Hentikan semua aliran kamera/mikrofon
+  if (localStream) {
+    localStream.getTracks().forEach(track => track.stop());
+    localStream = null;
+  }
+
+  // Tutup koneksi Peer
+  if (peerConnection) {
+    peerConnection.close();
+    peerConnection = null;
+  }
+
+  currentCallTargetId = null;
+
+  // Sembunyikan Overlay Panggilan
+  const overlay = document.getElementById('webrtc-call-overlay');
+  if (overlay) overlay.style.display = 'none';
 }
+
 // ==========================================================================
 // INISIALISASI SAAT HALAMAN SELESAI DIMUAT
 // ==========================================================================
