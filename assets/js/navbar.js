@@ -476,6 +476,54 @@ async function sendPrivateMessage(event) {
     fetchPrivateMessages(activeChatReceiverId);
   }
 }
+// ==========================================================================
+// INTEGRASI REAL-TIME CHAT & SIGNALING SUPABASE
+// ==========================================================================
+function subscribeToPrivateChat() {
+  const client = window.supabaseClient || (typeof supabaseClient !== 'undefined' ? supabaseClient : null);
+  if (!client) {
+    console.warn("Koneksi Supabase belum siap untuk langganan real-time.");
+    return;
+  }
+
+  // Cek apakah channel sudah aktif agar tidak double-subscription
+  if (chatSubscription) {
+    return;
+  }
+
+  // Membuka Channel Broadcast Supabase
+  chatSubscription = client.channel('global-chat-channel', {
+    config: {
+      broadcast: { self: false } // Tidak menerima pesan broadcast dari diri sendiri
+    }
+  });
+
+  // 1. Mendengarkan Sinyal WebRTC (Panggilan Video/Suara)
+  chatSubscription.on('broadcast', { event: 'webrtc-signal' }, ({ payload }) => {
+    if (payload) {
+      handleSignalData(payload);
+    }
+  });
+
+  // 2. Mendengarkan Pesan Baru (Database Changes)
+  client
+    .channel('public:messages')
+    .on('postgres_changes', { event: 'INSERT', schema: 'public', table: 'messages' }, (payload) => {
+      const newMsg = payload.new;
+      // Jika pesan yang masuk berkaitan dengan user yang sedang kita ajak chat, perbarui tampilan
+      if (activeChatReceiverId && (newMsg.sender_id === activeChatReceiverId || newMsg.receiver_id === activeChatReceiverId)) {
+        fetchPrivateMessages(activeChatReceiverId);
+      }
+    })
+    .subscribe();
+
+  // Berlangganan ke Broadcast Channel
+  chatSubscription.subscribe((status) => {
+    if (status === 'SUBSCRIBED') {
+      console.log("Berhasil terhubung ke Realtime Chat & Signaling Supabase!");
+    }
+  });
+}
 
 // ==========================================================================
 // LOGIKA UTAMA WEBRTC & SUPABASE SIGNALING (DIPERBARUI)

@@ -197,7 +197,7 @@ document.addEventListener("DOMContentLoaded", async () => {
             }
 
             const { error } = await supabaseClient.auth.resetPasswordForEmail(forgotEmail, {
-                redirectTo: window.location.origin + '/pages/edit-profil.html',
+                redirectTo: window.location.origin + '/pages/ubah-data-profil.html',
             });
 
             if (error) {
@@ -418,4 +418,73 @@ document.addEventListener("DOMContentLoaded", async () => {
         pesanNotif.style.backgroundColor = (tipe === 'sukses') ? '#d4edda' : '#f8d7da';
         pesanNotif.style.color = (tipe === 'sukses') ? '#155724' : '#721c24';
     }
+    
+    // ==========================================
+// G. PROSES UBAH KATA SANDI (USER LOGGED IN)
+// ==========================================
+const formUbahSandi = document.getElementById('form-ubah-sandi');
+const notifUbahSandi = document.getElementById('notif-ubah-sandi');
+const btnSubmitSandi = document.getElementById('btn-submit-sandi');
+
+if (formUbahSandi) {
+    formUbahSandi.addEventListener('submit', async (e) => {
+        e.preventDefault();
+
+        const newPassword = document.getElementById('new-password').value.trim();
+        const confirmPassword = document.getElementById('confirm-password').value.trim();
+
+        // 1. Validasi Panjang Kata Sandi
+        if (newPassword.length < 6) {
+            showNotifSandi("Kata sandi baru minimal harus 6 karakter!", true);
+            return;
+        }
+
+        // 2. Validasi Kesesuaian Konfirmasi Kata Sandi
+        if (newPassword !== confirmPassword) {
+            showNotifSandi("Konfirmasi kata sandi tidak cocok. Silakan periksa kembali!", true);
+            return;
+        }
+
+        // Ubah status tombol saat proses berlangsung
+        if (btnSubmitSandi) {
+            btnSubmitSandi.disabled = true;
+            btnSubmitSandi.textContent = "Memproses...";
+        }
+
+        try {
+            // 3. Panggil API Supabase untuk Memperbarui Kata Sandi
+            const { data, error } = await supabaseClient.auth.updateUser({
+                password: newPassword
+            });
+
+            if (error) throw error;
+
+            showNotifSandi("Kata sandi berhasil diperbarui!", false);
+            formUbahSandi.reset();
+
+        } catch (err) {
+            console.error("Gagal mengubah kata sandi:", err);
+            showNotifSandi("Gagal mengubah kata sandi: " + err.message, true);
+        } finally {
+            if (btnSubmitSandi) {
+                btnSubmitSandi.disabled = false;
+                btnSubmitSandi.textContent = "Ubah Kata Sandi";
+            }
+        }
+    });
+}
+
+// Helper untuk menampilkan notifikasi ubah kata sandi
+function showNotifSandi(message, isError) {
+    if (!notifUbahSandi) return;
+    notifUbahSandi.style.display = "block";
+    notifUbahSandi.style.backgroundColor = isError ? "#f8d7da" : "#d4edda";
+    notifUbahSandi.style.color = isError ? "#721c24" : "#155724";
+    notifUbahSandi.style.border = isError ? "1px solid #f5c6cb" : "1px solid #c3e6cb";
+    notifUbahSandi.style.padding = "10px";
+    notifUbahSandi.style.borderRadius = "4px";
+    notifUbahSandi.style.marginBottom = "10px";
+    notifUbahSandi.textContent = message;
+}
+
 });
