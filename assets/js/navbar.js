@@ -524,6 +524,89 @@ function subscribeToPrivateChat() {
     }
   });
 }
+// ==========================================================================
+// PENDAFTARAN SERVICE WORKER & WEBPUSH NOTIFICATION (VERSI BERSIP & EFISIEN)
+// ==========================================================================
+
+// 1. Fungsi Konversi VAPID Public Key ke Uint8Array
+function urlBase64ToUint8Array(base64String) {
+  const padding = '='.repeat((4 - base64String.length % 4) % 4);
+  const base64 = (base64String + padding).replace(/\-/g, '+').replace(/_/g, '/');
+  const rawData = window.atob(base64);
+  const outputArray = new Uint8Array(rawData.length);
+  for (let i = 0; i < rawData.length; ++i) {
+    outputArray[i] = rawData.charCodeAt(i);
+  }
+  return outputArray;
+}
+
+// 2. Fungsi Utama Inisialisasi Notifikasi Sistem HP
+async function setupSystemNotification() {
+  // Cek apakah browser mendukung Service Worker dan Push Manager
+  if (!('serviceWorker' in navigator) || !('PushManager' in window)) {
+    console.warn("Browser tidak mendukung Web Push Notification.");
+    return;
+  }
+
+  try {
+    // A. Daftarkan Service Worker
+    const registration = await navigator.serviceWorker.register('/sw.js');
+    console.log('Service Worker berhasil aktif:', registration.scope);
+
+    // B. Minta Izin Notifikasi dari Pengguna
+    const permission = await Notification.requestPermission();
+    if (permission !== 'granted') {
+      console.warn('Izin notifikasi ditolak oleh pengguna.');
+      return;
+    }
+
+    // C. Masukkan Public VAPID Key milikmu dari Termux di sini
+    const publicVapidKey = 'BIGIK2pVpxvc5jfbw67pf3JVskbQ7RYhLzvCxuz3HBfl53FLZFil1zRsrwvYIdXzabw9pddzCulYeyGfS0hS5R8';
+
+    // D. Buat Subscription Push ke Sistem HP
+    let subscription = await registration.pushManager.getSubscription();
+    if (!subscription) {
+      subscription = await registration.pushManager.subscribe({
+        userVisibleOnly: true,
+        applicationServerKey: urlBase64ToUint8Array(publicVapidKey)
+      });
+    }
+
+    // E. Simpan Subscription Token ke Supabase Database
+    await saveSubscriptionToSupabase(subscription);
+
+  } catch (error) {
+    console.error('Gagal menginisialisasi Notifikasi Sistem:', error);
+  }
+}
+
+// 3. Fungsi Menyimpan Subscription ke Tabel Supabase
+async function saveSubscriptionToSupabase(subscription) {
+  const client = window.supabaseClient || (typeof supabaseClient !== 'undefined' ? supabaseClient : null);
+  if (!client) return;
+
+  const { data: { session } } = await client.auth.getSession();
+  if (!session) {
+    console.log("User belum login, subscription tidak disimpan ke database.");
+    return;
+  }
+
+  const { error } = await client.from('push_subscriptions').upsert({
+    user_id: session.user.id,
+    subscription: subscription
+  }, { onConflict: 'user_id' });
+
+  if (error) {
+    console.error("Gagal menyimpan subscription ke database:", error.message);
+  } else {
+    console.log("Subscription push berhasil disimpan di Supabase!");
+  }
+}
+
+// 4. Jalankan Otomatis Saat Halaman Selesai Dimuat
+document.addEventListener('DOMContentLoaded', () => {
+  setupSystemNotification();
+});
 
 // ==========================================================================
 // LOGIKA UTAMA WEBRTC & SUPABASE SIGNALING (DIPERBARUI)
