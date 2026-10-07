@@ -261,3 +261,31 @@ function subscribeToPrivateChat() {
     }
   });
 }
+// ==========================================================================
+// FUNGSI UNTUK MEMBUKA CHAT LANGSUNG DARI POSTINGAN/PROFIL
+// ==========================================================================
+
+/**
+ * Membuka modal chat dan langsung memilih pengguna tujuan berdasarkan ID dan Nama.
+ * @param {string} userId - ID pengguna tujuan (dari post.user_id)
+ * @param {string} userName - Nama pengguna tujuan (dari author)
+ */
+async function openPrivateChat(userId, userName) {
+  // 1. Tampilkan Modal Chat Room
+  const modal = document.getElementById('Chat-Room');
+  if (modal) {
+    modal.style.display = 'block';
+  } else {
+    console.error("Modal #Chat-Room tidak ditemukan pada halaman ini.");
+    return;
+  }
+
+  // 2. Muat daftar pengguna dan aktifkan koneksi realtime
+  await loadChatUsers();
+  subscribeToPrivateChat();
+
+  // 3. Pilih pengguna tujuan dan muat percakapannya
+  if (userId && userName) {
+    await selectUserForChat(userId, userName);
+  }
+}
