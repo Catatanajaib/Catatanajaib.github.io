@@ -201,7 +201,7 @@ h4.logo {
   left: 0;
   background-color: #ffffff;
   list-style: none;
-  min-width: 80px;
+  min-width: 180px;
   border-radius: 8px;
   box-shadow: 0 4px 15px rgba(0, 0, 0, 0.15);
   padding: 8px 0;
@@ -648,3 +648,40 @@ h4.logo {
 label[for="post-image-input"]:hover {
   background-color: #f0f0f0;
 }
+   .profile-card {
+      display: flex;
+      align-items: center;
+      gap: 12px;
+      margin-top: 15px;
+    }
+
+    /* Foto profil yang dapat diklik untuk zoom */
+    .avatar-clickable {
+      cursor: pointer;
+      transition: transform 0.2s ease;
+    }
+    .avatar-clickable:hover {
+      transform: scale(1.08); /* Efek membesar sedikit saat disentuh kursor */
+    }
+
+    /* Styling link nama profil */
+    .profile-link {
+      text-decoration: none;
+      color: #333;
+      font-weight: bold;
+    }
+    .profile-link:hover {
+      color: #007bff;
+      text-decoration: underline;
+    }
+
+    /* Gaya tampilan foto di dalam modal zoom */
+    .modal-zoom-img {
+      width: 100%;
+      max-width: 300px;
+      height: auto;
+      border-radius: 50%;
+      margin: 15px auto;
+      display: block;
+      box-shadow: 0 4px 15px rgba(0, 0, 0, 0.2);
+    }

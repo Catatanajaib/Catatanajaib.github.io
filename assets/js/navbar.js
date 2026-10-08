@@ -21,12 +21,15 @@ class NavBar extends HTMLElement {
         </h4>
         <nav>
           <ul class="nav-links">
-            <li class="has-dropdown">MENU
+           
+            <li class="has-dropdown">
+            <span>MENU</span>
               <ul class="vertical-dropdown">
-                <li><a href="#" class="open-modal-btn" data-target="AboutModal">Kontak</a></li>
-                <li><a href="${basePath}pages/toko.html">TOKO</a></li>
-              </ul>
+                <li><a href="#" class="open-modal-btn" data-target="Pengaturan">⚙️ Profil</a></li>
+                </ul>
             </li>
+            
+            <li><a href="${basePath}pages/toko.html">TOKO</a></li>
             <li><a href="#" onclick="openChatFromNavbar(); return false;">💬 ChatsRoom</a></li>
             <li><a href="${basePath}index.html">BERANDA</a></li>
             <li><a href="#" class="open-modal-btn" data-target="PenelusuranModal">CARI</a></li>
@@ -35,15 +38,6 @@ class NavBar extends HTMLElement {
           </ul>
         </nav>
       </nav>
-
-      <!-- MODAL ABOUT -->
-      <div id="AboutModal" class="modal" style="display: none;">
-        <div class="modal-content">
-          <span class="close-btn" onclick="closeModalDirect('AboutModal')">&times;</span>
-          <h2>Tentang Kami</h2>
-          <p>Miftahul Mujib - 081910240675</p>
-        </div>
-      </div>
 
       <!-- MODAL PENELUSURAN -->
       <div id="PenelusuranModal" class="modal" style="display: none;">
@@ -61,7 +55,46 @@ class NavBar extends HTMLElement {
           </form>
         </div>
       </div>
+<!-- MODAL UTAMA: PENGATURAN PROFIL -->
+<div id="Pengaturan" class="modal" style="display: none;">
+  <div class="modal-content">
+    <span class="close-btn" onclick="closeModalDirect('Pengaturan')">&times;</span>
+    <h3>Profil Saya</h3>
 
+    <div class="profile-card">
+      <!-- 1. FOTO PROFIL (Klik untuk Zoom Modal) -->
+      <img 
+        src="https://via.placeholder.com/150" 
+        alt="Foto Profil" 
+        class="avatar avatar-clickable open-modal-btn" 
+        data-target="FotoZoomModal"
+      >
+
+      <!-- 2. NAMA PROFIL (Klik untuk Pindah ke Halaman HTML Profil) -->
+      <h4>
+        <a href="#" class="profile-link">
+          <span id="profile-name">-</span>
+        </a>
+      </h4>
+    </div>
+  </div>
+</div>
+
+<!-- MODAL TAMBAHAN: KHUSUS ZOOM FOTO PROFIL -->
+<div id="FotoZoomModal" class="modal" style="display: none;">
+  <div class="modal-content" style="text-align: center;">
+    <span class="close-btn" onclick="closeModalDirect('FotoZoomModal')">&times;</span>
+    <h3 id="profile-name"></h3>
+    <img 
+      src="https://via.placeholder.com/150" 
+      alt="Foto Profil" 
+      class="modal-zoom-img"
+      loading="lazy" 
+      width="150" 
+      height="150"
+    >
+  </div>
+</div>
       <!-- MODAL CHAT ROOM GLOBAL -->
       <div id="Chat-Room" class="modal" style="display: none;">
         <div class="modal-content chat-modal-content" style="width: 95%; display: flex; height: 800px; padding: 0; overflow: hidden; border-radius: 8px;">
