@@ -314,13 +314,29 @@
 
         <!-- ================= BLOK 2: DETAIL PROFIL PENGGUNA (Tampil jika Sudah Login) ================= -->
         <div class="post-container" id="box-profil" style="display: none;">
-            <h2 style="text-align: center;">Identitas</h2>
+            <h3 style="text-align: center;">Profil saya</h3>
             
             <div class="user-profile-info" style="margin-top: 15px; line-height: 1.8;">
-                <p><strong>Nama Pengguna:</strong> <span id="profile-name">-</span></p>
-                <p><strong>Email:</strong> <span id="profile-email">-</span></p>
+                
+      <!-- 1. FOTO PROFIL (Klik untuk Zoom Modal) -->
+      <img 
+        src="https://via.placeholder.com/150" 
+        alt="Foto Profil" 
+        class="avatar avatar-clickable open-modal-btn" 
+        data-target="FotoZoomModal"
+      >
+    
+    <h4>
+    <a href="#" class="profile-link">
+        <span id="profile-name">-</span>
+    </a>
+    </h4>
+    <p><strong>Email:</strong> <span id="profile-email">-</span></p>
                 
             </div>
+            
+
+    
 
             <!-- Tombol Navigasi & Aksi Pengguna -->
             <div style="margin-top: 20px; display: flex; gap: 10px; flex-wrap: wrap;">
