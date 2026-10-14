@@ -100,7 +100,7 @@ async function loadChatUsers() {
   userListContainer.innerHTML = uniqueUsers.map(u => `
     <div class="user-chat-item" 
          onclick="selectUserForChat('${u.id}', '${escapeHtml(u.name)}')"
-         style="padding: 10px; margin-bottom: 4px; border-radius: 6px; cursor: pointer; background: #fff; border: 1px solid #e9ecef;">
+         style="padding: 10px; margin-bottom: 4px; text-align: left; border-radius: 6px; cursor: pointer; background: #fff; border: 1px solid #e9ecef;">
       <div style="font-weight: 600; font-size: 13px; color: #333;">👤 ${escapeHtml(u.name)}</div>
       <div style="font-size: 11px; color: #888;">Klik untuk pesan & telepon</div>
     </div>
