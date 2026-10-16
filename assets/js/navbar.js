@@ -72,7 +72,7 @@ class NavBar extends HTMLElement {
 
       <!-- 2. NAMA PROFIL (Klik untuk Pindah ke Halaman HTML Profil) -->
       <h4>
-        <a href="#" class="profile-link">
+        <a href="${basePath}pages/pengaturan-profil.html" class="profile-link">
           <span id="profile-name">-</span>
         </a>
       </h4>

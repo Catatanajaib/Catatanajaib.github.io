@@ -197,7 +197,7 @@ document.addEventListener("DOMContentLoaded", async () => {
             }
 
             const { error } = await supabaseClient.auth.resetPasswordForEmail(forgotEmail, {
-                redirectTo: window.location.origin + '/pages/ubah-data-profil.html',
+                redirectTo: window.location.origin + '/pages/pengaturan-profil.html',
             });
 
             if (error) {

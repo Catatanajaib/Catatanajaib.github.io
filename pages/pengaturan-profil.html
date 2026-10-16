@@ -1,0 +1,463 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Catatan Ajaib - Profil & Pengaturan</title>
+  
+  <base href="../">
+    <!-- Stylesheet Utama -->
+    <link rel="stylesheet" href="styles.css">
+    <link rel="stylesheet" href="../assets/css/ubah-data-profil.css">
+    <!-- Script Utama & Pendukung (Di-load setelah HTML selesai dibaca) -->
+    <!-- google drive key-->
+    <!-- Masukkan ini di dalam <head> ... </head> -->
+<script src="https://accounts.google.com/gsi/client" async defer></script>
+<script src="https://apis.google.com/js/api.js"></script>
+
+    <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+
+    <script src="/matter.min.js" defer></script>
+    
+
+<script src="assets/js/utils.js" defer></script>
+<script src="assets/js/gdrive.js" defer></script>
+<script src="assets/js/webrtc.js" defer></script>
+<script src="assets/js/chat.js" defer></script>
+<script src="assets/js/push-notification.js" defer></script>
+<script src="assets/js/navbar.js" defer></script>
+    <script src="assets/js/login.js" defer></script>
+    <script src="assets/js/main.js" defer></script>
+    <script src="assets/js/pisical.js" defer></script>
+    <script src="assets/js/modalhandler.js" defer></script>
+    <script src="assets/js/post-card-element.js" defer></script>
+    <script src="assets/js/musik.js" defer></script>
+
+  <style>
+    .profile-wrapper {
+      max-width: 480px;
+      margin: 0 auto;
+      background: #ffffff;
+      border-radius: 12px;
+      box-shadow: 0 2px 10px rgba(0,0,0,0.04);
+      overflow: hidden;
+    }
+    .profile-header {
+      display: flex;
+      align-items: center;
+      padding: 16px 20px;
+      border-bottom: 1px solid #f0f0f0;
+      background: #fff;
+    }
+    .profile-header h3 {
+      margin: 0;
+      font-size: 17px;
+      font-weight: 600;
+    }
+    .profile-item {
+      padding: 16px 20px;
+      border-bottom: 1px solid #f7f7f7;
+      cursor: pointer;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      transition: background 0.15s ease;
+    }
+    .profile-item:hover {
+      background: #fafafa;
+    }
+    .profile-item-content {
+      display: flex;
+      flex-direction: column;
+      gap: 4px;
+    }
+    .item-label {
+      font-size: 14px;
+      color: #222;
+    }
+    .item-value {
+      font-size: 13px;
+      color: #888;
+    }
+    .item-right {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+    }
+    .profile-avatar {
+      width: 40px;
+      height: 40px;
+      border-radius: 50%;
+      object-fit: cover;
+    }
+    .arrow-icon {
+      color: #ccc;
+      font-size: 16px;
+    }
+    .edit-inline-box {
+      display: none;
+      padding: 16px 20px;
+      background: #fbfbfb;
+      border-bottom: 1px solid #eee;
+    }
+    .edit-inline-box input, .edit-inline-box select {
+      width: 100%;
+      padding: 10px;
+      box-sizing: border-box;
+      border: 1px solid #ddd;
+      border-radius: 6px;
+      font-size: 14px;
+      margin-bottom: 10px;
+    }
+    .btn-group {
+      display: flex;
+      gap: 8px;
+    }
+    .btn-sm {
+      padding: 7px 14px;
+      background: #007bff;
+      color: white;
+      border: none;
+      border-radius: 5px;
+      cursor: pointer;
+      font-size: 13px;
+      font-weight: 500;
+    }
+    .btn-cancel {
+      background: #e4e6eb;
+      color: #333;
+    }
+  </style>
+</head>
+<body>
+
+  <!-- PEMBERITAHUAN JIKA USER BELUM LOGIN -->
+  <div id="box-belum-login" style="display: none; max-width: 450px; margin: 80px auto; padding: 30px; text-align: center; border: 1px solid #e0e0e0; border-radius: 12px; background-color: #ffffff; box-shadow: 0 4px 12px rgba(0,0,0,0.05); font-family: sans-serif;">
+    <div style="font-size: 48px; margin-bottom: 10px;">🔒</div>
+    <h2 style="margin: 0 0 10px 0; color: #333;">Akses Terbatas</h2>
+    <p style="color: #666; margin-bottom: 20px; font-size: 14px; line-height: 1.5;">
+      Kamu harus masuk ke akunmu terlebih dahulu untuk dapat mengubah data profil atau kata sandi.
+    </p>
+    <a href="../index.html" style="display: inline-block; padding: 10px 24px; background-color: #007bff; color: white; border-radius: 6px; text-decoration: none; font-weight: bold;">
+      Masuk / Login Sekarang
+    </a>
+  </div>
+
+  <!-- CONTAINER UTAMA -->
+  <div id="box-konten-profil" class="profile-wrapper" style="max-width: 500px; margin: 20px auto; padding: 0 15px; background: transparent; box-shadow: none;">
+    
+    <!-- INDIKATOR TAB -->
+    <div id="nav-tab-container" class="tab-navigation" style="display: flex; gap: 10px; margin-bottom: 15px; border-bottom: 2px solid #e0e0e0;">
+      <button id="tab-profil" class="tab-btn active" onclick="switchTab(0)" style="flex: 1; padding: 10px; border: none; background: none; font-weight: bold; cursor: pointer; border-bottom: 3px solid #007bff; color: #007bff;">
+        👤 Data Profil
+      </button>
+      <button id="tab-sandi" class="tab-btn" onclick="switchTab(1)" style="flex: 1; padding: 10px; border: none; background: none; font-weight: bold; cursor: pointer; border-bottom: 3px solid transparent; color: #666;">
+        🔒 Ubah Kata Sandi
+      </button>
+    </div>
+
+    <!-- AREA SLIDER -->
+    <div class="horizontal-slider" style="display: flex; overflow-x: hidden; scroll-behavior: smooth;">
+      
+      <!-- SLIDE 1: TAMPILAN PROFIL & EDIT INLINE -->
+      <section class="slide-page" style="min-width: 100%; box-sizing: border-box;">
+        <div class="profile-wrapper">
+          
+          <div class="profile-header">
+            <h3>Profil</h3>
+          </div>
+
+          <!-- 1. GAMBAR PROFIL -->
+          <div class="profile-item" onclick="toggleEdit('foto')">
+            <div class="profile-item-content">
+              <span class="item-label">Gambar profil</span>
+            </div>
+            <div class="item-right">
+              <img src="https://via.placeholder.com/150" alt="Foto" class="profile-avatar" id="img-profil">
+              <span class="arrow-icon">›</span>
+            </div>
+          </div>
+          <div id="edit-box-foto" class="edit-inline-box">
+            <p style="margin: 0 0 8px 0; font-size: 13px; color: #666;">Ganti foto profil baru:</p>
+            <input type="file" id="input-file-foto" accept="image/*">
+            <div class="btn-group">
+              <button type="button" class="btn-sm" onclick="toggleEdit('foto')">Batal</button>
+            </div>
+          </div>
+
+          <!-- 2. NAMA PANGGILAN -->
+          <div class="profile-item" onclick="toggleEdit('nama')">
+            <div class="profile-item-content">
+              <span class="item-label">Nama panggilan</span>
+              <span class="item-value" id="val-nama">-</span>
+            </div>
+            <div class="item-right">
+              <span class="arrow-icon">›</span>
+            </div>
+          </div>
+          <div id="edit-box-nama" class="edit-inline-box">
+            <input type="text" id="input-nama-baru" placeholder="Masukkan nama panggilan baru">
+            <div class="btn-group">
+              <button type="button" class="btn-sm" onclick="simpanNama()">Simpan</button>
+              <button type="button" class="btn-sm btn-cancel" onclick="toggleEdit('nama')">Batal</button>
+            </div>
+          </div>
+
+          <!-- 3. EMAIL -->
+          <div class="profile-item">
+            <div class="profile-item-content">
+              <span class="item-label">Email</span>
+              <span class="item-value" id="val-email">Tidak diikat</span>
+            </div>
+          </div>
+
+          <!-- 4. JENIS KELAMIN -->
+          <div class="profile-item" onclick="toggleEdit('gender')">
+            <div class="profile-item-content">
+              <span class="item-label">Jenis kelamin</span>
+              <span class="item-value" id="val-gender">Belum ditetapkan</span>
+            </div>
+            <div class="item-right">
+              <span class="arrow-icon">›</span>
+            </div>
+          </div>
+          <div id="edit-box-gender" class="edit-inline-box">
+            <select id="input-gender-baru">
+              <option value="Laki-laki">Laki-laki</option>
+              <option value="Perempuan">Perempuan</option>
+            </select>
+            <div class="btn-group">
+              <button type="button" class="btn-sm" onclick="simpanGender()">Simpan</button>
+              <button type="button" class="btn-sm btn-cancel" onclick="toggleEdit('gender')">Batal</button>
+            </div>
+          </div>
+
+          <!-- 5. ULANG TAHUN -->
+          <div class="profile-item" onclick="toggleEdit('birthday')">
+            <div class="profile-item-content">
+              <span class="item-label">Ulang Tahun</span>
+              <span class="item-value" id="val-birthday">Belum ditetapkan</span>
+            </div>
+            <div class="item-right">
+              <span class="arrow-icon">›</span>
+            </div>
+          </div>
+          <div id="edit-box-birthday" class="edit-inline-box">
+            <input type="date" id="input-birthday-baru">
+            <div class="btn-group">
+              <button type="button" class="btn-sm" onclick="simpanBirthday()">Simpan</button>
+              <button type="button" class="btn-sm btn-cancel" onclick="toggleEdit('birthday')">Batal</button>
+            </div>
+          </div>
+
+          <!-- 6. NEGARA -->
+          <div class="profile-item">
+            <div class="profile-item-content">
+              <span class="item-label">Negara/wilayah terdaftar</span>
+              <span class="item-value">Indonesia</span>
+            </div>
+          </div>
+
+        </div>
+      </section>
+
+      <!-- SLIDE 2: FORM UBAH KATA SANDI -->
+      <section class="slide-page" style="min-width: 100%; box-sizing: border-box;">
+        <div id="box-ubah-sandi" style="padding: 20px; background: #fff; border: 1px solid #e0e0e0; border-radius: 8px;">
+          <h3 id="judul-form-sandi" style="margin-top: 0;">Ubah Kata Sandi</h3>
+          <p id="subjudul-form-sandi" style="font-size: 14px; color: #666;">Masukkan kata sandi baru untuk akun Anda.</p>
+          
+          <div id="notif-ubah-sandi" style="display: none; font-size: 14px;"></div>
+
+          <form id="form-ubah-sandi">
+            <div style="margin-bottom: 12px;">
+              <label for="new-password" style="display: block; margin-bottom: 5px; font-weight: bold;">Kata Sandi Baru:</label>
+              <input type="password" id="new-password" required minlength="6" placeholder="Masukkan kata sandi baru" style="width: 100%; padding: 8px; box-sizing: border-box; border: 1px solid #ccc; border-radius: 4px;">
+            </div>
+
+            <div style="margin-bottom: 18px;">
+              <label for="confirm-password" style="display: block; margin-bottom: 5px; font-weight: bold;">Konfirmasi Kata Sandi Baru:</label>
+              <input type="password" id="confirm-password" required minlength="6" placeholder="Ulangi kata sandi baru" style="width: 100%; padding: 8px; box-sizing: border-box; border: 1px solid #ccc; border-radius: 4px;">
+            </div>
+
+            <button type="submit" id="btn-submit-sandi" style="width: 100%; padding: 10px; background-color: #007bff; color: white; border: none; border-radius: 4px; font-weight: bold; cursor: pointer;">
+              Simpan Kata Sandi Baru
+            </button>
+          </form>
+        </div>
+      </section>
+
+    </div>
+  </div>
+
+  <script>
+    // Fungsi Toggle Edit Inline
+    function toggleEdit(bagian) {
+      const boxes = ['foto', 'nama', 'gender', 'birthday'];
+      boxes.forEach(b => {
+        const el = document.getElementById('edit-box-' + b);
+        if (el) {
+          if (b === bagian) {
+            el.style.display = el.style.display === "block" ? "none" : "block";
+          } else {
+            el.style.display = "none";
+          }
+        }
+      });
+    }
+
+    document.addEventListener("DOMContentLoaded", async () => {
+      const boxBelumLogin = document.getElementById("box-belum-login");
+      const boxKontenProfil = document.getElementById("box-konten-profil");
+      const navTabContainer = document.getElementById("nav-tab-container");
+      const judulFormSandi = document.getElementById("judul-form-sandi");
+
+      let isRecoveryMode = false;
+
+      if (window.supabaseClient) {
+        window.supabaseClient.auth.onAuthStateChange((event, session) => {
+          if (event === 'PASSWORD_RECOVERY') {
+            isRecoveryMode = true;
+            if (boxKontenProfil) boxKontenProfil.style.display = "block";
+            if (boxBelumLogin) boxBelumLogin.style.display = "none";
+            if (navTabContainer) navTabContainer.style.display = "none";
+            if (judulFormSandi) judulFormSandi.textContent = "Buat Kata Sandi Baru";
+            switchTab(1);
+          }
+        });
+      }
+
+      async function checkSession() {
+        if (isRecoveryMode) return;
+        if (!window.supabaseClient) return;
+
+        const { data: { session } } = await window.supabaseClient.auth.getSession();
+
+        if (!session) {
+          if (boxKontenProfil) boxKontenProfil.style.display = "none";
+          if (boxBelumLogin) boxBelumLogin.style.display = "block";
+        } else {
+          if (boxKontenProfil) boxKontenProfil.style.display = "block";
+          if (boxBelumLogin) boxBelumLogin.style.display = "none";
+
+          const user = session.user;
+          const email = user.email || "Tidak diikat";
+          const meta = user.user_metadata || {};
+
+          const username = meta.nama_lengkap || meta.username || email.split('@')[0];
+          const gender = meta.jenis_kelamin || "Belum ditetapkan";
+          const birthday = meta.ulang_tahun || "Belum ditetapkan";
+          const avatarUrl = meta.avatar_url || "https://via.placeholder.com/150";
+
+          document.getElementById("val-nama").textContent = profile-name;
+          document.getElementById("input-nama-baru").value = username;
+          document.getElementById("val-email").textContent = profile-email;
+          document.getElementById("val-gender").textContent = gender;
+          if(meta.jenis_kelamin) document.getElementById("input-gender-baru").value = gender;
+          document.getElementById("val-birthday").textContent = birthday;
+          if(meta.ulang_tahun) document.getElementById("input-birthday-baru").value = birthday;
+          document.getElementById("img-profil").src = avatarUrl;
+        }
+      }
+
+      await checkSession();
+
+      // Submit Ubah Sandi
+      const formUbahSandi = document.getElementById("form-ubah-sandi");
+      if (formUbahSandi) {
+        formUbahSandi.addEventListener("submit", async (e) => {
+          e.preventDefault();
+          const newPassword = document.getElementById("new-password").value.trim();
+          const confirmPassword = document.getElementById("confirm-password").value.trim();
+          const btnSubmit = document.getElementById("btn-submit-sandi");
+
+          if (newPassword !== confirmPassword) {
+            showNotifSandi("Konfirmasi kata sandi tidak cocok!", true);
+            return;
+          }
+
+          if (btnSubmit) {
+            btnSubmit.disabled = true;
+            btnSubmit.textContent = "Memproses...";
+          }
+
+          try {
+            const { error } = await window.supabaseClient.auth.updateUser({ password: newPassword });
+            if (error) throw error;
+
+            showNotifSandi("Kata sandi berhasil diperbarui! Mengalihkan...", false);
+            setTimeout(() => { window.location.href = "../index.html"; }, 2000);
+          } catch (err) {
+            showNotifSandi("Gagal memperbarui: " + err.message, true);
+          } finally {
+            if (btnSubmit) {
+              btnSubmit.disabled = false;
+              btnSubmit.textContent = "Simpan Kata Sandi Baru";
+            }
+          }
+        });
+      }
+    });
+
+    function showNotifSandi(message, isError) {
+      const notif = document.getElementById("notif-ubah-sandi");
+      if (!notif) return;
+      notif.style.display = "block";
+      notif.style.backgroundColor = isError ? "#f8d7da" : "#d4edda";
+      notif.style.color = isError ? "#721c24" : "#155724";
+      notif.style.padding = "10px";
+      notif.style.borderRadius = "4px";
+      notif.style.marginBottom = "12px";
+      notif.textContent = message;
+    }
+
+    function switchTab(index) {
+      const slider = document.querySelector('.horizontal-slider');
+      const tabProfil = document.getElementById('tab-profil');
+      const tabSandi = document.getElementById('tab-sandi');
+
+      if (!slider) return;
+
+      const scrollAmount = slider.clientWidth * index;
+      slider.scrollTo({ left: scrollAmount, behavior: 'smooth' });
+
+      if (tabProfil && tabSandi) {
+        if (index === 0) {
+          tabProfil.style.borderBottom = "3px solid #007bff";
+          tabProfil.style.color = "#007bff";
+          tabSandi.style.borderBottom = "3px solid transparent";
+          tabSandi.style.color = "#666";
+        } else {
+          tabSandi.style.borderBottom = "3px solid #007bff";
+          tabSandi.style.color = "#007bff";
+          tabProfil.style.borderBottom = "3px solid transparent";
+          tabProfil.style.color = "#666";
+        }
+      }
+    }
+
+    // Fungsi Simpan Data Inline
+    async function simpanNama() {
+      const val = document.getElementById("input-nama-baru").value.trim();
+      if (!val) return alert("Nama tidak boleh kosong!");
+      const { error } = await window.supabaseClient.auth.updateUser({ data: { nama_lengkap: val } });
+      if (error) alert("Gagal: " + error.message);
+      else { alert("Nama berhasil diperbarui!"); document.getElementById("val-nama").textContent = val; toggleEdit('nama'); }
+    }
+
+    async function simpanGender() {
+      const val = document.getElementById("input-gender-baru").value;
+      const { error } = await window.supabaseClient.auth.updateUser({ data: { jenis_kelamin: val } });
+      if (error) alert("Gagal: " + error.message);
+      else { alert("Jenis kelamin diperbarui!"); document.getElementById("val-gender").textContent = val; toggleEdit('gender'); }
+    }
+
+    async function simpanBirthday() {
+      const val = document.getElementById("input-birthday-baru").value;
+      const { error } = await window.supabaseClient.auth.updateUser({ data: { ulang_tahun: val } });
+      if (error) alert("Gagal: " + error.message);
+      else { alert("Ulang tahun diperbarui!"); document.getElementById("val-birthday").textContent = val; toggleEdit('birthday'); }
+    }
+  </script>
+</body>
+</html>
