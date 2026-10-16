@@ -9,23 +9,19 @@
     <!-- Stylesheet Utama -->
     <link rel="stylesheet" href="styles.css">
     <link rel="stylesheet" href="../assets/css/ubah-data-profil.css">
+    
     <!-- Script Utama & Pendukung (Di-load setelah HTML selesai dibaca) -->
-    <!-- google drive key-->
-    <!-- Masukkan ini di dalam <head> ... </head> -->
-<script src="https://accounts.google.com/gsi/client" async defer></script>
-<script src="https://apis.google.com/js/api.js"></script>
-
+    <script src="https://accounts.google.com/gsi/client" async defer></script>
+    <script src="https://apis.google.com/js/api.js"></script>
     <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
-
     <script src="/matter.min.js" defer></script>
     
-
-<script src="assets/js/utils.js" defer></script>
-<script src="assets/js/gdrive.js" defer></script>
-<script src="assets/js/webrtc.js" defer></script>
-<script src="assets/js/chat.js" defer></script>
-<script src="assets/js/push-notification.js" defer></script>
-<script src="assets/js/navbar.js" defer></script>
+    <script src="assets/js/utils.js" defer></script>
+    <script src="assets/js/gdrive.js" defer></script>
+    <script src="assets/js/webrtc.js" defer></script>
+    <script src="assets/js/chat.js" defer></script>
+    <script src="assets/js/push-notification.js" defer></script>
+    <script src="assets/js/navbar.js" defer></script>
     <script src="assets/js/login.js" defer></script>
     <script src="assets/js/main.js" defer></script>
     <script src="assets/js/pisical.js" defer></script>
@@ -34,12 +30,18 @@
     <script src="assets/js/musik.js" defer></script>
 
   <style>
+    /* Penyesuaian tambahan agar selaras dengan styles.css */
+    body {
+      background: #00bcd4;
+      margin: 0;
+      padding-top: 70px; /* Menghindari tertutup navbar */
+    }
     .profile-wrapper {
-      max-width: 480px;
+      max-width: 500px;
       margin: 0 auto;
       background: #ffffff;
       border-radius: 12px;
-      box-shadow: 0 2px 10px rgba(0,0,0,0.04);
+      box-shadow: 0 4px 12px rgba(0,0,0,0.1);
       overflow: hidden;
     }
     .profile-header {
@@ -51,8 +53,9 @@
     }
     .profile-header h3 {
       margin: 0;
-      font-size: 17px;
+      font-size: 18px;
       font-weight: 600;
+      color: #333;
     }
     .profile-item {
       padding: 16px 20px;
@@ -62,6 +65,7 @@
       justify-content: space-between;
       align-items: center;
       transition: background 0.15s ease;
+      text-align: left;
     }
     .profile-item:hover {
       background: #fafafa;
@@ -73,11 +77,12 @@
     }
     .item-label {
       font-size: 14px;
+      font-weight: 600;
       color: #222;
     }
     .item-value {
       font-size: 13px;
-      color: #888;
+      color: #65676b;
     }
     .item-right {
       display: flex;
@@ -85,26 +90,28 @@
       gap: 8px;
     }
     .profile-avatar {
-      width: 40px;
-      height: 40px;
+      width: 44px;
+      height: 44px;
       border-radius: 50%;
       object-fit: cover;
     }
     .arrow-icon {
       color: #ccc;
-      font-size: 16px;
+      font-size: 18px;
+      font-weight: bold;
     }
     .edit-inline-box {
       display: none;
       padding: 16px 20px;
       background: #fbfbfb;
       border-bottom: 1px solid #eee;
+      text-align: left;
     }
     .edit-inline-box input, .edit-inline-box select {
       width: 100%;
       padding: 10px;
       box-sizing: border-box;
-      border: 1px solid #ddd;
+      border: 1px solid #ccc;
       border-radius: 6px;
       font-size: 14px;
       margin-bottom: 10px;
@@ -113,24 +120,29 @@
       display: flex;
       gap: 8px;
     }
-    .btn-sm {
-      padding: 7px 14px;
-      background: #007bff;
-      color: white;
-      border: none;
-      border-radius: 5px;
-      cursor: pointer;
-      font-size: 13px;
-      font-weight: 500;
+    .tab-navigation {
+      display: flex;
+      gap: 10px;
+      margin-bottom: 15px;
+      background: #ffffff;
+      padding: 8px;
+      border-radius: 12px;
+      box-shadow: 0 2px 8px rgba(0,0,0,0.05);
     }
-    .btn-cancel {
-      background: #e4e6eb;
-      color: #333;
+    .tab-btn {
+      flex: 1;
+      padding: 10px;
+      border: none;
+      background: none;
+      font-weight: bold;
+      cursor: pointer;
+      border-radius: 6px;
+      transition: all 0.2s ease;
     }
   </style>
 </head>
 <body>
-
+<my-navbar></my-navbar>
   <!-- PEMBERITAHUAN JIKA USER BELUM LOGIN -->
   <div id="box-belum-login" style="display: none; max-width: 450px; margin: 80px auto; padding: 30px; text-align: center; border: 1px solid #e0e0e0; border-radius: 12px; background-color: #ffffff; box-shadow: 0 4px 12px rgba(0,0,0,0.05); font-family: sans-serif;">
     <div style="font-size: 48px; margin-bottom: 10px;">🔒</div>
@@ -138,42 +150,43 @@
     <p style="color: #666; margin-bottom: 20px; font-size: 14px; line-height: 1.5;">
       Kamu harus masuk ke akunmu terlebih dahulu untuk dapat mengubah data profil atau kata sandi.
     </p>
-    <a href="../index.html" style="display: inline-block; padding: 10px 24px; background-color: #007bff; color: white; border-radius: 6px; text-decoration: none; font-weight: bold;">
+    <a href="../index.html" class="action-btn" style="display: inline-block; padding: 10px 24px; background-color: #007bff; color: white; border-radius: 6px; text-decoration: none; font-weight: bold;">
       Masuk / Login Sekarang
     </a>
   </div>
 
   <!-- CONTAINER UTAMA -->
-  <div id="box-konten-profil" class="profile-wrapper" style="max-width: 500px; margin: 20px auto; padding: 0 15px; background: transparent; box-shadow: none;">
+  <div id="box-konten-profil" class="main-container" style="display: none;">
     
     <!-- INDIKATOR TAB -->
-    <div id="nav-tab-container" class="tab-navigation" style="display: flex; gap: 10px; margin-bottom: 15px; border-bottom: 2px solid #e0e0e0;">
-      <button id="tab-profil" class="tab-btn active" onclick="switchTab(0)" style="flex: 1; padding: 10px; border: none; background: none; font-weight: bold; cursor: pointer; border-bottom: 3px solid #007bff; color: #007bff;">
+    <div id="nav-tab-container" class="tab-navigation">
+      <button id="tab-profil" class="tab-btn active" onclick="switchTab(0)" style="background: #007bff; color: white;">
         👤 Data Profil
       </button>
-      <button id="tab-sandi" class="tab-btn" onclick="switchTab(1)" style="flex: 1; padding: 10px; border: none; background: none; font-weight: bold; cursor: pointer; border-bottom: 3px solid transparent; color: #666;">
+      <button id="tab-sandi" class="tab-btn" onclick="switchTab(1)" style="background: #f0f2f5; color: #666;">
         🔒 Ubah Kata Sandi
       </button>
     </div>
 
     <!-- AREA SLIDER -->
-    <div class="horizontal-slider" style="display: flex; overflow-x: hidden; scroll-behavior: smooth;">
+    <div class="horizontal-slider">
       
       <!-- SLIDE 1: TAMPILAN PROFIL & EDIT INLINE -->
-      <section class="slide-page" style="min-width: 100%; box-sizing: border-box;">
+      <section class="slide-page" style="padding-top: 0;">
         <div class="profile-wrapper">
           
           <div class="profile-header">
-            <h3>Profil</h3>
+            <h3>Informasi Akun</h3>
           </div>
 
           <!-- 1. GAMBAR PROFIL -->
           <div class="profile-item" onclick="toggleEdit('foto')">
             <div class="profile-item-content">
-              <span class="item-label">Gambar profil</span>
+              <span class="item-label">Gambar Profil</span>
+              <span class="item-value">Ketuk untuk mengubah foto</span>
             </div>
             <div class="item-right">
-              <img src="https://via.placeholder.com/150" alt="Foto" class="profile-avatar" id="img-profil">
+              <img src="https://via.placeholder.com/150" alt="Foto" class="profile-avatar avatar-clickable" id="img-profil">
               <span class="arrow-icon">›</span>
             </div>
           </div>
@@ -181,14 +194,14 @@
             <p style="margin: 0 0 8px 0; font-size: 13px; color: #666;">Ganti foto profil baru:</p>
             <input type="file" id="input-file-foto" accept="image/*">
             <div class="btn-group">
-              <button type="button" class="btn-sm" onclick="toggleEdit('foto')">Batal</button>
+              <button type="button" class="action-btn" style="background: #e4e6eb;" onclick="toggleEdit('foto')">Batal</button>
             </div>
           </div>
 
           <!-- 2. NAMA PANGGILAN -->
           <div class="profile-item" onclick="toggleEdit('nama')">
             <div class="profile-item-content">
-              <span class="item-label">Nama panggilan</span>
+              <span class="item-label">Nama Panggilan</span>
               <span class="item-value" id="val-nama">-</span>
             </div>
             <div class="item-right">
@@ -198,8 +211,8 @@
           <div id="edit-box-nama" class="edit-inline-box">
             <input type="text" id="input-nama-baru" placeholder="Masukkan nama panggilan baru">
             <div class="btn-group">
-              <button type="button" class="btn-sm" onclick="simpanNama()">Simpan</button>
-              <button type="button" class="btn-sm btn-cancel" onclick="toggleEdit('nama')">Batal</button>
+              <button type="button" class="btn-post" style="width: auto; padding: 8px 16px;" onclick="simpanNama()">Simpan</button>
+              <button type="button" class="action-btn" style="background: #e4e6eb;" onclick="toggleEdit('nama')">Batal</button>
             </div>
           </div>
 
@@ -214,7 +227,7 @@
           <!-- 4. JENIS KELAMIN -->
           <div class="profile-item" onclick="toggleEdit('gender')">
             <div class="profile-item-content">
-              <span class="item-label">Jenis kelamin</span>
+              <span class="item-label">Jenis Kelamin</span>
               <span class="item-value" id="val-gender">Belum ditetapkan</span>
             </div>
             <div class="item-right">
@@ -227,8 +240,8 @@
               <option value="Perempuan">Perempuan</option>
             </select>
             <div class="btn-group">
-              <button type="button" class="btn-sm" onclick="simpanGender()">Simpan</button>
-              <button type="button" class="btn-sm btn-cancel" onclick="toggleEdit('gender')">Batal</button>
+              <button type="button" class="btn-post" style="width: auto; padding: 8px 16px;" onclick="simpanGender()">Simpan</button>
+              <button type="button" class="action-btn" style="background: #e4e6eb;" onclick="toggleEdit('gender')">Batal</button>
             </div>
           </div>
 
@@ -245,15 +258,15 @@
           <div id="edit-box-birthday" class="edit-inline-box">
             <input type="date" id="input-birthday-baru">
             <div class="btn-group">
-              <button type="button" class="btn-sm" onclick="simpanBirthday()">Simpan</button>
-              <button type="button" class="btn-sm btn-cancel" onclick="toggleEdit('birthday')">Batal</button>
+              <button type="button" class="btn-post" style="width: auto; padding: 8px 16px;" onclick="simpanBirthday()">Simpan</button>
+              <button type="button" class="action-btn" style="background: #e4e6eb;" onclick="toggleEdit('birthday')">Batal</button>
             </div>
           </div>
 
           <!-- 6. NEGARA -->
           <div class="profile-item">
             <div class="profile-item-content">
-              <span class="item-label">Negara/wilayah terdaftar</span>
+              <span class="item-label">Negara / Wilayah</span>
               <span class="item-value">Indonesia</span>
             </div>
           </div>
@@ -262,25 +275,25 @@
       </section>
 
       <!-- SLIDE 2: FORM UBAH KATA SANDI -->
-      <section class="slide-page" style="min-width: 100%; box-sizing: border-box;">
-        <div id="box-ubah-sandi" style="padding: 20px; background: #fff; border: 1px solid #e0e0e0; border-radius: 8px;">
-          <h3 id="judul-form-sandi" style="margin-top: 0;">Ubah Kata Sandi</h3>
-          <p id="subjudul-form-sandi" style="font-size: 14px; color: #666;">Masukkan kata sandi baru untuk akun Anda.</p>
+      <section class="slide-page" style="padding-top: 0;">
+        <div class="post-container" style="background: #fff; max-width: 480px; margin: 0 auto;">
+          <h3 id="judul-form-sandi" style="margin-top: 0; color: #333;">Ubah Kata Sandi</h3>
+          <p id="subjudul-form-sandi" style="font-size: 14px; color: #65676b; margin-bottom: 15px;">Masukkan kata sandi baru untuk mengamankan akun Anda.</p>
           
-          <div id="notif-ubah-sandi" style="display: none; font-size: 14px;"></div>
+          <div id="notif-ubah-sandi" style="display: none; font-size: 14px; margin-bottom: 12px;"></div>
 
           <form id="form-ubah-sandi">
-            <div style="margin-bottom: 12px;">
-              <label for="new-password" style="display: block; margin-bottom: 5px; font-weight: bold;">Kata Sandi Baru:</label>
-              <input type="password" id="new-password" required minlength="6" placeholder="Masukkan kata sandi baru" style="width: 100%; padding: 8px; box-sizing: border-box; border: 1px solid #ccc; border-radius: 4px;">
+            <div class="form-group">
+              <label for="new-password">Kata Sandi Baru:</label>
+              <input type="password" id="new-password" required minlength="6" placeholder="Minimal 6 karakter">
             </div>
 
-            <div style="margin-bottom: 18px;">
-              <label for="confirm-password" style="display: block; margin-bottom: 5px; font-weight: bold;">Konfirmasi Kata Sandi Baru:</label>
-              <input type="password" id="confirm-password" required minlength="6" placeholder="Ulangi kata sandi baru" style="width: 100%; padding: 8px; box-sizing: border-box; border: 1px solid #ccc; border-radius: 4px;">
+            <div class="form-group">
+              <label for="confirm-password">Konfirmasi Kata Sandi Baru:</label>
+              <input type="password" id="confirm-password" required minlength="6" placeholder="Ulangi kata sandi baru">
             </div>
 
-            <button type="submit" id="btn-submit-sandi" style="width: 100%; padding: 10px; background-color: #007bff; color: white; border: none; border-radius: 4px; font-weight: bold; cursor: pointer;">
+            <button type="submit" id="btn-submit-sandi" class="btn-post">
               Simpan Kata Sandi Baru
             </button>
           </form>
@@ -349,9 +362,10 @@
           const birthday = meta.ulang_tahun || "Belum ditetapkan";
           const avatarUrl = meta.avatar_url || "https://via.placeholder.com/150";
 
-          document.getElementById("val-nama").textContent = profile-name;
+          // Memperbaiki pemanggilan elemen DOM yang sebelumnya error
+          document.getElementById("val-nama").textContent = username;
           document.getElementById("input-nama-baru").value = username;
-          document.getElementById("val-email").textContent = profile-email;
+          document.getElementById("val-email").textContent = email;
           document.getElementById("val-gender").textContent = gender;
           if(meta.jenis_kelamin) document.getElementById("input-gender-baru").value = gender;
           document.getElementById("val-birthday").textContent = birthday;
@@ -423,14 +437,14 @@
 
       if (tabProfil && tabSandi) {
         if (index === 0) {
-          tabProfil.style.borderBottom = "3px solid #007bff";
-          tabProfil.style.color = "#007bff";
-          tabSandi.style.borderBottom = "3px solid transparent";
+          tabProfil.style.background = "#007bff";
+          tabProfil.style.color = "white";
+          tabSandi.style.background = "#f0f2f5";
           tabSandi.style.color = "#666";
         } else {
-          tabSandi.style.borderBottom = "3px solid #007bff";
-          tabSandi.style.color = "#007bff";
-          tabProfil.style.borderBottom = "3px solid transparent";
+          tabSandi.style.background = "#007bff";
+          tabSandi.style.color = "white";
+          tabProfil.style.background = "#f0f2f5";
           tabProfil.style.color = "#666";
         }
       }

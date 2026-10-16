@@ -1,0 +1,132 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Profil Pengguna</title>
+  <!-- Menghubungkan dengan file CSS Anda -->
+  <base href="../">
+    <!-- Stylesheet Utama -->
+    <link rel="stylesheet" href="styles.css">
+    <link rel="stylesheet" href="../assets/css/ubah-data-profil.css">
+    
+    <!-- Script Utama & Pendukung (Di-load setelah HTML selesai dibaca) -->
+    <script src="https://accounts.google.com/gsi/client" async defer></script>
+    <script src="https://apis.google.com/js/api.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+    <script src="/matter.min.js" defer></script>
+    
+    <script src="assets/js/utils.js" defer></script>
+    <script src="assets/js/gdrive.js" defer></script>
+    <script src="assets/js/webrtc.js" defer></script>
+    <script src="assets/js/chat.js" defer></script>
+    <script src="assets/js/push-notification.js" defer></script>
+    <script src="assets/js/navbar.js" defer></script>
+    <script src="assets/js/login.js" defer></script>
+    <script src="assets/js/main.js" defer></script>
+    <script src="assets/js/pisical.js" defer></script>
+    <script src="assets/js/modalhandler.js" defer></script>
+    <script src="assets/js/post-card-element.js" defer></script>
+    <script src="assets/js/musik.js" defer></script>
+</head>
+<body>
+
+  <!-- ================= NAVIGASI BAR ================= -->
+<my-navbar></my-navbar>
+  <!-- ================= KONTEN UTAMA HALAMAN PROFIL ================= -->
+  <!-- Menggunakan .slide-page agar pas dalam struktur horizontal slider jika diperlukan -->
+  <main class="slide-page">
+    
+    <!-- Wadah utama yang otomatis berubah menjadi 3 kolom di laptop/desktop -->
+    <div class="main-container">
+
+      <!-- KARTU 1: Informasi Utama & Foto Profil -->
+      <div class="article-card">
+        <div class="post-container" style="text-align: center;">
+          <!-- Foto Profil dengan efek klik/zoom -->
+          <img src="https://images.unsplash.com/photo-1534528741775-53994a69daeb?w=400&auto=format&fit=crop&q=80" 
+               alt="Foto Profil" 
+               class="avatar avatar-clickable" 
+               style="width: 100px; height: 100px; margin: 0 auto 15px; display: block;" 
+               onclick="document.getElementById('zoomModal').style.display='flex'">
+               
+          <h2 style="text-align: center; color: #050505; margin-bottom: 5px;">Miftahul Mujib</h2>
+          <span style="color: #65676b; font-size: 14px;">@miftahulmujib</span>
+          
+          <div class="profile-card" style="justify-content: center; margin-top: 10px;">
+            <button class="action-btn active" style="background: #007bff; color: white; border-radius: 6px;">Ikuti</button>
+            <button class="action-btn" style="background: #f2f2f2; border-radius: 6px;">Kirim Pesan</button>
+          </div>
+        </div>
+
+        <div class="post-container">
+          <h3 style="font-size: 16px; margin-bottom: 10px; color: #333;">Tentang Saya</h3>
+          <p class="post-content" style="padding: 0;">
+            Pengembang web yang tertarik dengan teknologi, desain antarmuka, serta eksplorasi konsep-konsep sains dan pemrograman.
+          </p>
+        </div>
+      </div>
+
+      <!-- KARTU 2: Aktivitas / Postingan Terakhir -->
+      <div class="article-card">
+        <div class="post-container">
+          <h3 style="font-size: 16px; margin-bottom: 12px; color: #333;">Aktivitas Terbaru</h3>
+          <div class="post-card" style="margin-bottom: 0; box-shadow: none; border: 1px solid #e4e6eb;">
+            <div class="post-header">
+              <img src="https://images.unsplash.com/photo-1534528741775-53994a69daeb?w=400&auto=format&fit=crop&q=80" alt="Avatar" class="avatar">
+              <div class="user-info">
+                <h4>Miftahul Mujib</h4>
+                <span>Baru saja</span>
+              </div>
+            </div>
+            <div class="post-content">
+              Sedang mempelajari tata letak responsif menggunakan CSS Grid dan Flexbox agar tampilan website semakin optimal di berbagai perangkat! 🚀
+            </div>
+            <div class="post-stats">
+              <span>👍 24 Suka</span>
+              <span>💬 5 Komentar</span>
+            </div>
+            <div class="post-actions">
+              <button class="action-btn active">Suka</button>
+              <button class="action-btn">Komentar</button>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- KARTU 3: Keahlian / Informasi Tambahan -->
+      <div class="article-card">
+        <div class="post-container">
+          <h3 style="font-size: 16px; margin-bottom: 12px; color: #333;">Keahlian & Minat</h3>
+          <div style="display: flex; flex-direction: column; gap: 8px; text-align: left;">
+            <div style="background: #f0f2f5; padding: 10px; border-radius: 6px; font-size: 14px; font-weight: 600; color: #444;">
+              💻 Web Development (HTML, CSS, JS)
+            </div>
+            <div style="background: #f0f2f5; padding: 10px; border-radius: 6px; font-size: 14px; font-weight: 600; color: #444;">
+              🎨 Desain Grafis (Adobe Photoshop)
+            </div>
+            <div style="background: #f0f2f5; padding: 10px; border-radius: 6px; font-size: 14px; font-weight: 600; color: #444;">
+              ⚡ Eksplorasi Sains & Fisika
+            </div>
+          </div>
+        </div>
+
+        <div class="call-to-action" style="margin-top: 0;">
+          <p style="font-size: 13px; color: #166534; font-weight: 600; margin: 0;">Status: Terbuka untuk Kolaborasi Proyek Baru</p>
+        </div>
+      </div>
+
+    </div>
+  </main>
+
+  <!-- ================= MODAL ZOOM FOTO PROFIL ================= -->
+  <div id="zoomModal" class="modal" onclick="this.style.display='none'">
+    <div class="modal-content" style="text-align: center;" onclick="event.stopPropagation()">
+      <span class="close-btn" onclick="document.getElementById('zoomModal').style.display='none'">&times;</span>
+      <h3 style="margin-bottom: 15px; color: #333;">Foto Profil</h3>
+      <img src="https://images.unsplash.com/photo-1534528741775-53994a69daeb?w=400&auto=format&fit=crop&q=80" alt="Zoom Profil" class="modal-zoom-img">
+    </div>
+  </div>
+
+</body>
+</html>
