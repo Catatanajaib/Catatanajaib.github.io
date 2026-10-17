@@ -42,30 +42,51 @@
 
       <!-- KARTU 1: Informasi Utama & Foto Profil -->
       <div class="article-card">
+              <!-- KARTU 1: Informasi Utama & Foto Profil -->
+      <div class="article-card">
         <div class="post-container" style="text-align: center;">
           <!-- Foto Profil dengan efek klik/zoom -->
           <img src="https://images.unsplash.com/photo-1534528741775-53994a69daeb?w=400&auto=format&fit=crop&q=80" 
+               id="profile-avatar"
                alt="Foto Profil" 
                class="avatar avatar-clickable" 
                style="width: 100px; height: 100px; margin: 0 auto 15px; display: block;" 
                onclick="document.getElementById('zoomModal').style.display='flex'">
                
-          <h2 style="text-align: center; color: #050505; margin-bottom: 5px;">Miftahul Mujib</h2>
-          <span style="color: #65676b; font-size: 14px;">@miftahulmujib</span>
+          <h2 id="profile-nama" style="text-align: center; color: #050505; margin-bottom: 5px;">Miftahul Mujib</h2>
           
-          <div class="profile-card" style="justify-content: center; margin-top: 10px;">
-            <button class="action-btn active" style="background: #007bff; color: white; border-radius: 6px;">Ikuti</button>
-            <button class="action-btn" style="background: #f2f2f2; border-radius: 6px;">Kirim Pesan</button>
+          <span id="profile-username" style="color: #65676b; font-size: 14px;">@miftahulmujib</span>
+          
+          <!-- KELOMPOK TOMBOL AKSI (BERUBAH OTOMATIS) -->
+          <div class="profile-card" style="justify-content: center; margin-top: 10px; gap: 8px; flex-wrap: wrap; border: none; box-shadow: none; background: transparent;">
+            
+            <!-- 1. Tombol untuk Pengunjung Lain (Default muncul sebelum login / lihat profil orang lain) -->
+            <div id="action-buttons-lain" style="display: flex; gap: 8px;">
+              <button class="action-btn active" style="background: #007bff; color: white; border-radius: 6px;">Ikuti</button>
+              <button class="action-btn" style="background: #f2f2f2; border-radius: 6px;">Kirim Pesan</button>
+            </div>
+
+            <!-- 2. Tombol Statistik untuk Pemilik Akun Sendiri (Awalnya disembunyikan, muncul jika akun terkait login) -->
+            <div id="action-buttons-owner" style="display: none; gap: 8px;">
+              <button class="action-btn" style="background: #f0f2f5; color: #333; border-radius: 6px; cursor: pointer;">Pengikut</button>
+              <button class="action-btn" style="background: #f0f2f5; color: #333; border-radius: 6px; cursor: pointer;">Mengikuti</button>
+            </div>
+
+            <!-- 3. Tombol Perbarui Biodata (Awalnya disembunyikan, muncul jika akun terkait login) -->
+            <button id="btn-edit-profil" class="action-btn active" style="background: #007bff; color: white; border-radius: 6px; display: none;" onclick="location.href='../pages/pengaturan-profil.html'">Perbarui biodata</button>
+
           </div>
+          
         </div>
 
         <div class="post-container">
           <h3 style="font-size: 16px; margin-bottom: 10px; color: #333;">Tentang Saya</h3>
-          <p class="post-content" style="padding: 0;">
+          <p id="profile-bio" class="post-content" style="padding: 0;">
             Pengembang web yang tertarik dengan teknologi, desain antarmuka, serta eksplorasi konsep-konsep sains dan pemrograman.
           </p>
         </div>
       </div>
+
 
       <!-- KARTU 2: Aktivitas / Postingan Terakhir -->
       <div class="article-card">
@@ -112,7 +133,7 @@
         </div>
 
         <div class="call-to-action" style="margin-top: 0;">
-          <p style="font-size: 13px; color: #166534; font-weight: 600; margin: 0;">Status: Terbuka untuk Kolaborasi Proyek Baru</p>
+          <p id="profile-status" style="font-size: 13px; color: #166534; font-weight: 600; margin: 0;">Status: Terbuka untuk Kolaborasi Proyek Baru</p>
         </div>
       </div>
 
@@ -127,6 +148,64 @@
       <img src="https://images.unsplash.com/photo-1534528741775-53994a69daeb?w=400&auto=format&fit=crop&q=80" alt="Zoom Profil" class="modal-zoom-img">
     </div>
   </div>
+  
+  <script>
+  document.addEventListener("DOMContentLoaded", async () => {
+    // Pastikan Supabase sudah siap
+    if (!window.supabaseClient) return;
+
+    // Ambil sesi user yang sedang login
+    const { data: { session } } = await window.supabaseClient.auth.getSession();
+
+    // Referensi elemen tombol
+    const btnLain = document.getElementById("action-buttons-lain");
+    const btnOwner = document.getElementById("action-buttons-owner");
+    const btnEdit = document.getElementById("btn-edit-profil");
+
+    if (session) {
+      // --- JIKA USER SUDAH LOGIN (PROFIL SENDIRI) ---
+      const user = session.user;
+      const meta = user.user_metadata || {};
+
+      const nama = meta.nama_lengkap || meta.username || user.email.split('@')[0];
+      const usernameTag = "@" + (meta.username || user.email.split('@')[0]);
+      const avatarUrl = meta.avatar_url || "https://images.unsplash.com/photo-1534528741775-53994a69daeb?w=400&auto=format&fit=crop&q=80";
+      const bioText = meta.bio || "Pengembang web yang tertarik dengan teknologi, desain antarmuka, serta eksplorasi konsep-konsep sains dan pemrograman.";
+      const statusText = meta.status || "Terbuka untuk Kolaborasi Proyek Baru";
+
+      // Perbarui teks dan gambar profil
+      document.getElementById("profile-nama").textContent = nama;
+      document.getElementById("profile-username").textContent = usernameTag;
+      document.getElementById("profile-avatar").src = avatarUrl;
+      document.getElementById("profile-bio").textContent = bioText;
+      
+      const elStatus = document.getElementById("profile-status");
+      if (elStatus) elStatus.textContent = "Status: " + statusText;
+
+      // Atur visibilitas tombol khusus pemilik akun
+      if (btnLain) btnLain.style.display = "none";     // Sembunyikan "Ikuti & Kirim Pesan"
+      if (btnOwner) btnOwner.style.display = "flex";   // Tampilkan statistik pengikut
+      if (btnEdit) btnEdit.style.display = "inline-block"; // Tampilkan tombol edit profil
+
+      // Sinkronisasi foto modal zoom & aktivitas
+      const modalZoomImg = document.querySelector(".modal-zoom-img");
+      if (modalZoomImg) modalZoomImg.src = avatarUrl;
+
+      document.querySelectorAll(".post-header .user-info h4").forEach(el => {
+        el.textContent = nama;
+      });
+      document.querySelectorAll(".post-card .post-header img.avatar").forEach(el => {
+        el.src = avatarUrl;
+      });
+
+    } else {
+      // --- JIKA BELUM LOGIN / MELIHAT PROFIL ORANG LAIN ---
+      if (btnLain) btnLain.style.display = "flex";     // Tampilkan "Ikuti & Kirim Pesan"
+      if (btnOwner) btnOwner.style.display = "none";   // Sembunyikan statistik pengikut
+      if (btnEdit) btnEdit.style.display = "none";     // Sembunyikan tombol edit profil
+    }
+  });
+</script>
 
 </body>
 </html>

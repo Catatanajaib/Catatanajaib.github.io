@@ -270,6 +270,42 @@
               <span class="item-value">Indonesia</span>
             </div>
           </div>
+          
+                    <!-- 7. BIO / TENTANG SAYA -->
+          <div class="profile-item" onclick="toggleEdit('bio')">
+            <div class="profile-item-content">
+              <span class="item-label">Tentang Saya (Bio)</span>
+              <span class="item-value" id="val-bio">Belum ada bio</span>
+            </div>
+            <div class="item-right">
+              <span class="arrow-icon">›</span>
+            </div>
+          </div>
+          <div id="edit-box-bio" class="edit-inline-box">
+            <textarea id="input-bio-baru" rows="3" placeholder="Tuliskan bio atau deskripsi singkat tentangmu..." style="width: 100%; padding: 10px; box-sizing: border-box; border: 1px solid #ccc; border-radius: 6px; font-size: 14px; margin-bottom: 10px;"></textarea>
+            <div class="btn-group">
+              <button type="button" class="btn-post" style="width: auto; padding: 8px 16px;" onclick="simpanBio()">Simpan</button>
+              <button type="button" class="action-btn" style="background: #e4e6eb;" onclick="toggleEdit('bio')">Batal</button>
+            </div>
+          </div>
+
+          <!-- 8. STATUS PROFESIONAL -->
+          <div class="profile-item" onclick="toggleEdit('status')">
+            <div class="profile-item-content">
+              <span class="item-label">Status Kolaborasi</span>
+              <span class="item-value" id="val-status">Belum ditetapkan</span>
+            </div>
+            <div class="item-right">
+              <span class="arrow-icon">›</span>
+            </div>
+          </div>
+          <div id="edit-box-status" class="edit-inline-box">
+            <input type="text" id="input-status-baru" placeholder="Contoh: Terbuka untuk Kolaborasi Proyek Baru">
+            <div class="btn-group">
+              <button type="button" class="btn-post" style="width: auto; padding: 8px 16px;" onclick="simpanStatus()">Simpan</button>
+              <button type="button" class="action-btn" style="background: #e4e6eb;" onclick="toggleEdit('status')">Batal</button>
+            </div>
+          </div>
 
         </div>
       </section>
@@ -306,7 +342,7 @@
   <script>
     // Fungsi Toggle Edit Inline
     function toggleEdit(bagian) {
-      const boxes = ['foto', 'nama', 'gender', 'birthday'];
+      const boxes = ['foto', 'nama', 'gender', 'birthday', 'bio', 'status'];
       boxes.forEach(b => {
         const el = document.getElementById('edit-box-' + b);
         if (el) {
@@ -360,6 +396,16 @@
           const username = meta.nama_lengkap || meta.username || email.split('@')[0];
           const gender = meta.jenis_kelamin || "Belum ditetapkan";
           const birthday = meta.ulang_tahun || "Belum ditetapkan";
+          const bio = meta.bio || "Belum ada bio";
+          const status = meta.status || "Terbuka untuk Kolaborasi Proyek Baru";
+
+          // Tampilkan ke elemen pengaturan
+          document.getElementById("val-bio").textContent = bio;
+          if(meta.bio) document.getElementById("input-bio-baru").value = meta.bio;
+          
+          document.getElementById("val-status").textContent = status;
+          if(meta.status) document.getElementById("input-status-baru").value = meta.status;
+
           const avatarUrl = meta.avatar_url || "https://via.placeholder.com/150";
 
           // Memperbaiki pemanggilan elemen DOM yang sebelumnya error
@@ -458,6 +504,21 @@
       if (error) alert("Gagal: " + error.message);
       else { alert("Nama berhasil diperbarui!"); document.getElementById("val-nama").textContent = val; toggleEdit('nama'); }
     }
+    
+        async function simpanBio() {
+      const val = document.getElementById("input-bio-baru").value.trim();
+      const { error } = await window.supabaseClient.auth.updateUser({ data: { bio: val } });
+      if (error) alert("Gagal: " + error.message);
+      else { alert("Bio berhasil diperbarui!"); document.getElementById("val-bio").textContent = val; toggleEdit('bio'); }
+    }
+
+    async function simpanStatus() {
+      const val = document.getElementById("input-status-baru").value.trim();
+      const { error } = await window.supabaseClient.auth.updateUser({ data: { status: val } });
+      if (error) alert("Gagal: " + error.message);
+      else { alert("Status berhasil diperbarui!"); document.getElementById("val-status").textContent = val; toggleEdit('status'); }
+    }
+
 
     async function simpanGender() {
       const val = document.getElementById("input-gender-baru").value;
