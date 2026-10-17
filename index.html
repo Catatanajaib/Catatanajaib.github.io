@@ -416,6 +416,10 @@
       </div>
 
     </div>
+    <div style="margin-top: 20px; display: flex; gap: 10px; flex-wrap: wrap;">
+                <button type="button" id="btn-logout" style="flex: 1; padding: 10px; background-color: #dc3545; color: white; border: none; border-radius: 4px; cursor: pointer; font-weight: bold;">Keluar (Logout)</button>
+            </div>
+        </div>
   </main>
 
   <!-- ================= MODAL ZOOM FOTO PROFIL ================= -->
@@ -426,7 +430,20 @@
       <img src="https://images.unsplash.com/photo-1534528741775-53994a69daeb?w=400&auto=format&fit=crop&q=80" alt="Zoom Profil" class="modal-zoom-img">
     </div>
   </div>
-  
+  <script>
+document.addEventListener("DOMContentLoaded", () => {
+    const btnShowLogin = document.getElementById("btn-show-login");
+    const formLoginWrapper = document.getElementById("form-login-wrapper");
+
+    if (btnShowLogin && formLoginWrapper) {
+        btnShowLogin.addEventListener("click", () => {
+            // Sembunyikan tombol 'login' dan munculkan form input login
+            btnShowLogin.style.display = "none";
+            formLoginWrapper.style.display = "block";
+        });
+    }
+});
+</script>
   <script>
   document.addEventListener("DOMContentLoaded", async () => {
     // Pastikan Supabase sudah siap
@@ -494,129 +511,47 @@
       <span>🌐</span>
       <span>catatanajaib.github.io</span>
 </footer>
+<div class="post-container" style="text-align: center; max-width: 450px; margin: 20px auto;">
+    <!-- Bagian Profil / Avatar Inisial -->
+    <div class="profile-img" style="width: 70px; height: 70px; background-color: #00bcd4; color: #fff; border-radius: 50%; display: flex; align-items: center; justify-content: center; font-size: 28px; font-weight: bold; margin: 0 auto 16px;">
+        M
+    </div>
+    
+    <h2 style="font-size: 20px; color: #050505; margin-bottom: 6px;">MIFTAH98, OTOMOTIF 081910240675</h2>
+    <p style="font-size: 14px; color: #65676b; margin-bottom: 20px;">Dukung konten & karya kami via QRIS / E-Wallet / Bank</p>
 
-   <style>
-        .card {
-            background: #ffffff;
-            border-radius: 16px;
-            box-shadow: 0 10px 25px rgba(0,0,0,0.1);
-            width: 90%;
-            height: a:autofill;
-            padding: 24px;
-            
-        }
-        .profile-img {
-            width: 10%;
-            height: 10%;
-            background-color: #00a5cf;
-            color: #fff;
-            border-radius: 50%;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            font-size: 32px;
-            font-weight: bold;
-            margin: 0 auto 16px;
-        }
-        h1 {
-            font-size: 22px;
-            color: #1a202c;
-            margin-bottom: 6px;
-        }
-        p.subtitle {
-            font-size: 14px;
-            color: #718096;
-            margin-bottom: 20px;
-        }
-        .qris-box {
-            background: #f7fafc;
-            border: 2px dashed #cbd5e0;
-            border-radius: 12px;
-            padding: 16px;
-            margin-bottom: 20px;
-        }
-        .qris-box img {
-            width: 90%;
-            height: 70%;
-            border-radius: 8px;
-        }
-        .info-group {
-            background: #edf2f7;
-            padding: 12px 16px;
-            border-radius: 8px;
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-            margin-bottom: 12px;
-            font-size: 14px;
-        }
-        .info-group span.label {
-            color: #4a5568;
-            font-weight: 500;
-        }
-        .info-group span.value {
-            color: #2d3748;
-            font-weight: bold;
-        }
-        .btn-copy {
-            background-color: #0084ff;
-            color: white;
-            border: none;
-            padding: 6px 12px;
-            border-radius: 6px;
-            cursor: pointer;
-            font-size: 12px;
-            transition: background 0.2s;
-        }
-        .btn-copy:hover {
-            background-color: #0066cc;
-        }
-        .footer-text {
-            font-size: 12px;
-            color: #a0aec0;
-            margin-top: 16px;
-        }
-    </style>
-</head>
-<body>
-
-<div class="card">
-    <div class="profile-img">M</div>
-    <h1>MIFTAH98, OTOMOTIF 081910240675</h1>
-    <p class="subtitle">Dukung konten & karya kami via QRIS / E-Wallet / Bank</p>
-
-    <!-- Tempat Menampilkan Gambar QRIS -->
-    <div class="qris-box">
+    <!-- Tempat Menampilkan Gambar QRIS dengan efek kontainer pos-card -->
+    <div style="background: #f7fafc; border: 2px dashed #cbd5e0; border-radius: 12px; padding: 16px; margin-bottom: 20px;">
         <p style="font-size: 12px; font-weight: bold; color: #4a5568; margin-bottom: 8px;">Scan QRIS GoPay Merchant</p>
-        <!-- Ganti 'IMG_20260927_203441.jpeg' dengan nama file gambar QRIS Anda jika di-host di folder yang sama -->
-        <img src="assets/images/sawer.jpeg" alt="QRIS MIFTAH98 OTOMOTIF">
+        <img src="assets/images/sawer.jpeg" alt="QRIS MIFTAH98 OTOMOTIF" style="width: 100%; max-width: 250px; height: auto; border-radius: 8px; display: block; margin: 0 auto;">
     </div>
 
     <!-- Informasi Nomor Sawer / Rekening -->
-    <div class="info-group">
-        <div>
-            <span class="label">Nomor / ID:</span><br>
-            <span class="value" id="nomor-sawer">901509027272</span>
+    <div style="background: #edf2f7; padding: 12px 16px; border-radius: 8px; display: flex; justify-content: space-between; align-items: center; margin-bottom: 12px; font-size: 14px;">
+        <div style="text-align: left;">
+            <span style="color: #4a5568; font-weight: 500; font-size: 12px;">Nomor / ID:</span><br>
+            <span style="color: #2d3748; font-weight: bold;" id="nomor-sawer">901509027272</span>
         </div>
-        <button class="btn-copy" onclick="copyNumber()">Salin</button>
+        <button class="action-btn" style="background-color: #007bff; color: white; border: none; padding: 6px 14px; border-radius: 6px; cursor: pointer; font-size: 12px; flex: 0 0 auto;" onclick="copyNumber()">Salin</button>
     </div>
 
-    <div class="info-group">
-        <div>
-            <span class="label">NMID QRIS:</span><br>
-            <span class="value">ID1025452391614</span>
+    <div style="background: #edf2f7; padding: 12px 16px; border-radius: 8px; display: flex; justify-content: space-between; align-items: center; margin-bottom: 12px; font-size: 14px;">
+        <div style="text-align: left;">
+            <span style="color: #4a5568; font-weight: 500; font-size: 12px;">NMID QRIS:</span><br>
+            <span style="color: #2d3748; font-weight: bold;">ID1025452391614</span>
         </div>
     </div>
 
-    <p class="footer-text">Terima kasih atas bantuan & dukungan Anda! 🙏</p>
+    <p style="font-size: 12px; color: #a0aec0; margin-top: 16px;">Terima kasih atas bantuan & dukungan Anda! 🙏</p>
 </div>
+
 <script>
     function copyNumber() {
-        const textToCopy = document.getElementById('nomor-sawer').innerText;
-        navigator.clipboard.writeText(textToCopy).then(() => {
-            alert('Nomor 901509027272 berhasil disalin!');
+        const nomor = document.getElementById("nomor-sawer").innerText;
+        navigator.clipboard.writeText(nomor).then(() => {
+            alert("Nomor berhasil disalin: " + nomor);
         }).catch(err => {
-            console.error('Gagal menyalin text: ', err);
+            console.error("Gagal menyalin teks: ", err);
         });
     }
 </script>
