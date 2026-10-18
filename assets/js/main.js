@@ -599,10 +599,12 @@ async function loadPosts() {
         <header class="post-header" style="position: relative; display: flex; justify-content: space-between; align-items: center;">
           <div style="display: flex; align-items: center; gap: 10px;">
             <img src="https://picsum.photos/600/300?random=5" alt="Foto Profil" class="avatar">
-            <div class="user-info">
-              <h4>${author}</h4>
+              <div class="user-info">
+              <!-- Menggunakan post.user_id agar akurat dan konsisten dengan tombol kirim pesan -->
+              <h4><a href='/pages/profil-pengguna.html?id=${post.user_id}'>${author}</a></h4>
               <span>${date}</span>
             </div>
+
           </div>
 
           <details class="post-menu-dropdown" style="position: relative;">

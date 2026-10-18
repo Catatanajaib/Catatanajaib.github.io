@@ -311,16 +311,13 @@
 </div>
 
         </div>
-
-        <!-- ================= BLOK 2: DETAIL PROFIL PENGGUNA (Tampil jika Sudah Login) ================= -->
-        <main class="slide-page">
+<!-- ================= BLOK 2: DETAIL PROFIL PENGGUNA ================= -->
+<main class="slide-page">
     
     <!-- Wadah utama yang otomatis berubah menjadi 3 kolom di laptop/desktop -->
     <div class="main-container">
 
       <!-- KARTU 1: Informasi Utama & Foto Profil -->
-      <div class="article-card">
-              <!-- KARTU 1: Informasi Utama & Foto Profil -->
       <div class="article-card">
         <div class="post-container" style="text-align: center;">
           <!-- Foto Profil dengan efek klik/zoom -->
@@ -338,33 +335,31 @@
           <!-- KELOMPOK TOMBOL AKSI (BERUBAH OTOMATIS) -->
           <div class="profile-card" style="justify-content: center; margin-top: 10px; gap: 8px; flex-wrap: wrap; border: none; box-shadow: none; background: transparent;">
             
-            <!-- 1. Tombol untuk Pengunjung Lain (Default muncul sebelum login / lihat profil orang lain) -->
+            <!-- 1. Tombol untuk Pengunjung Lain -->
             <div id="action-buttons-lain" style="display: flex; gap: 8px;">
               <button class="action-btn active" style="background: #007bff; color: white; border-radius: 6px;">Ikuti</button>
               <button class="action-btn" style="background: #f2f2f2; border-radius: 6px;">Kirim Pesan</button>
             </div>
 
-            <!-- 2. Tombol Statistik untuk Pemilik Akun Sendiri (Awalnya disembunyikan, muncul jika akun terkait login) -->
+            <!-- 2. Tombol Statistik untuk Pemilik Akun Sendiri -->
             <div id="action-buttons-owner" style="display: none; gap: 8px;">
               <button class="action-btn" style="background: #f0f2f5; color: #333; border-radius: 6px; cursor: pointer;">Pengikut</button>
               <button class="action-btn" style="background: #f0f2f5; color: #333; border-radius: 6px; cursor: pointer;">Mengikuti</button>
             </div>
 
-            <!-- 3. Tombol Perbarui Biodata (Awalnya disembunyikan, muncul jika akun terkait login) -->
+            <!-- 3. Tombol Perbarui Biodata -->
             <button id="btn-edit-profil" class="action-btn active" style="background: #007bff; color: white; border-radius: 6px; display: none;" onclick="location.href='../pages/pengaturan-profil.html'">Perbarui biodata</button>
 
           </div>
-          
         </div>
 
-        <div class="post-container">
+        <div class="post-container" style="margin-bottom: 0;">
           <h3 style="font-size: 16px; margin-bottom: 10px; color: #333;">Tentang Saya</h3>
           <p id="profile-bio" class="post-content" style="padding: 0;">
             Pengembang web yang tertarik dengan teknologi, desain antarmuka, serta eksplorasi konsep-konsep sains dan pemrograman.
           </p>
         </div>
       </div>
-
 
       <!-- KARTU 2: Aktivitas / Postingan Terakhir -->
       <div class="article-card">
@@ -393,113 +388,133 @@
         </div>
       </div>
 
-      <!-- KARTU 3: Keahlian / Informasi Tambahan -->
+      <!-- KARTU 3: Keahlian, Status, & Tombol Logout -->
       <div class="article-card">
-        <div class="post-container">
-          <h3 style="font-size: 16px; margin-bottom: 12px; color: #333;">Keahlian & Minat</h3>
-          <div style="display: flex; flex-direction: column; gap: 8px; text-align: left;">
-            <div style="background: #f0f2f5; padding: 10px; border-radius: 6px; font-size: 14px; font-weight: 600; color: #444;">
-              💻 Web Development (HTML, CSS, JS)
+        <div>
+          <div class="post-container">
+            <h3 style="font-size: 16px; margin-bottom: 12px; color: #333;">Keahlian & Minat</h3>
+            <div style="display: flex; flex-direction: column; gap: 8px; text-align: left;">
+              <div style="background: #f0f2f5; padding: 10px; border-radius: 6px; font-size: 14px; font-weight: 600; color: #444;">
+                💻 Web Development (HTML, CSS, JS)
+              </div>
+              <div style="background: #f0f2f5; padding: 10px; border-radius: 6px; font-size: 14px; font-weight: 600; color: #444;">
+                🎨 Desain Grafis (Adobe Photoshop)
+              </div>
+              <div style="background: #f0f2f5; padding: 10px; border-radius: 6px; font-size: 14px; font-weight: 600; color: #444;">
+                ⚡ Eksplorasi Sains & Fisika
+              </div>
             </div>
-            <div style="background: #f0f2f5; padding: 10px; border-radius: 6px; font-size: 14px; font-weight: 600; color: #444;">
-              🎨 Desain Grafis (Adobe Photoshop)
-            </div>
-            <div style="background: #f0f2f5; padding: 10px; border-radius: 6px; font-size: 14px; font-weight: 600; color: #444;">
-              ⚡ Eksplorasi Sains & Fisika
-            </div>
+          </div>
+
+          <div class="call-to-action" style="margin-top: 0;">
+            <p id="profile-status" style="font-size: 13px; color: #166534; font-weight: 600; margin: 0;">Status: Terbuka untuk Kolaborasi Proyek Baru</p>
           </div>
         </div>
 
-        <div class="call-to-action" style="margin-top: 0;">
-          <p id="profile-status" style="font-size: 13px; color: #166534; font-weight: 600; margin: 0;">Status: Terbuka untuk Kolaborasi Proyek Baru</p>
+        <!-- Tombol Logout ditempatkan di dalam kartu ke-3 agar sejajar rapi -->
+        <div style="margin-top: 20px;">
+          <button type="button" id="btn-logout" style="width: 100%; padding: 10px; background-color: #dc3545; color: white; border: none; border-radius: 6px; cursor: pointer; font-weight: bold;">Keluar (Logout)</button>
         </div>
       </div>
 
     </div>
-    <div style="margin-top: 20px; display: flex; gap: 10px; flex-wrap: wrap;">
-                <button type="button" id="btn-logout" style="flex: 1; padding: 10px; background-color: #dc3545; color: white; border: none; border-radius: 4px; cursor: pointer; font-weight: bold;">Keluar (Logout)</button>
-            </div>
-        </div>
-  </main>
+</main>
 
-  <!-- ================= MODAL ZOOM FOTO PROFIL ================= -->
-  <div id="zoomModal" class="modal" onclick="this.style.display='none'">
+<!-- ================= MODAL ZOOM FOTO PROFIL ================= -->
+<div id="zoomModal" class="modal" onclick="this.style.display='none'">
     <div class="modal-content" style="text-align: center;" onclick="event.stopPropagation()">
       <span class="close-btn" onclick="document.getElementById('zoomModal').style.display='none'">&times;</span>
       <h3 style="margin-bottom: 15px; color: #333;">Foto Profil</h3>
       <img src="https://images.unsplash.com/photo-1534528741775-53994a69daeb?w=400&auto=format&fit=crop&q=80" alt="Zoom Profil" class="modal-zoom-img">
     </div>
-  </div>
-  <script>
+</div>
+
+<!-- ================= SCRIPT JAVASCRIPT ================= -->
+<script>
 document.addEventListener("DOMContentLoaded", () => {
     const btnShowLogin = document.getElementById("btn-show-login");
     const formLoginWrapper = document.getElementById("form-login-wrapper");
 
     if (btnShowLogin && formLoginWrapper) {
         btnShowLogin.addEventListener("click", () => {
-            // Sembunyikan tombol 'login' dan munculkan form input login
             btnShowLogin.style.display = "none";
             formLoginWrapper.style.display = "block";
         });
     }
 });
 </script>
-  <script>
-  document.addEventListener("DOMContentLoaded", async () => {
-    // Pastikan Supabase sudah siap
-    if (!window.supabaseClient) return;
+<script>
+document.addEventListener("DOMContentLoaded", async () => {
+  if (!window.supabaseClient) return;
 
-    // Ambil sesi user yang sedang login
-    const { data: { session } } = await window.supabaseClient.auth.getSession();
+  // Tangkap parameter 'id' dari URL (contoh: profil-pengguna.html?id=uuid-user-disini)
+  const urlParams = new URLSearchParams(window.location.search);
+  const targetUserId = urlParams.get('id');
 
-    // Referensi elemen tombol
+  const { data: { session } } = await window.supabaseClient.auth.getSession();
+  const currentLoginUser = session ? session.user : null;
+
+  let userData = null;
+  let isOwner = false;
+
+  if (targetUserId) {
+    // --- SKENARIO A: Membuka profil berdasarkan ID user di URL ---
+    const { data, error } = await window.supabaseClient
+      .from('profiles') // Sesuaikan dengan nama tabel profil Anda
+      .select('*')
+      .eq('id', targetUserId) // Mencocokkan kolom id di database dengan parameter URL
+      .single();
+
+    if (data) {
+      userData = data;
+      // Cek apakah ID yang dibuka sama dengan user yang sedang login
+      if (currentLoginUser && currentLoginUser.id === targetUserId) {
+        isOwner = true;
+      }
+    }
+  } else if (currentLoginUser) {
+    // --- SKENARIO B: Membuka profil sendiri (tanpa parameter di URL) ---
+    const meta = currentLoginUser.user_metadata || {};
+    userData = {
+      nama_lengkap: meta.nama_lengkap || meta.username || currentLoginUser.email.split('@')[0],
+      username: meta.username || currentLoginUser.email.split('@')[0],
+      avatar_url: meta.avatar_url || "https://images.unsplash.com/photo-1534528741775-53994a69daeb?w=400&auto=format&fit=crop&q=80",
+      bio: meta.bio || "Pengembang web yang tertarik dengan teknologi...",
+      status: meta.status || "Terbuka untuk Kolaborasi Proyek Baru"
+    };
+    isOwner = true;
+  }
+
+  // Render data ke elemen HTML profil (sama seperti sebelumnya)
+  if (userData) {
+    const nama = userData.nama_lengkap || userData.username;
+    const usernameTag = "@" + (userData.username || "pengguna");
+    const avatarUrl = userData.avatar_url || "https://images.unsplash.com/photo-1534528741775-53994a69daeb?w=400&auto=format&fit=crop&q=80";
+    
+    document.getElementById("profile-nama").textContent = nama;
+    document.getElementById("profile-username").textContent = usernameTag;
+    document.getElementById("profile-avatar").src = avatarUrl;
+    document.getElementById("profile-bio").textContent = userData.bio || "-";
+    
+    const elStatus = document.getElementById("profile-status");
+    if (elStatus) elStatus.textContent = "Status: " + (userData.status || "-");
+
+    // Atur visibilitas tombol
     const btnLain = document.getElementById("action-buttons-lain");
     const btnOwner = document.getElementById("action-buttons-owner");
     const btnEdit = document.getElementById("btn-edit-profil");
 
-    if (session) {
-      // --- JIKA USER SUDAH LOGIN (PROFIL SENDIRI) ---
-      const user = session.user;
-      const meta = user.user_metadata || {};
-
-      const nama = meta.nama_lengkap || meta.username || user.email.split('@')[0];
-      const usernameTag = "@" + (meta.username || user.email.split('@')[0]);
-      const avatarUrl = meta.avatar_url || "https://images.unsplash.com/photo-1534528741775-53994a69daeb?w=400&auto=format&fit=crop&q=80";
-      const bioText = meta.bio || "Pengembang web yang tertarik dengan teknologi, desain antarmuka, serta eksplorasi konsep-konsep sains dan pemrograman.";
-      const statusText = meta.status || "Terbuka untuk Kolaborasi Proyek Baru";
-
-      // Perbarui teks dan gambar profil
-      document.getElementById("profile-nama").textContent = nama;
-      document.getElementById("profile-username").textContent = usernameTag;
-      document.getElementById("profile-avatar").src = avatarUrl;
-      document.getElementById("profile-bio").textContent = bioText;
-      
-      const elStatus = document.getElementById("profile-status");
-      if (elStatus) elStatus.textContent = "Status: " + statusText;
-
-      // Atur visibilitas tombol khusus pemilik akun
-      if (btnLain) btnLain.style.display = "none";     // Sembunyikan "Ikuti & Kirim Pesan"
-      if (btnOwner) btnOwner.style.display = "flex";   // Tampilkan statistik pengikut
-      if (btnEdit) btnEdit.style.display = "inline-block"; // Tampilkan tombol edit profil
-
-      // Sinkronisasi foto modal zoom & aktivitas
-      const modalZoomImg = document.querySelector(".modal-zoom-img");
-      if (modalZoomImg) modalZoomImg.src = avatarUrl;
-
-      document.querySelectorAll(".post-header .user-info h4").forEach(el => {
-        el.textContent = nama;
-      });
-      document.querySelectorAll(".post-card .post-header img.avatar").forEach(el => {
-        el.src = avatarUrl;
-      });
-
+    if (isOwner) {
+      if (btnLain) btnLain.style.display = "none";
+      if (btnOwner) btnOwner.style.display = "flex";
+      if (btnEdit) btnEdit.style.display = "inline-block";
     } else {
-      // --- JIKA BELUM LOGIN / MELIHAT PROFIL ORANG LAIN ---
-      if (btnLain) btnLain.style.display = "flex";     // Tampilkan "Ikuti & Kirim Pesan"
-      if (btnOwner) btnOwner.style.display = "none";   // Sembunyikan statistik pengikut
-      if (btnEdit) btnEdit.style.display = "none";     // Sembunyikan tombol edit profil
+      if (btnLain) btnLain.style.display = "flex";
+      if (btnOwner) btnOwner.style.display = "none";
+      if (btnEdit) btnEdit.style.display = "none";
     }
-  });
+  }
+});
 </script>
 
 
