@@ -32,17 +32,15 @@
 <body>
 
   <!-- ================= NAVIGASI BAR ================= -->
-<my-navbar></my-navbar>
+  <my-navbar></my-navbar>
+  
   <!-- ================= KONTEN UTAMA HALAMAN PROFIL ================= -->
-  <!-- Menggunakan .slide-page agar pas dalam struktur horizontal slider jika diperlukan -->
   <main class="slide-page">
     
     <!-- Wadah utama yang otomatis berubah menjadi 3 kolom di laptop/desktop -->
     <div class="main-container">
 
       <!-- KARTU 1: Informasi Utama & Foto Profil -->
-      <div class="article-card">
-              <!-- KARTU 1: Informasi Utama & Foto Profil -->
       <div class="article-card">
         <div class="post-container" style="text-align: center;">
           <!-- Foto Profil dengan efek klik/zoom -->
@@ -60,19 +58,19 @@
           <!-- KELOMPOK TOMBOL AKSI (BERUBAH OTOMATIS) -->
           <div class="profile-card" style="justify-content: center; margin-top: 10px; gap: 8px; flex-wrap: wrap; border: none; box-shadow: none; background: transparent;">
             
-            <!-- 1. Tombol untuk Pengunjung Lain (Default muncul sebelum login / lihat profil orang lain) -->
+            <!-- 1. Tombol untuk Pengunjung Lain -->
             <div id="action-buttons-lain" style="display: flex; gap: 8px;">
               <button class="action-btn active" style="background: #007bff; color: white; border-radius: 6px;">Ikuti</button>
               <button class="action-btn" style="background: #f2f2f2; border-radius: 6px;">Kirim Pesan</button>
             </div>
 
-            <!-- 2. Tombol Statistik untuk Pemilik Akun Sendiri (Awalnya disembunyikan, muncul jika akun terkait login) -->
+            <!-- 2. Tombol Statistik untuk Pemilik Akun Sendiri -->
             <div id="action-buttons-owner" style="display: none; gap: 8px;">
               <button class="action-btn" style="background: #f0f2f5; color: #333; border-radius: 6px; cursor: pointer;">Pengikut</button>
               <button class="action-btn" style="background: #f0f2f5; color: #333; border-radius: 6px; cursor: pointer;">Mengikuti</button>
             </div>
 
-            <!-- 3. Tombol Perbarui Biodata (Awalnya disembunyikan, muncul jika akun terkait login) -->
+            <!-- 3. Tombol Perbarui Biodata -->
             <button id="btn-edit-profil" class="action-btn active" style="background: #007bff; color: white; border-radius: 6px; display: none;" onclick="location.href='../pages/pengaturan-profil.html'">Perbarui biodata</button>
 
           </div>
@@ -87,30 +85,19 @@
         </div>
       </div>
 
-
-      <!-- KARTU 2: Aktivitas / Postingan Terakhir -->
+      <!-- KARTU 2: Aktivitas / Daftar Postingan (Mendukung Scroll 10+ Postingan) -->
       <div class="article-card">
         <div class="post-container">
           <h3 style="font-size: 16px; margin-bottom: 12px; color: #333;">Aktivitas Terbaru</h3>
-          <div class="post-card" style="margin-bottom: 0; box-shadow: none; border: 1px solid #e4e6eb;">
-            <div class="post-header">
-              <img src="https://images.unsplash.com/photo-1534528741775-53994a69daeb?w=400&auto=format&fit=crop&q=80" alt="Avatar" class="avatar">
-              <div class="user-info">
-                <h4>Miftahul Mujib</h4>
-                <span>Baru saja</span>
-              </div>
-            </div>
-            <div class="post-content">
-              Sedang mempelajari tata letak responsif menggunakan CSS Grid dan Flexbox agar tampilan website semakin optimal di berbagai perangkat! 🚀
-            </div>
-            <div class="post-stats">
-              <span>👍 24 Suka</span>
-              <span>💬 5 Komentar</span>
-            </div>
-            <div class="post-actions">
-              <button class="action-btn active">Suka</button>
-              <button class="action-btn">Komentar</button>
-            </div>
+          
+          <!-- Wadah daftar postingan -->
+          <div id="user-latest-posts-container" style="display: flex; flex-direction: column; gap: 15px;">
+            <p style="color: #65676b; font-size: 14px; text-align: center;">Memuat aktivitas...</p>
+          </div>
+
+          <!-- Indikator loading saat scroll ke bawah -->
+          <div id="load-more-indicator" style="text-align: center; padding: 10px; display: none; color: #65676b; font-size: 13px;">
+            Memuat aktivitas lainnya...
           </div>
         </div>
       </div>
@@ -149,63 +136,193 @@
     </div>
   </div>
   
+  <!-- ================= SCRIPT UTAMA ================= -->
   <script>
-  document.addEventListener("DOMContentLoaded", async () => {
-    // Pastikan Supabase sudah siap
-    if (!window.supabaseClient) return;
+    document.addEventListener("DOMContentLoaded", async () => {
+      if (!window.supabaseClient) return;
 
-    // Ambil sesi user yang sedang login
-    const { data: { session } } = await window.supabaseClient.auth.getSession();
+      const urlParams = new URLSearchParams(window.location.search);
+      const targetUserId = urlParams.get('id');
 
-    // Referensi elemen tombol
-    const btnLain = document.getElementById("action-buttons-lain");
-    const btnOwner = document.getElementById("action-buttons-owner");
-    const btnEdit = document.getElementById("btn-edit-profil");
+      const { data: { session } } = await window.supabaseClient.auth.getSession();
+      const currentLoginUser = session ? session.user : null;
 
-    if (session) {
-      // --- JIKA USER SUDAH LOGIN (PROFIL SENDIRI) ---
-      const user = session.user;
-      const meta = user.user_metadata || {};
+      const btnLain = document.getElementById("action-buttons-lain");
+      const btnOwner = document.getElementById("action-buttons-owner");
+      const btnEdit = document.getElementById("btn-edit-profil");
 
-      const nama = meta.nama_lengkap || meta.username || user.email.split('@')[0];
-      const usernameTag = "@" + (meta.username || user.email.split('@')[0]);
-      const avatarUrl = meta.avatar_url || "https://images.unsplash.com/photo-1534528741775-53994a69daeb?w=400&auto=format&fit=crop&q=80";
-      const bioText = meta.bio || "Pengembang web yang tertarik dengan teknologi, desain antarmuka, serta eksplorasi konsep-konsep sains dan pemrograman.";
-      const statusText = meta.status || "Terbuka untuk Kolaborasi Proyek Baru";
+      let userData = null;
+      let isOwner = false;
 
-      // Perbarui teks dan gambar profil
-      document.getElementById("profile-nama").textContent = nama;
-      document.getElementById("profile-username").textContent = usernameTag;
-      document.getElementById("profile-avatar").src = avatarUrl;
-      document.getElementById("profile-bio").textContent = bioText;
-      
-      const elStatus = document.getElementById("profile-status");
-      if (elStatus) elStatus.textContent = "Status: " + statusText;
+      if (targetUserId) {
+        const { data, error } = await window.supabaseClient
+          .from('profiles')
+          .select('*')
+          .eq('id', targetUserId)
+          .single();
 
-      // Atur visibilitas tombol khusus pemilik akun
-      if (btnLain) btnLain.style.display = "none";     // Sembunyikan "Ikuti & Kirim Pesan"
-      if (btnOwner) btnOwner.style.display = "flex";   // Tampilkan statistik pengikut
-      if (btnEdit) btnEdit.style.display = "inline-block"; // Tampilkan tombol edit profil
+        if (data) {
+          userData = data;
+          if (currentLoginUser && currentLoginUser.id === targetUserId) {
+            isOwner = true;
+          }
+        }
+      } else if (currentLoginUser) {
+        const meta = currentLoginUser.user_metadata || {};
+        userData = {
+          nama_lengkap: meta.nama_lengkap || meta.username || currentLoginUser.email.split('@')[0],
+          username: meta.username || currentLoginUser.email.split('@')[0],
+          avatar_url: meta.avatar_url || "https://images.unsplash.com/photo-1534528741775-53994a69daeb?w=400&auto=format&fit=crop&q=80",
+          bio: meta.bio || "Pengembang web yang tertarik dengan teknologi...",
+          status: meta.status || "Terbuka untuk Kolaborasi Proyek Baru"
+        };
+        isOwner = true;
+      }
 
-      // Sinkronisasi foto modal zoom & aktivitas
-      const modalZoomImg = document.querySelector(".modal-zoom-img");
-      if (modalZoomImg) modalZoomImg.src = avatarUrl;
+      if (userData) {
+        const nama = userData.nama_lengkap || userData.username || "Pengguna";
+        const usernameTag = "@" + (userData.username || "pengguna");
+        const avatarUrl = userData.avatar_url || "https://images.unsplash.com/photo-1534528741775-53994a69daeb?w=400&auto=format&fit=crop&q=80";
+        const bioText = userData.bio || "-";
+        const statusText = userData.status || "-";
 
-      document.querySelectorAll(".post-header .user-info h4").forEach(el => {
-        el.textContent = nama;
+        document.getElementById("profile-nama").textContent = nama;
+        document.getElementById("profile-username").textContent = usernameTag;
+        document.getElementById("profile-avatar").src = avatarUrl;
+        document.getElementById("profile-bio").textContent = bioText;
+        
+        const elStatus = document.getElementById("profile-status");
+        if (elStatus) elStatus.textContent = "Status: " + statusText;
+
+        const modalZoomImg = document.querySelector(".modal-zoom-img");
+        if (modalZoomImg) modalZoomImg.src = avatarUrl;
+
+        document.querySelectorAll(".post-header .user-info h4").forEach(el => {
+          el.textContent = nama;
+        });
+        document.querySelectorAll(".post-card .post-header img.avatar").forEach(el => {
+          el.src = avatarUrl;
+        });
+      }
+
+      if (isOwner) {
+        if (btnLain) btnLain.style.display = "none";
+        if (btnOwner) btnOwner.style.display = "flex";
+        if (btnEdit) btnEdit.style.display = "inline-block";
+      } else {
+        if (btnLain) btnLain.style.display = "flex";
+        if (btnOwner) btnOwner.style.display = "none";
+        if (btnEdit) btnEdit.style.display = "none";
+      }
+
+      // =========================================================================
+      // SISTEM PAGINATION & INFINITE SCROLL UNTUK 10+ AKTIVITAS TERBARU
+      // =========================================================================
+      const postsContainer = document.getElementById("user-latest-posts-container");
+      const loadIndicator = document.getElementById("load-more-indicator");
+      const activeUserId = targetUserId || (currentLoginUser ? currentLoginUser.id : null);
+
+      let currentPage = 0;
+      const pageSize = 10; // Batasi 10 aktivitas per pemuatan
+      let isLoading = false;
+      let hasMore = true;
+
+      async function loadUserPosts() {
+        if (isLoading || !hasMore || !activeUserId) return;
+        isLoading = true;
+        if (currentPage > 0 && loadIndicator) loadIndicator.style.display = "block";
+
+        try {
+          const from = currentPage * pageSize;
+          const to = from + pageSize - 1;
+
+          const { data: userPosts, error: postError } = await window.supabaseClient
+            .from('posts')
+            .select('*')
+            .eq('user_id', activeUserId)
+            .order('created_at', { ascending: false })
+            .range(from, to);
+
+          if (postError) throw postError;
+
+          if (currentPage === 0) {
+            postsContainer.innerHTML = ""; // Bersihkan teks "Memuat..."
+          }
+
+          if (userPosts && userPosts.length > 0) {
+            userPosts.forEach(post => {
+              const waktuPosting = new Date(post.created_at).toLocaleDateString('id-ID', {
+                day: 'numeric', month: 'short', year: 'numeric'
+              });
+
+              const postHTML = `
+                <div class="post-card" style="margin-bottom: 0; box-shadow: none; border: 1px solid #e4e6eb;">
+                  <div class="post-header">
+                    <img src="${userData.avatar_url || 'https://images.unsplash.com/photo-1534528741775-53994a69daeb?w=400&auto=format&fit=crop&q=80'}" alt="Avatar" class="avatar">
+                    <div class="user-info">
+                      <h4>${userData.nama_lengkap || userData.username}</h4>
+                      <span>${waktuPosting}</span>
+                    </div>
+                  </div>
+                  <div class="post-content">
+                    ${post.content || post.caption || 'Tidak ada teks.'}
+                  </div>
+                  <div class="post-stats">
+                    <span>👍 ${post.likes_count || 0} Suka</span>
+                    <span>💬 ${post.comments_count || 0} Komentar</span>
+                  </div>
+                  <div class="post-actions">
+                    <button class="action-btn active">Suka</button>
+                    <button class="action-btn">Komentar</button>
+                  </div>
+                </div>
+              `;
+              postsContainer.insertAdjacentHTML('beforeend', postHTML);
+            });
+
+            currentPage++;
+            
+            // Jika jumlah data yang diambil kurang dari pageSize, berarti sudah habis
+            if (userPosts.length < pageSize) {
+              hasMore = false;
+            }
+          } else {
+            hasMore = false;
+            if (currentPage === 0) {
+              postsContainer.innerHTML = `
+                <p style="color: #65676b; font-size: 14px; text-align: center; padding: 15px 0;">
+                  Belum ada aktivitas atau postingan terbaru dari pengguna ini.
+                </p>
+              `;
+            }
+          }
+        } catch (err) {
+          console.error("Gagal memuat aktivitas postingan:", err);
+          if (currentPage === 0) {
+            postsContainer.innerHTML = `
+              <p style="color: #dc3545; font-size: 14px; text-align: center;">
+                Gagal memuat aktivitas.
+              </p>
+            `;
+          }
+        } finally {
+          isLoading = false;
+          if (loadIndicator) loadIndicator.style.display = "none";
+        }
+      }
+
+      // Panggil pertama kali untuk memuat 10 data awal
+      loadUserPosts();
+
+      // Event listener untuk mendeteksi saat pengguna melakukan scroll ke bawah halaman
+      window.addEventListener("scroll", () => {
+        // Jika posisi scroll sudah mendekati bagian bawah halaman (jarak 200px dari bawah)
+        if ((window.innerHeight + window.scrollY) >= document.body.offsetHeight - 200) {
+          loadUserPosts();
+        }
       });
-      document.querySelectorAll(".post-card .post-header img.avatar").forEach(el => {
-        el.src = avatarUrl;
-      });
-
-    } else {
-      // --- JIKA BELUM LOGIN / MELIHAT PROFIL ORANG LAIN ---
-      if (btnLain) btnLain.style.display = "flex";     // Tampilkan "Ikuti & Kirim Pesan"
-      if (btnOwner) btnOwner.style.display = "none";   // Sembunyikan statistik pengikut
-      if (btnEdit) btnEdit.style.display = "none";     // Sembunyikan tombol edit profil
-    }
-  });
-</script>
+    });
+  </script>
 
 </body>
 </html>
