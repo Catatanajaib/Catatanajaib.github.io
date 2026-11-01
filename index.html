@@ -244,14 +244,12 @@
         
     
 <!-- SECTION PENDAFTARAN & PROFIL -->
-
-   
-    
-    <!-- ================= SECTION PENDAFTARAN & PROFIL ================= -->
+<!-- ================= SECTION PENDAFTARAN & PROFIL ================= -->
 <section class="slide-page" id="slide-pendaftaran">
     <main class="container">
         <play-musik-in></play-musik-in>
-    <!-- ================= BLOK 1: TAMPILAN JIKA BELUM LOGIN ================= -->
+        
+        <!-- ================= BLOK 1: TAMPILAN JIKA BELUM LOGIN ================= -->
         <div id="box-auth">
             
             <!-- KARTU 1: TOMBOL DAFTAR SEKARANG -->
@@ -268,11 +266,9 @@
                     Silakan mendaftar atau masuk ke akun kamu untuk mengakses fitur lengkap.
                 </p>
 
-            <!-- Tombol Login Awal -->
-            <div id="form-login-wrapper" style= margin-top: 15px; border-top: 1px solid #eee; padding-top: 15px;">
-                
-                <div id="login-notif" style="display: none; padding: 10px; margin-bottom: 15px; border-radius: 4px; font-size: 0.9rem; text-align: center;">
-                </div>
+                <!-- Form Login Langsung -->
+                <div id="form-login-wrapper" style="margin-top: 15px; border-top: 1px solid #eee; padding-top: 15px;">
+                    <div id="login-notif" style="display: none; padding: 10px; margin-bottom: 15px; border-radius: 4px; font-size: 0.9rem; text-align: center;"></div>
 
                     <form id="form-login-direct">
                         <div style="margin-bottom: 12px; text-align: left;">
@@ -288,289 +284,227 @@
                         <button type="submit" id="btn-submit-login" style="width: 100%; padding: 10px; background-color: #007bff; color: white; border: none; border-radius: 4px; font-weight: bold; cursor: pointer;">
                             Masuk
                         </button>
-                        </form>
+                    </form>
                 </div>
             </div>
-            <!-- Masukkan link ini di dekat form login -->
-                <div style="margin-top: 10px; text-align: right;">
-                    <a href="#" id="btn-show-forgot" style="color: #007bff; text-decoration: none; font-size: 14px;">Lupa Kata Sandi?</a>
-</div>
 
-<!-- Modal / Form Sederhana Lupa Password (Hidden secara default) -->
-<div id="box-forgot-password" style="display: none; margin-top: 15px; padding: 15px; border: 1px solid #ccc; border-radius: 8px; background-color: #f9f9f9;">
-    <h3>Reset Kata Sandi</h3>
-    <p style="font-size: 13px; color: #666;">Masukkan email kamu untuk menerima tautan pembaruan kata sandi.</p>
-    
-    <div style="margin-bottom: 10px;">
-        <label for="forgot-email">Alamat Email:</label>
-        <input type="email" id="forgot-email" placeholder="nama@email.com" style="width: 100%; padding: 8px; margin-top: 5px; box-sizing: border-box;">
+            <div style="margin-top: 10px; text-align: right;">
+                <a href="#" id="btn-show-forgot" style="color: #007bff; text-decoration: none; font-size: 14px;">Lupa Kata Sandi?</a>
+            </div>
+
+            <!-- Modal / Form Lupa Password -->
+            <div id="box-forgot-password" style="display: none; margin-top: 15px; padding: 15px; border: 1px solid #ccc; border-radius: 8px; background-color: #f9f9f9;">
+                <h3>Reset Kata Sandi</h3>
+                <p style="font-size: 13px; color: #666;">Masukkan email kamu untuk menerima tautan pembaruan kata sandi.</p>
+                
+                <div style="margin-bottom: 10px;">
+                    <label for="forgot-email">Alamat Email:</label>
+                    <input type="email" id="forgot-email" placeholder="nama@email.com" style="width: 100%; padding: 8px; margin-top: 5px; box-sizing: border-box;">
+                </div>
+                
+                <button type="button" id="btn-send-reset" style="background-color: #28a745; color: white; border: none; padding: 8px 15px; border-radius: 4px; cursor: pointer;">Kirim Tautan Reset</button>
+                <button type="button" id="btn-cancel-forgot" style="background-color: #dc3545; color: white; border: none; padding: 8px 15px; border-radius: 4px; cursor: pointer; margin-left: 5px;">Batal</button>
+            </div>
+        </div>
+
+        <!-- ================= BLOK 2: DETAIL PROFIL PENGGUNA (3 Kolom) ================= -->
+        <div class="main-container">
+
+            <!-- KARTU 1: Informasi Utama & Foto Profil -->
+            <div class="article-card">
+                <div class="post-container" style="text-align: center;">
+                    <img src="https://images.unsplash.com/photo-1534528741775-53994a69daeb?w=400&auto=format&fit=crop&q=80" 
+                         id="profile-avatar"
+                         alt="Foto Profil" 
+                         class="avatar avatar-clickable" 
+                         style="width: 100px; height: 100px; margin: 0 auto 15px; display: block;" 
+                         onclick="document.getElementById('zoomModal').style.display='flex'">
+                         
+                    <h2 id="profile-nama" style="text-align: center; color: #050505; margin-bottom: 5px;">Miftahul Mujib</h2>
+                    <span id="profile-username" style="color: #65676b; font-size: 14px;">@miftahulmujib</span>
+                    
+                    <div class="profile-card" style="justify-content: center; margin-top: 10px; gap: 8px; flex-wrap: wrap; border: none; box-shadow: none; background: transparent;">
+                        <div id="action-buttons-lain" style="display: flex; gap: 8px;">
+                            <button class="action-btn active" style="background: #007bff; color: white; border-radius: 6px;">Ikuti</button>
+                            <button class="action-btn" style="background: #f2f2f2; border-radius: 6px;">Kirim Pesan</button>
+                        </div>
+                        <div id="action-buttons-owner" style="display: none; gap: 8px;">
+                            <button class="action-btn" style="background: #f0f2f5; color: #333; border-radius: 6px; cursor: pointer;">Pengikut</button>
+                            <button class="action-btn" style="background: #f0f2f5; color: #333; border-radius: 6px; cursor: pointer;">Mengikuti</button>
+                        </div>
+                        <button id="btn-edit-profil" class="action-btn active" style="background: #007bff; color: white; border-radius: 6px; display: none;" onclick="location.href='../pages/pengaturan-profil.html'">Perbarui biodata</button>
+                    </div>
+                </div>
+
+                <div class="post-container" style="margin-bottom: 0;">
+                    <h3 style="font-size: 16px; margin-bottom: 10px; color: #333;">Tentang Saya</h3>
+                    <p id="profile-bio" class="post-content" style="padding: 0;">
+                        Pengembang web yang tertarik dengan teknologi, desain antarmuka, serta eksplorasi konsep-konsep sains dan pemrograman.
+                    </p>
+                </div>
+            </div>
+
+
+            <!-- KARTU 3: Keahlian, Status, & Tombol Logout -->
+            <div class="article-card">
+                <div>
+                    <div class="post-container">
+                        <h3 style="font-size: 16px; margin-bottom: 12px; color: #333;">Keahlian & Minat</h3>
+                        <div style="display: flex; flex-direction: column; gap: 8px; text-align: left;">
+                            <div style="background: #f0f2f5; padding: 10px; border-radius: 6px; font-size: 14px; font-weight: 600; color: #444;">
+                                💻 Web Development (HTML, CSS, JS)
+                            </div>
+                            <div style="background: #f0f2f5; padding: 10px; border-radius: 6px; font-size: 14px; font-weight: 600; color: #444;">
+                                🎨 Desain Grafis (Adobe Photoshop)
+                            </div>
+                            <div style="background: #f0f2f5; padding: 10px; border-radius: 6px; font-size: 14px; font-weight: 600; color: #444;">
+                                ⚡ Eksplorasi Sains & Fisika
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="call-to-action" style="margin-top: 0;">
+                        <p id="profile-status" style="font-size: 13px; color: #166534; font-weight: 600; margin: 0;">Status: Terbuka untuk Kolaborasi Proyek Baru</p>
+                    </div>
+                </div>
+
+                <div style="margin-top: 20px;">
+                    <button type="button" id="btn-logout" style="width: 100%; padding: 10px; background-color: #dc3545; color: white; border: none; border-radius: 6px; cursor: pointer; font-weight: bold;">Keluar (Logout)</button>
+                </div>
+            </div>
+
+        </div>
+    </main>
+
+    <!-- MODAL ZOOM FOTO PROFIL -->
+    <div id="zoomModal" class="modal" onclick="this.style.display='none'">
+        <div class="modal-content" style="text-align: center;" onclick="event.stopPropagation()">
+          <span class="close-btn" onclick="document.getElementById('zoomModal').style.display='none'">&times;</span>
+          <h3 style="margin-bottom: 15px; color: #333;">Foto Profil</h3>
+          <img src="https://images.unsplash.com/photo-1534528741775-53994a69daeb?w=400&auto=format&fit=crop&q=80" alt="Zoom Profil" class="modal-zoom-img">
+        </div>
     </div>
-    
-    <button type="button" id="btn-send-reset" style="background-color: #28a745; color: white; border: none; padding: 8px 15px; border-radius: 4px; cursor: pointer;">Kirim Tautan Reset</button>
-    <button type="button" id="btn-cancel-forgot" style="background-color: #dc3545; color: white; border: none; padding: 8px 15px; border-radius: 4px; cursor: pointer; margin-left: 5px;">Batal</button>
-</div>
 
-        </div>
-<!-- ================= BLOK 2: DETAIL PROFIL PENGGUNA ================= -->
-<main class="slide-page">
-    
-    <!-- Wadah utama yang otomatis berubah menjadi 3 kolom di laptop/desktop -->
-    <div class="main-container">
+    <!-- SCRIPT JAVASCRIPT UTAMA PROFIL -->
+    <script>
+    document.addEventListener("DOMContentLoaded", async () => {
+      if (!window.supabaseClient) return;
 
-      <!-- KARTU 1: Informasi Utama & Foto Profil -->
-      <div class="article-card">
-        <div class="post-container" style="text-align: center;">
-          <!-- Foto Profil dengan efek klik/zoom -->
-          <img src="https://images.unsplash.com/photo-1534528741775-53994a69daeb?w=400&auto=format&fit=crop&q=80" 
-               id="profile-avatar"
-               alt="Foto Profil" 
-               class="avatar avatar-clickable" 
-               style="width: 100px; height: 100px; margin: 0 auto 15px; display: block;" 
-               onclick="document.getElementById('zoomModal').style.display='flex'">
-               
-          <h2 id="profile-nama" style="text-align: center; color: #050505; margin-bottom: 5px;">Miftahul Mujib</h2>
-          
-          <span id="profile-username" style="color: #65676b; font-size: 14px;">@miftahulmujib</span>
-          
-          <!-- KELOMPOK TOMBOL AKSI (BERUBAH OTOMATIS) -->
-          <div class="profile-card" style="justify-content: center; margin-top: 10px; gap: 8px; flex-wrap: wrap; border: none; box-shadow: none; background: transparent;">
-            
-            <!-- 1. Tombol untuk Pengunjung Lain -->
-            <div id="action-buttons-lain" style="display: flex; gap: 8px;">
-              <button class="action-btn active" style="background: #007bff; color: white; border-radius: 6px;">Ikuti</button>
-              <button class="action-btn" style="background: #f2f2f2; border-radius: 6px;">Kirim Pesan</button>
-            </div>
+      const urlParams = new URLSearchParams(window.location.search);
+      const targetUserId = urlParams.get('id');
 
-            <!-- 2. Tombol Statistik untuk Pemilik Akun Sendiri -->
-            <div id="action-buttons-owner" style="display: none; gap: 8px;">
-              <button class="action-btn" style="background: #f0f2f5; color: #333; border-radius: 6px; cursor: pointer;">Pengikut</button>
-              <button class="action-btn" style="background: #f0f2f5; color: #333; border-radius: 6px; cursor: pointer;">Mengikuti</button>
-            </div>
+      const { data: { session } } = await window.supabaseClient.auth.getSession();
+      const currentLoginUser = session ? session.user : null;
 
-            <!-- 3. Tombol Perbarui Biodata -->
-            <button id="btn-edit-profil" class="action-btn active" style="background: #007bff; color: white; border-radius: 6px; display: none;" onclick="location.href='../pages/pengaturan-profil.html'">Perbarui biodata</button>
+      let userData = null;
+      let isOwner = false;
 
-          </div>
-        </div>
+      if (targetUserId) {
+        const { data, error } = await window.supabaseClient
+          .from('profiles')
+          .select('*')
+          .eq('id', targetUserId)
+          .single();
 
-        <div class="post-container" style="margin-bottom: 0;">
-          <h3 style="font-size: 16px; margin-bottom: 10px; color: #333;">Tentang Saya</h3>
-          <p id="profile-bio" class="post-content" style="padding: 0;">
-            Pengembang web yang tertarik dengan teknologi, desain antarmuka, serta eksplorasi konsep-konsep sains dan pemrograman.
-          </p>
-        </div>
-      </div>
-
-      <!-- KARTU 2: Aktivitas / Postingan Terakhir -->
-      <div class="article-card">
-        <div class="post-container">
-          <h3 style="font-size: 16px; margin-bottom: 12px; color: #333;">Aktivitas Terbaru</h3>
-          <div class="post-card" style="margin-bottom: 0; box-shadow: none; border: 1px solid #e4e6eb;">
-            <div class="post-header">
-              <img src="https://images.unsplash.com/photo-1534528741775-53994a69daeb?w=400&auto=format&fit=crop&q=80" alt="Avatar" class="avatar">
-              <div class="user-info">
-                <h4>Miftahul Mujib</h4>
-                <span>Baru saja</span>
-              </div>
-            </div>
-            <div class="post-content">
-              Sedang mempelajari tata letak responsif menggunakan CSS Grid dan Flexbox agar tampilan website semakin optimal di berbagai perangkat! 🚀
-            </div>
-            <div class="post-stats">
-              <span>👍 24 Suka</span>
-              <span>💬 5 Komentar</span>
-            </div>
-            <div class="post-actions">
-              <button class="action-btn active">Suka</button>
-              <button class="action-btn">Komentar</button>
-            </div>
-          </div>
-        </div>
-      </div>
-
-      <!-- KARTU 3: Keahlian, Status, & Tombol Logout -->
-      <div class="article-card">
-        <div>
-          <div class="post-container">
-            <h3 style="font-size: 16px; margin-bottom: 12px; color: #333;">Keahlian & Minat</h3>
-            <div style="display: flex; flex-direction: column; gap: 8px; text-align: left;">
-              <div style="background: #f0f2f5; padding: 10px; border-radius: 6px; font-size: 14px; font-weight: 600; color: #444;">
-                💻 Web Development (HTML, CSS, JS)
-              </div>
-              <div style="background: #f0f2f5; padding: 10px; border-radius: 6px; font-size: 14px; font-weight: 600; color: #444;">
-                🎨 Desain Grafis (Adobe Photoshop)
-              </div>
-              <div style="background: #f0f2f5; padding: 10px; border-radius: 6px; font-size: 14px; font-weight: 600; color: #444;">
-                ⚡ Eksplorasi Sains & Fisika
-              </div>
-            </div>
-          </div>
-
-          <div class="call-to-action" style="margin-top: 0;">
-            <p id="profile-status" style="font-size: 13px; color: #166534; font-weight: 600; margin: 0;">Status: Terbuka untuk Kolaborasi Proyek Baru</p>
-          </div>
-        </div>
-
-        <!-- Tombol Logout ditempatkan di dalam kartu ke-3 agar sejajar rapi -->
-        <div style="margin-top: 20px;">
-          <button type="button" id="btn-logout" style="width: 100%; padding: 10px; background-color: #dc3545; color: white; border: none; border-radius: 6px; cursor: pointer; font-weight: bold;">Keluar (Logout)</button>
-        </div>
-      </div>
-
-    </div>
-</main>
-
-<!-- ================= MODAL ZOOM FOTO PROFIL ================= -->
-<div id="zoomModal" class="modal" onclick="this.style.display='none'">
-    <div class="modal-content" style="text-align: center;" onclick="event.stopPropagation()">
-      <span class="close-btn" onclick="document.getElementById('zoomModal').style.display='none'">&times;</span>
-      <h3 style="margin-bottom: 15px; color: #333;">Foto Profil</h3>
-      <img src="https://images.unsplash.com/photo-1534528741775-53994a69daeb?w=400&auto=format&fit=crop&q=80" alt="Zoom Profil" class="modal-zoom-img">
-    </div>
-</div>
-
-<!-- ================= SCRIPT JAVASCRIPT ================= -->
-<script>
-document.addEventListener("DOMContentLoaded", () => {
-    const btnShowLogin = document.getElementById("btn-show-login");
-    const formLoginWrapper = document.getElementById("form-login-wrapper");
-
-    if (btnShowLogin && formLoginWrapper) {
-        btnShowLogin.addEventListener("click", () => {
-            btnShowLogin.style.display = "none";
-            formLoginWrapper.style.display = "block";
-        });
-    }
-});
-</script>
-<script>
-document.addEventListener("DOMContentLoaded", async () => {
-  if (!window.supabaseClient) return;
-
-  // Tangkap parameter 'id' dari URL (contoh: profil-pengguna.html?id=uuid-user-disini)
-  const urlParams = new URLSearchParams(window.location.search);
-  const targetUserId = urlParams.get('id');
-
-  const { data: { session } } = await window.supabaseClient.auth.getSession();
-  const currentLoginUser = session ? session.user : null;
-
-  let userData = null;
-  let isOwner = false;
-
-  if (targetUserId) {
-    // --- SKENARIO A: Membuka profil berdasarkan ID user di URL ---
-    const { data, error } = await window.supabaseClient
-      .from('profiles') // Sesuaikan dengan nama tabel profil Anda
-      .select('*')
-      .eq('id', targetUserId) // Mencocokkan kolom id di database dengan parameter URL
-      .single();
-
-    if (data) {
-      userData = data;
-      // Cek apakah ID yang dibuka sama dengan user yang sedang login
-      if (currentLoginUser && currentLoginUser.id === targetUserId) {
+        if (data) {
+          userData = data;
+          if (currentLoginUser && currentLoginUser.id === targetUserId) {
+            isOwner = true;
+          }
+        }
+      } else if (currentLoginUser) {
+        const meta = currentLoginUser.user_metadata || {};
+        userData = {
+          nama_lengkap: meta.nama_lengkap || meta.username || currentLoginUser.email.split('@')[0],
+          username: meta.username || currentLoginUser.email.split('@')[0],
+          avatar_url: meta.avatar_url || "https://images.unsplash.com/photo-1534528741775-53994a69daeb?w=400&auto=format&fit=crop&q=80",
+          bio: meta.bio || "Pengembang web yang tertarik dengan teknologi...",
+          status: meta.status || "Terbuka untuk Kolaborasi Proyek Baru"
+        };
         isOwner = true;
       }
-    }
-  } else if (currentLoginUser) {
-    // --- SKENARIO B: Membuka profil sendiri (tanpa parameter di URL) ---
-    const meta = currentLoginUser.user_metadata || {};
-    userData = {
-      nama_lengkap: meta.nama_lengkap || meta.username || currentLoginUser.email.split('@')[0],
-      username: meta.username || currentLoginUser.email.split('@')[0],
-      avatar_url: meta.avatar_url || "https://images.unsplash.com/photo-1534528741775-53994a69daeb?w=400&auto=format&fit=crop&q=80",
-      bio: meta.bio || "Pengembang web yang tertarik dengan teknologi...",
-      status: meta.status || "Terbuka untuk Kolaborasi Proyek Baru"
-    };
-    isOwner = true;
-  }
 
-  // Render data ke elemen HTML profil (sama seperti sebelumnya)
-  if (userData) {
-    const nama = userData.nama_lengkap || userData.username;
-    const usernameTag = "@" + (userData.username || "pengguna");
-    const avatarUrl = userData.avatar_url || "https://images.unsplash.com/photo-1534528741775-53994a69daeb?w=400&auto=format&fit=crop&q=80";
-    
-    document.getElementById("profile-nama").textContent = nama;
-    document.getElementById("profile-username").textContent = usernameTag;
-    document.getElementById("profile-avatar").src = avatarUrl;
-    document.getElementById("profile-bio").textContent = userData.bio || "-";
-    
-    const elStatus = document.getElementById("profile-status");
-    if (elStatus) elStatus.textContent = "Status: " + (userData.status || "-");
+      if (userData) {
+        const nama = userData.nama_lengkap || userData.username;
+        const usernameTag = "@" + (userData.username || "pengguna");
+        const avatarUrl = userData.avatar_url || "https://images.unsplash.com/photo-1534528741775-53994a69daeb?w=400&auto=format&fit=crop&q=80";
+        
+        document.getElementById("profile-nama").textContent = nama;
+        document.getElementById("profile-username").textContent = usernameTag;
+        document.getElementById("profile-avatar").src = avatarUrl;
+        document.getElementById("profile-bio").textContent = userData.bio || "-";
+        
+        const elStatus = document.getElementById("profile-status");
+        if (elStatus) elStatus.textContent = "Status: " + (userData.status || "-");
 
-    // Atur visibilitas tombol
-    const btnLain = document.getElementById("action-buttons-lain");
-    const btnOwner = document.getElementById("action-buttons-owner");
-    const btnEdit = document.getElementById("btn-edit-profil");
+        const modalZoomImg = document.querySelector(".modal-zoom-img");
+        if (modalZoomImg) modalZoomImg.src = avatarUrl;
 
-    if (isOwner) {
-      if (btnLain) btnLain.style.display = "none";
-      if (btnOwner) btnOwner.style.display = "flex";
-      if (btnEdit) btnEdit.style.display = "inline-block";
-    } else {
-      if (btnLain) btnLain.style.display = "flex";
-      if (btnOwner) btnOwner.style.display = "none";
-      if (btnEdit) btnEdit.style.display = "none";
-    }
-  }
-});
-</script>
+        const btnLain = document.getElementById("action-buttons-lain");
+        const btnOwner = document.getElementById("action-buttons-owner");
+        const btnEdit = document.getElementById("btn-edit-profil");
 
+        if (isOwner) {
+          if (btnLain) btnLain.style.display = "none";
+          if (btnOwner) btnOwner.style.display = "flex";
+          if (btnEdit) btnEdit.style.display = "inline-block";
+        } else {
+          if (btnLain) btnLain.style.display = "flex";
+          if (btnOwner) btnOwner.style.display = "none";
+          if (btnEdit) btnEdit.style.display = "none";
+        }
+      }
+    });
+    </script>
 
+    <!-- Footer Link / Domain -->
+    <footer style="z-10 mt-6 pt-2 text-xs md:text-sm text-yellow-200/90 font-medium tracking-wide flex items-center justify-center gap-1">
+          <span>🌐</span>
+          <span>catatanajaib.github.io</span>
+    </footer>
 
-
-    <!-- 4. Footer Link / Domain -->
-    
-<footer style="z-10 mt-6 pt-2 text-xs md:text-sm text-yellow-200/90 font-medium tracking-wide flex items-center justify-center gap-1">
-      <span>🌐</span>
-      <span>catatanajaib.github.io</span>
-</footer>
-<div class="post-container" style="text-align: center; max-width: 450px; margin: 20px auto;">
-    <!-- Bagian Profil / Avatar Inisial -->
-    <div class="profile-img" style="width: 70px; height: 70px; background-color: #00bcd4; color: #fff; border-radius: 50%; display: flex; align-items: center; justify-content: center; font-size: 28px; font-weight: bold; margin: 0 auto 16px;">
-        M
-    </div>
-    
-    <h2 style="font-size: 20px; color: #050505; margin-bottom: 6px;">MIFTAH98, OTOMOTIF 081910240675</h2>
-    <p style="font-size: 14px; color: #65676b; margin-bottom: 20px;">Dukung konten & karya kami via QRIS / E-Wallet / Bank</p>
-
-    <!-- Tempat Menampilkan Gambar QRIS dengan efek kontainer pos-card -->
-    <div style="background: #f7fafc; border: 2px dashed #cbd5e0; border-radius: 12px; padding: 16px; margin-bottom: 20px;">
-        <p style="font-size: 12px; font-weight: bold; color: #4a5568; margin-bottom: 8px;">Scan QRIS GoPay Merchant</p>
-        <img src="assets/images/sawer.jpeg" alt="QRIS MIFTAH98 OTOMOTIF" style="width: 100%; max-width: 250px; height: auto; border-radius: 8px; display: block; margin: 0 auto;">
-    </div>
-
-    <!-- Informasi Nomor Sawer / Rekening -->
-    <div style="background: #edf2f7; padding: 12px 16px; border-radius: 8px; display: flex; justify-content: space-between; align-items: center; margin-bottom: 12px; font-size: 14px;">
-        <div style="text-align: left;">
-            <span style="color: #4a5568; font-weight: 500; font-size: 12px;">Nomor / ID:</span><br>
-            <span style="color: #2d3748; font-weight: bold;" id="nomor-sawer">901509027272</span>
+    <!-- Bagian QRIS / Sawer -->
+    <div class="post-container" style="text-align: center; max-width: 450px; margin: 20px auto;">
+        <div class="profile-img" style="width: 70px; height: 70px; background-color: #00bcd4; color: #fff; border-radius: 50%; display: flex; align-items: center; justify-content: center; font-size: 28px; font-weight: bold; margin: 0 auto 16px;">
+            M
         </div>
-        <button class="action-btn" style="background-color: #007bff; color: white; border: none; padding: 6px 14px; border-radius: 6px; cursor: pointer; font-size: 12px; flex: 0 0 auto;" onclick="copyNumber()">Salin</button>
-    </div>
+        
+        <h2 style="font-size: 20px; color: #050505; margin-bottom: 6px;">MIFTAH98, OTOMOTIF 081910240675</h2>
+        <p style="font-size: 14px; color: #65676b; margin-bottom: 20px;">Dukung konten & karya kami via QRIS / E-Wallet / Bank</p>
 
-    <div style="background: #edf2f7; padding: 12px 16px; border-radius: 8px; display: flex; justify-content: space-between; align-items: center; margin-bottom: 12px; font-size: 14px;">
-        <div style="text-align: left;">
-            <span style="color: #4a5568; font-weight: 500; font-size: 12px;">NMID QRIS:</span><br>
-            <span style="color: #2d3748; font-weight: bold;">ID1025452391614</span>
+        <div style="background: #f7fafc; border: 2px dashed #cbd5e0; border-radius: 12px; padding: 16px; margin-bottom: 20px;">
+            <p style="font-size: 12px; font-weight: bold; color: #4a5568; margin-bottom: 8px;">Scan QRIS GoPay Merchant</p>
+            <img src="assets/images/sawer.jpeg" alt="QRIS MIFTAH98 OTOMOTIF" style="width: 100%; max-width: 250px; height: auto; border-radius: 8px; display: block; margin: 0 auto;">
         </div>
+
+        <div style="background: #edf2f7; padding: 12px 16px; border-radius: 8px; display: flex; justify-content: space-between; align-items: center; margin-bottom: 12px; font-size: 14px;">
+            <div style="text-align: left;">
+                <span style="color: #4a5568; font-weight: 500; font-size: 12px;">Nomor / ID:</span><br>
+                <span style="color: #2d3748; font-weight: bold;" id="nomor-sawer">901509027272</span>
+            </div>
+            <button class="action-btn" style="background-color: #007bff; color: white; border: none; padding: 6px 14px; border-radius: 6px; cursor: pointer; font-size: 12px; flex: 0 0 auto;" onclick="copyNumber()">Salin</button>
+        </div>
+
+        <div style="background: #edf2f7; padding: 12px 16px; border-radius: 8px; display: flex; justify-content: space-between; align-items: center; margin-bottom: 12px; font-size: 14px;">
+            <div style="text-align: left;">
+                <span style="color: #4a5568; font-weight: 500; font-size: 12px;">NMID QRIS:</span><br>
+                <span style="color: #2d3748; font-weight: bold;">ID1025452391614</span>
+            </div>
+        </div>
+
+        <p style="font-size: 12px; color: #a0aec0; margin-top: 16px;">Terima kasih atas bantuan & dukungan Anda! 🙏</p>
     </div>
 
-    <p style="font-size: 12px; color: #a0aec0; margin-top: 16px;">Terima kasih atas bantuan & dukungan Anda! 🙏</p>
-</div>
-
-<script>
-    function copyNumber() {
-        const nomor = document.getElementById("nomor-sawer").innerText;
-        navigator.clipboard.writeText(nomor).then(() => {
-            alert("Nomor berhasil disalin: " + nomor);
-        }).catch(err => {
-            console.error("Gagal menyalin teks: ", err);
-        });
-    }
-</script>
-
+    <script>
+        function copyNumber() {
+            const nomor = document.getElementById("nomor-sawer").innerText;
+            navigator.clipboard.writeText(nomor).then(() => {
+                alert("Nomor berhasil disalin: " + nomor);
+            }).catch(err => {
+                console.error("Gagal menyalin teks: ", err);
+            });
+        }
+    </script>
 </section>
 
 </div>
